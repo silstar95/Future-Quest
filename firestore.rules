@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // User simulations - users can read/write their own simulations
+    match /userSimulations/{simulationId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Classrooms - educators can read/write classrooms they created
+    match /classrooms/{classroomId} {
+      allow read, write: if request.auth != null && 
+        resource.data.educatorId == request.auth.uid;
+      
+      // Students can read classrooms they're part of
+      allow read: if request.auth != null && 
+        request.auth.uid in resource.data.students;
+    }
+    
+    // Notifications - users can read their own notifications
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow write: if request.auth != null;
+    }
+    
+    // Simulations metadata - read-only for all authenticated users
+    match /simulations/{simulationId} {
+      allow read: if request.auth != null;
+    }
+    
+    // Analytics and insights - users can read their own data
+    match /analytics/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Public data that everyone can read
+    match /public/{document=**} {
+      allow read: if true;
+    }
+  }
+}
