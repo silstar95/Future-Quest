@@ -48,6 +48,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
   const phaserGameRef = useRef<CityGame | null>(null)
   const [selectedBuilding, setSelectedBuilding] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isClient, setIsClient] = useState(false)
   const router = useRouter()
 
   const [tooltip, setTooltip] = useState<any>(null)
@@ -114,6 +115,11 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
     badges: [],
     unlockedBuildings: userProgress?.unlockedBuildings || [],
   }
+
+  // Set client-side flag
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const loadBuildingPositions = async () => {
     if (!user) {
@@ -364,6 +370,20 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
 
   const handleBackToDashboard = () => {
     router.push("/dashboard/student")
+  }
+
+  // Don't render until we're on the client
+  if (!isClient) {
+    return (
+      <div className="w-full space-y-6">
+        <div className="h-[600px] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading city builder...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

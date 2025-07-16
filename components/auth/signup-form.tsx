@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Mail, GraduationCap, Users, ArrowLeft } from "lucide-react"
 import Image from "next/image"
 
-export default function SignupForm() {
+function SignupFormContent() {
   const searchParams = useSearchParams()
   const userType = searchParams.get("type") || "student"
   const router = useRouter()
@@ -381,5 +381,15 @@ export default function SignupForm() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SignupForm() {
+  return (
+    <Suspense fallback={<div className="min-h-screen brand-gradient-bg flex items-center justify-center">
+      <div className="text-white text-2xl">Loading...</div>
+    </div>}>
+      <SignupFormContent />
+    </Suspense>
   )
 }

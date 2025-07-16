@@ -273,14 +273,25 @@ export function StudentDashboard() {
   }
 
   useEffect(() => {
+    console.log("StudentDashboard useEffect - user:", user?.uid, "userProfile:", userProfile, "loading:", loading)
+    
     if (!loading && !user) {
+      console.log("No user, redirecting to login")
       router.push("/auth/login")
       return
     }
 
-    if (!loading && userProfile?.userType !== "student") {
-      router.push("/dashboard/educator")
-      return
+    // Only redirect if userType is explicitly "educator" or "counselor"
+    // Allow students and users without a clear userType to stay on student dashboard
+    if (!loading && userProfile && userProfile.userType && userProfile.userType !== "student") {
+      console.log("User is not a student, redirecting to:", userProfile.userType, "dashboard")
+      if (userProfile.userType === "educator") {
+        router.push("/dashboard/educator")
+        return
+      } else if (userProfile.userType === "counselor") {
+        router.push("/dashboard/counselor")
+        return
+      }
     }
 
     if (user) {
@@ -330,10 +341,19 @@ export function StudentDashboard() {
             generateInsights(data)
           }
         }
+        // Always set dataLoading to false, even if no data exists
         setDataLoading(false)
       })
 
-      return () => unsubscribe()
+      // Set a timeout to ensure dataLoading is set to false even if the listener doesn't fire
+      const timeout = setTimeout(() => {
+        setDataLoading(false)
+      }, 3000)
+
+      return () => {
+        unsubscribe()
+        clearTimeout(timeout)
+      }
     }
   }, [user, userProfile, loading, router])
 
@@ -386,21 +406,25 @@ export function StudentDashboard() {
   }
 
   const handleStartSimulation = (simulationId: string) => {
+    console.log("Starting simulation:", simulationId)
     router.push(`/simulations?start=${encodeURIComponent(simulationId)}`)
   }
 
   const handleViewAllSimulations = () => {
+    console.log("Viewing all simulations")
     router.push("/simulations")
   }
 
   const handleViewCity = async () => {
+    console.log("Viewing city")
     setIsNavigating(true)
     // Add a small delay for smooth transition
     await new Promise((resolve) => setTimeout(resolve, 300))
     router.push("/simulations?tab=city")
   }
 
-  if (loading || dataLoading) {
+  // Only show loading screen if we don't have any user data at all
+  if (loading && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -411,20 +435,82 @@ export function StudentDashboard() {
     )
   }
 
-  if (!studentProgress) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">Unable to load dashboard data. Please try again.</p>
-          <Button onClick={fetchStudentData} className="mt-4">
-            Retry
-          </Button>
-        </div>
-      </div>
-    )
+  // Create fallback data if studentProgress is null
+  const fallbackProgress: StudentProgress = {
+    completedSimulations: userProfile?.completedSimulations || [],
+    totalHours: 0,
+    level: 1,
+    totalXP: 0,
+    badges: [],
+    currentStreak: 1,
+    weeklyGoal: 3,
+    weeklyProgress: 0,
+    recentActivity: [],
+    upcomingDeadlines: [],
+    recommendedSimulations: [
+      "Healthcare Administrator",
+      "Software Developer",
+      "Brand Manager",
+      "Superconductor Engineer",
+      "Creative Director",
+      "Financial Analyst",
+    ],
+    interests: userProfile?.interests || [],
+    cityLevel: 1,
+    unlockedBuildings: [],
+    insights: {
+      industries: ["Technology", "Healthcare", "Creative Arts", "Finance", "Engineering", "Education"],
+      careers: [
+        "Software Developer",
+        "UX Designer",
+        "Data Scientist",
+        "Healthcare Administrator",
+        "Creative Director",
+        "Financial Analyst",
+        "Marketing Manager",
+        "Project Manager",
+      ],
+      colleges: [
+        "MIT",
+        "Stanford University",
+        "Harvard University",
+        "UC Berkeley",
+        "Carnegie Mellon",
+        "Georgia Tech",
+      ],
+      degrees: [
+        "Computer Science",
+        "Business Administration",
+        "Healthcare Administration",
+        "Engineering",
+        "Digital Media",
+        "Data Science",
+      ],
+      strengths: [
+        "Creative Problem Solving",
+        "Analytical Thinking",
+        "Communication Skills",
+        "Leadership Potential",
+      ],
+      workStyles: [
+        "Collaborative Team Environment",
+        "Independent Project Work",
+        "Creative & Flexible Setting",
+        "Structured & Organized Environment",
+      ],
+      nextSteps: [
+        "Explore advanced simulations",
+        "Connect with professionals",
+        "Research college programs",
+        "Consider internship opportunities",
+      ],
+    },
   }
 
-  const completedCount = userData?.completedSimulations?.length || studentProgress.completedSimulations.length || 0
+  // Use studentProgress if available, otherwise use fallback
+  const displayProgress = studentProgress || fallbackProgress
+
+  const completedCount = userData?.completedSimulations?.length || displayProgress.completedSimulations.length || 0
   const calculatedLevel = Math.floor(completedCount / 2) + 1
   const calculatedXP = completedCount * 250
   const nextSimulation = getNextSimulation()
@@ -477,7 +563,7 @@ export function StudentDashboard() {
                       <p className="text-sm opacity-90 mb-6">
                         Based on your interests:{" "}
                         {userData?.interests?.join(", ") ||
-                          studentProgress.interests.join(", ") ||
+                          displayProgress.interests.join(", ") ||
                           "General exploration"}
                       </p>
                       <div className="flex items-center justify-between">
@@ -558,11 +644,11 @@ export function StudentDashboard() {
                     <div className="text-sm font-medium text-blue-800">Simulations Completed</div>
                   </div>
                   <div className="text-center p-6 bg-green-50 rounded-xl">
-                    <div className="text-4xl font-bold text-green-600 mb-2">{studentProgress.totalHours || 0}</div>
-                    <div className="text-sm font-medium text-green-800">Hours Experienced</div>
-                  </div>
-                  <div className="text-center p-6 bg-purple-50 rounded-xl">
-                    <div className="text-4xl font-bold text-purple-600 mb-2">{studentProgress.interests.length}</div>
+                                      <div className="text-4xl font-bold text-green-600 mb-2">{displayProgress.totalHours || 0}</div>
+                  <div className="text-sm font-medium text-green-800">Hours Experienced</div>
+                </div>
+                <div className="text-center p-6 bg-purple-50 rounded-xl">
+                  <div className="text-4xl font-bold text-purple-600 mb-2">{displayProgress.interests.length}</div>
                     <div className="text-sm font-medium text-purple-800">Careers Explored</div>
                   </div>
                 </div>
@@ -727,7 +813,7 @@ export function StudentDashboard() {
                 {/* Level Progress */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">Level {studentProgress.level}</span>
+                    <span className="font-medium">Level {displayProgress.level}</span>
                     <span className="text-sm text-gray-500">Explorer</span>
                   </div>
                   <Progress value={(completedCount % 3) * 33.33} className="h-3" />
@@ -736,7 +822,7 @@ export function StudentDashboard() {
 
                 {/* Current Streak */}
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600 mb-1">{studentProgress.currentStreak}</div>
+                  <div className="text-2xl font-bold text-yellow-600 mb-1">{displayProgress.currentStreak}</div>
                   <div className="text-sm font-medium text-yellow-800">Day Streak</div>
                 </div>
 
@@ -747,8 +833,8 @@ export function StudentDashboard() {
                     Badges Earned
                   </h4>
                   <div className="space-y-2">
-                    {studentProgress.badges.length > 0 ? (
-                      studentProgress.badges.map((badge, index) => (
+                    {displayProgress.badges.length > 0 ? (
+                      displayProgress.badges.map((badge, index) => (
                         <Badge key={index} variant="outline" className="w-full justify-start">
                           🏆 {badge}
                         </Badge>
@@ -766,8 +852,8 @@ export function StudentDashboard() {
                     Your Interests
                   </h4>
                   <div className="flex flex-wrap gap-1">
-                    {studentProgress.interests.length > 0 ? (
-                      studentProgress.interests.map((interest, index) => (
+                    {displayProgress.interests.length > 0 ? (
+                      displayProgress.interests.map((interest, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
                           {interest}
                         </Badge>

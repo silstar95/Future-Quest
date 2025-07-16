@@ -148,6 +148,7 @@ export async function updateUserProfile(uid: string, updates: any) {
 
 export async function saveOnboardingAnswers(uid: string, answers: any) {
   try {
+    console.log("Saving onboarding answers for user:", uid, "with data:", answers)
     const userRef = doc(db, "users", uid)
 
     const updateData = {
@@ -160,7 +161,7 @@ export async function saveOnboardingAnswers(uid: string, answers: any) {
 
     await updateDoc(userRef, updateData)
 
-    console.log("Onboarding answers saved successfully")
+    console.log("Onboarding answers saved successfully for user:", uid)
 
     return {
       success: true,
@@ -594,5 +595,33 @@ export const unlockBuilding = async (userId: string, buildingId: string) => {
   } catch (error) {
     console.error("Error unlocking building:", error)
     throw error
+  }
+}
+
+// Complete simulation function
+export const completeSimulation = async (userId: string, simulationId: string, completionData: any) => {
+  try {
+    const userRef = doc(db, "users", userId)
+    const simulationProgressRef = doc(db, "simulationProgress", `${userId}_${simulationId}`)
+    
+    // Update user profile with completed simulation
+    await updateDoc(userRef, {
+      completedSimulations: arrayUnion(simulationId),
+      updatedAt: serverTimestamp(),
+    })
+    
+    // Save detailed completion data
+    await setDoc(simulationProgressRef, {
+      userId,
+      simulationId,
+      completed: true,
+      completedAt: serverTimestamp(),
+      ...completionData,
+    })
+    
+    return { success: true }
+  } catch (error) {
+    console.error("Error completing simulation:", error)
+    return { success: false, error }
   }
 }

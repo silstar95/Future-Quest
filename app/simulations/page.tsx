@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,12 +8,28 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
-import { GameifiedCityViewer } from "@/components/city/gamified-city-viewer"
+import dynamic from "next/dynamic"
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter, useSearchParams } from "next/navigation"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Search, Clock, Trophy, Play, Building, Star } from "lucide-react"
+
+// Dynamically import the city viewer to prevent SSR issues
+const GameifiedCityViewer = dynamic(
+  () => import("@/components/city/gamified-city-viewer").then((mod) => ({ default: mod.GameifiedCityViewer })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[600px] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading city builder...</p>
+        </div>
+      </div>
+    ),
+  }
+)
 
 interface UserData {
   completedSimulations: string[]

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { OnboardingQuiz } from "./onboarding-quiz"
 import {
@@ -18,7 +18,7 @@ import LoginForm from "../auth/login-form"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 
-export function LandingPage() {
+function LandingPageContent() {
   const searchParams = useSearchParams()
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [authMode, setAuthMode] = useState<"signup" | "login" | null>(null)
@@ -174,5 +174,15 @@ export function LandingPage() {
         </div>
       </section>
     </div>
+  )
+}
+
+export function LandingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#211c3a] to-[#d59f7b] flex items-center justify-center">
+      <div className="text-white text-2xl">Loading...</div>
+    </div>}>
+      <LandingPageContent />
+    </Suspense>
   )
 }

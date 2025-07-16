@@ -81,10 +81,9 @@ export function useAuth() {
         }),
       }
 
-      const result = await createUserProfile({
-        uid: firebaseUser.uid,
-        userData: profileData,
-      })
+      console.log("Creating user profile with data:", profileData)
+
+      const result = await createUserProfile(firebaseUser.uid, profileData)
 
       console.log("User profile created:", result)
       return firebaseUser
@@ -129,10 +128,7 @@ export function useAuth() {
         }),
       }
 
-      const result = await createUserProfile({
-        uid: firebaseUser.uid,
-        userData: profileData,
-      })
+      const result = await createUserProfile(firebaseUser.uid, profileData)
 
       console.log("User profile created with Google:", result)
       return firebaseUser
