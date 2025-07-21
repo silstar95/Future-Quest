@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -11,7 +11,9 @@ import { TaskThree } from "./tasks/task-three"
 import { TaskFour } from "./tasks/task-four"
 import { TaskFive } from "./tasks/task-five"
 import { GameOfficeViewer } from "./game-office-viewer"
-import { Star, Users, TrendingUp, Shield, Megaphone, CheckCircle, Play, Trophy, Zap, Building } from "lucide-react"
+import { Star, Users, TrendingUp, Shield, Megaphone, CheckCircle, Play, Trophy, Building } from "lucide-react"
+import { TaskReflection } from "./task-reflection"
+import { RoleDebrief } from "./role-debrief"
 
 interface ExperiencePhaseProps {
   onComplete: (data: any) => void
@@ -27,7 +29,6 @@ const TASKS = [
     color: "from-purple-500 to-pink-500",
     location: "whiteboard",
     description: "Design your celebrity's unique brand identity in our creative workshop.",
-    xp: 100,
     difficulty: "Easy",
   },
   {
@@ -38,7 +39,6 @@ const TASKS = [
     color: "from-blue-500 to-cyan-500",
     location: "research",
     description: "Develop long-term partnership strategies in our research center.",
-    xp: 150,
     difficulty: "Medium",
   },
   {
@@ -49,7 +49,6 @@ const TASKS = [
     color: "from-green-500 to-emerald-500",
     location: "creative",
     description: "Create viral social media campaigns in our creative studio.",
-    xp: 200,
     difficulty: "Medium",
   },
   {
@@ -60,18 +59,16 @@ const TASKS = [
     color: "from-orange-500 to-red-500",
     location: "research",
     description: "Analyze competition and develop winning strategies.",
-    xp: 175,
     difficulty: "Hard",
   },
   {
     id: "task-5",
     title: "Crisis Management Command Center",
-    role: "PR Manager",
+    role: "Public Relations Manager",
     icon: Shield,
     color: "from-red-500 to-pink-500",
     location: "media",
     description: "Handle PR crises with professional damage control.",
-    xp: 250,
     difficulty: "Hard",
   },
 ]
@@ -82,36 +79,42 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
   const [taskData, setTaskData] = useState(initialData?.taskData || {})
   const [currentLocation, setCurrentLocation] = useState(initialData?.currentLocation || "lobby")
   const [showTask, setShowTask] = useState(false)
-  const [totalXP, setTotalXP] = useState(initialData?.totalXP || 0)
-  const [playerLevel, setPlayerLevel] = useState(1)
+  const [showReflection, setShowReflection] = useState(false)
+  const [showDebrief, setShowDebrief] = useState(false)
+  const [currentTaskReflection, setCurrentTaskReflection] = useState<any>(null)
+  const [reviewingTask, setReviewingTask] = useState<string | null>(null)
 
   const progress = (completedTasks.length / TASKS.length) * 100
   const currentTaskData = TASKS[currentTask]
 
-  useEffect(() => {
-    // Calculate player level based on XP
-    const newLevel = Math.floor(totalXP / 200) + 1
-    setPlayerLevel(newLevel)
-  }, [totalXP])
-
   const handleTaskComplete = (taskId: string, data: any) => {
     const task = TASKS.find((t) => t.id === taskId)
-    const newCompletedTasks = [...completedTasks, taskId]
-    const newTaskData = { ...taskData, [taskId]: data }
-    const newTotalXP = totalXP + (task?.xp || 0)
-
-    setCompletedTasks(newCompletedTasks)
-    setTaskData(newTaskData)
-    setTotalXP(newTotalXP)
+    setCurrentTaskReflection({ taskId, taskTitle: task?.title, role: task?.role })
+    setTaskData((prev: any) => ({ ...prev, [taskId]: data }))
     setShowTask(false)
+    setShowReflection(true)
+  }
+
+  const handleReflectionComplete = (reflectionData: any) => {
+    setTaskData((prev: any) => ({
+      ...prev,
+      [`${currentTaskReflection.taskId}_reflection`]: reflectionData,
+    }))
+    setShowReflection(false)
+    setShowDebrief(true)
+  }
+
+  const handleDebriefComplete = () => {
+    const newCompletedTasks = [...completedTasks, currentTaskReflection.taskId]
+    setCompletedTasks(newCompletedTasks)
+    setShowDebrief(false)
+    setCurrentTaskReflection(null)
 
     if (newCompletedTasks.length === TASKS.length) {
       // All tasks completed
       onComplete({
         completedTasks: newCompletedTasks,
-        taskData: newTaskData,
-        totalXP: newTotalXP,
-        playerLevel,
+        taskData,
         completedAt: new Date().toISOString(),
       })
     } else {
@@ -131,49 +134,84 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
     }
   }
 
+  const handleTaskSelect = (taskId: string) => {
+    const task = TASKS.find((t) => t.id === taskId)
+    if (task && !completedTasks.includes(taskId)) {
+      setShowTask(true)
+    }
+  }
+
+  const handleTaskReview = (taskId: string) => {
+    setReviewingTask(taskId)
+    setShowTask(true)
+  }
+
   const renderCurrentTask = () => {
-    const taskId = currentTaskData.id
+    const taskId = reviewingTask || currentTaskData?.id
+    const isReviewing = reviewingTask !== null
+    const existingData = isReviewing ? taskData[taskId] : undefined
+
+    const taskProps = {
+      onComplete: isReviewing
+        ? (data: any) => {
+            setTaskData((prev: any) => ({ ...prev, [taskId]: data }))
+            setReviewingTask(null)
+            setShowTask(false)
+          }
+        : (data: any) => handleTaskComplete(taskId, data),
+      initialData: existingData,
+    }
 
     switch (taskId) {
       case "task-1":
-        return <TaskOne onComplete={(data) => handleTaskComplete(taskId, data)} />
+        return <TaskOne {...taskProps} />
       case "task-2":
-        return <TaskTwo onComplete={(data) => handleTaskComplete(taskId, data)} />
+        return <TaskTwo {...taskProps} celebrityData={taskData["task-1"]} />
       case "task-3":
-        return <TaskThree onComplete={(data) => handleTaskComplete(taskId, data)} />
+        return <TaskThree {...taskProps} celebrityData={taskData["task-1"]} />
       case "task-4":
-        return <TaskFour onComplete={(data) => handleTaskComplete(taskId, data)} />
+        return <TaskFour {...taskProps} celebrityData={taskData["task-1"]} />
       case "task-5":
-        return <TaskFive onComplete={(data) => handleTaskComplete(taskId, data)} />
+        return <TaskFive {...taskProps} celebrityData={taskData["task-1"]} />
       default:
         return null
     }
   }
 
-  if (showTask && currentTaskData) {
+  if (showReflection && currentTaskReflection) {
+    return <TaskReflection taskTitle={currentTaskReflection.taskTitle} onComplete={handleReflectionComplete} />
+  }
+
+  if (showDebrief && currentTaskReflection) {
+    return <RoleDebrief role={currentTaskReflection.role} onContinue={handleDebriefComplete} />
+  }
+
+  if (showTask && (currentTaskData || reviewingTask)) {
+    const displayTask = reviewingTask ? TASKS.find((t) => t.id === reviewingTask) : currentTaskData
+    const isReviewing = reviewingTask !== null
+
     return (
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Task Header */}
-        <Card className={`bg-gradient-to-r ${currentTaskData.color} text-white border-0 shadow-2xl`}>
+        <Card className={`bg-gradient-to-r ${displayTask?.color} text-white border-0 shadow-2xl`}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center text-2xl mb-2">
-                  <currentTaskData.icon className="mr-3 h-8 w-8" />
-                  {currentTaskData.title}
+                  {displayTask?.icon && <displayTask.icon className="mr-3 h-8 w-8" />}
+                  {displayTask?.title}
+                  {isReviewing && <Badge className="ml-3 bg-white/20 text-white border-white/30">Review Mode</Badge>}
                 </CardTitle>
                 <div className="flex items-center gap-4 text-white/90">
-                  <Badge className="bg-white/20 text-white border-white/30">{currentTaskData.role}</Badge>
-                  <Badge className="bg-white/20 text-white border-white/30">+{currentTaskData.xp} XP</Badge>
-                  <Badge className="bg-white/20 text-white border-white/30">{currentTaskData.difficulty}</Badge>
+                  <Badge className="bg-white/20 text-white border-white/30">{displayTask?.role}</Badge>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold">#{currentTask + 1}</div>
+                <div className="text-3xl font-bold">#{TASKS.findIndex((t) => t.id === displayTask?.id) + 1}</div>
                 <div className="text-sm opacity-75">of {TASKS.length}</div>
               </div>
             </div>
-            <p className="text-white/80 text-lg">{currentTaskData.description}</p>
+            <p className="text-white/80 text-lg">{displayTask?.description}</p>
           </CardHeader>
         </Card>
 
@@ -182,7 +220,14 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
 
         {/* Back to Office Button */}
         <div className="text-center">
-          <Button variant="outline" onClick={() => setShowTask(false)} className="bg-white/80 backdrop-blur-sm">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setShowTask(false)
+              setReviewingTask(null)
+            }}
+            className="bg-white/80 backdrop-blur-sm"
+          >
             ← Back to Office
           </Button>
         </div>
@@ -198,7 +243,6 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
           <CardTitle className="flex items-center text-3xl">
             <Play className="mr-3 h-8 w-8" />
             Marketing Agency Experience
-            <Badge className="ml-4 bg-white/20 text-white border-white/30">Level {playerLevel}</Badge>
           </CardTitle>
           <p className="text-blue-100 text-lg leading-relaxed">
             Welcome to Future Marketing Agency! Navigate through our high-tech office, complete career tasks, and help
@@ -206,14 +250,7 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-300 flex items-center justify-center">
-                <Trophy className="mr-2 h-6 w-6" />
-                {totalXP}
-              </div>
-              <div className="text-sm opacity-90">Total XP</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-green-300 flex items-center justify-center">
                 <CheckCircle className="mr-2 h-6 w-6" />
@@ -223,10 +260,10 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-300 flex items-center justify-center">
-                <Zap className="mr-2 h-6 w-6" />
-                {playerLevel}
+                <Trophy className="mr-2 h-6 w-6" />
+                {TASKS.length - completedTasks.length}
               </div>
-              <div className="text-sm opacity-90">Player Level</div>
+              <div className="text-sm opacity-90">Tasks Remaining</div>
             </div>
           </div>
 
@@ -283,9 +320,6 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
                     <h4 className="font-bold text-sm mb-1">{task.role}</h4>
                     <p className="text-xs text-gray-600 mb-2">{task.title}</p>
                     <div className="flex justify-center gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        +{task.xp} XP
-                      </Badge>
                       <Badge
                         variant={
                           task.difficulty === "Easy"
@@ -320,7 +354,7 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
             Future Marketing Agency Office
           </CardTitle>
           <p className="text-gray-600">
-            Navigate through our high-tech office to complete your missions. Click on different rooms to explore!
+            Navigate through our high-tech office to complete your missions. Use keyboard controls to move around!
           </p>
         </CardHeader>
         <CardContent className="p-0">
@@ -330,6 +364,9 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
             tasks={TASKS}
             completedTasks={completedTasks}
             currentTask={currentTaskData}
+            taskData={taskData}
+            onTaskSelect={handleTaskSelect}
+            onTaskReview={handleTaskReview}
           />
         </CardContent>
       </Card>
@@ -354,8 +391,6 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
                   onComplete({
                     completedTasks,
                     taskData,
-                    totalXP,
-                    playerLevel,
                     completedAt: new Date().toISOString(),
                   })
                 }
@@ -364,7 +399,7 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
               >
                 <Trophy className="mr-2 h-5 w-5" />
                 Complete All Missions
-              </Button>
+            </Button>
             )}
           </div>
         </CardContent>

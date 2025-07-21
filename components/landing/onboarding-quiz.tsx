@@ -269,19 +269,19 @@ export function OnboardingQuiz() {
 
         if (user?.uid) {
           console.log("Saving onboarding answers for user:", user.uid)
-          await saveOnboardingAnswers(user.uid, onboardingData)
+          await saveOnboardingAnswers(user.uid, answers, onboardingData.interests, onboardingData.recommendedSimulations)
           console.log("Onboarding answers saved successfully")
+
+          // Refresh user profile to get updated data
+          await refreshUserProfile()
 
           toast({
             title: "🎉 Onboarding Complete!",
             description: "Your preferences have been saved. Welcome to Future Quest!",
           })
 
-          // Direct redirect to student dashboard after a short delay
-          setTimeout(() => {
-            console.log("Redirecting to student dashboard...")
-            router.push("/dashboard/student")
-          }, 1000)
+          // Direct redirect to student dashboard
+          router.replace("/dashboard/student")
         }
       } catch (error) {
         console.error("Error saving onboarding answers:", error)

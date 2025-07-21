@@ -1,5 +1,92 @@
 import * as Phaser from "phaser"
 
+// Orange cat sprite creation function
+function createCatSprite(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
+  const cat = scene.add.graphics()
+
+  // Main body (orange)
+  cat.fillStyle(0xff8c42) // Orange color
+  cat.fillEllipse(0, 0, 40, 50) // Body
+
+  // Belly (lighter orange)
+  cat.fillStyle(0xffb366)
+  cat.fillEllipse(0, 5, 25, 35) // Belly
+
+  // Head
+  cat.fillStyle(0xff8c42)
+  cat.fillCircle(0, -35, 20) // Head
+
+  // Ears
+  cat.fillStyle(0xff8c42)
+  // Left ear - triangular with slight curve
+  cat.beginPath()
+  cat.moveTo(-22, -35) // Base left
+  cat.lineTo(-15, -52) // Top point
+  cat.lineTo(-8, -35)  // Base right
+  cat.closePath()
+  cat.fillPath()
+  
+  // Right ear - triangular with slight curve
+  cat.beginPath()
+  cat.moveTo(8, -35)   // Base left
+  cat.lineTo(15, -52)  // Top point
+  cat.lineTo(22, -35)  // Base right
+  cat.closePath()
+  cat.fillPath()
+
+  // Inner ears (pink) - more detailed
+  cat.fillStyle(0xffb3ba)
+  cat.fillTriangle(-12, -45, -10, -38, -18, -38) // Left inner ear
+  cat.fillTriangle(12, -45, 10, -38, 18, -38) // Right inner ear
+
+  // Eyes (closed/happy)
+  cat.lineStyle(2, 0x000000)
+  cat.beginPath()
+  cat.arc(-8, -40, 3, 0.2, Math.PI - 0.2) // Left eye (curved line)
+  cat.strokePath()
+  cat.beginPath()
+  cat.arc(8, -40, 3, 0.2, Math.PI - 0.2) // Right eye (curved line)
+  cat.strokePath()
+
+  // Nose (small triangle)
+  cat.fillStyle(0xff69b4) // Pink
+  cat.fillTriangle(0, -32, -2, -28, 2, -28)
+
+  // Mouth (small curve)
+  cat.lineStyle(1, 0x000000)
+  cat.beginPath()
+  cat.arc(-3, -25, 3, 0, Math.PI) // Left side of mouth
+  cat.strokePath()
+  cat.beginPath()
+  cat.arc(3, -25, 3, 0, Math.PI) // Right side of mouth
+  cat.strokePath()
+
+  // Whiskers
+  cat.lineStyle(1, 0x000000)
+  // Left whiskers
+  cat.lineBetween(-25, -35, -15, -33)
+  cat.lineBetween(-25, -30, -15, -30)
+  cat.lineBetween(-25, -25, -15, -27)
+  // Right whiskers
+  cat.lineBetween(25, -35, 15, -33)
+  cat.lineBetween(25, -30, 15, -30)
+  cat.lineBetween(25, -25, 15, -27)
+
+  // Tail
+  cat.fillStyle(0xff8c42)
+  cat.fillEllipse(25, 10, 8, 30) // Tail
+
+  // Paws
+  cat.fillStyle(0xff8c42)
+  cat.fillCircle(-12, 25, 6) // Left front paw
+  cat.fillCircle(12, 25, 6) // Right front paw
+  cat.fillCircle(-8, 20, 5) // Left back paw
+  cat.fillCircle(8, 20, 5) // Right back paw
+
+  cat.setPosition(x, y)
+  return cat
+}
+
 interface BuildingData {
   id: string
   name: string
@@ -44,6 +131,14 @@ class CityScene extends Phaser.Scene {
   private studentStats!: StudentStats
   private buildingSprites: Map<string, Phaser.GameObjects.Container> = new Map()
   private avatar?: Phaser.GameObjects.Sprite
+  private cat?: Phaser.GameObjects.Graphics
+  private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
+  private wasd?: {
+    W: Phaser.Input.Keyboard.Key
+    A: Phaser.Input.Keyboard.Key
+    S: Phaser.Input.Keyboard.Key
+    D: Phaser.Input.Keyboard.Key
+  }
   private isDragging = false
   private draggedBuilding?: Phaser.GameObjects.Container
   private gridSize = 80
@@ -83,7 +178,8 @@ class CityScene extends Phaser.Scene {
   }) {
     this.buildings = data.buildings
     this.studentStats = data.studentStats
-    this.buildingPositions = data.buildingPositions || {}
+    // Ensure buildingPositions is always an object
+    this.buildingPositions = typeof data.buildingPositions === 'object' && data.buildingPositions !== null ? data.buildingPositions : {}
     this.onBuildingSelect = data.onBuildingSelect
     this.onUnlockAnimation = data.onUnlockAnimation
     this.onShowTooltip = data.onShowTooltip
@@ -504,7 +600,7 @@ class CityScene extends Phaser.Scene {
         lockBadge.setStrokeStyle(3, 0xcc5555)
         const lockIcon = this.add
           .text(35, -35, "🔒", {
-            fontSize: "16px",
+        fontSize: "16px",
           })
           .setOrigin(0.5)
 
@@ -581,18 +677,33 @@ class CityScene extends Phaser.Scene {
   }
 
   createAvatar() {
-    this.avatar = this.add.sprite(120, 400, "avatar")
-    this.avatar.setScale(2)
+    // Remove any existing avatar
+    if (this.avatar) {
+      this.avatar.destroy()
+      this.avatar = undefined
+    }
+    if (this.cat) {
+      this.cat.destroy()
+      this.cat = undefined
+    }
+    
+    // Create the cat character using the createCatSprite function
+    this.cat = createCatSprite(this, 100, 100)
+    this.cat.setInteractive()
 
-    // Idle animation
-    this.tweens.add({
-      targets: this.avatar,
-      scaleY: 1.8,
-      duration: 1500,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.easeInOut",
-    })
+    // Enable physics for the cat
+    this.physics.add.existing(this.cat)
+    const catBody = (this.cat as any).body as Phaser.Physics.Arcade.Body
+    catBody.setCollideWorldBounds(true)
+    catBody.setSize(40, 50) // Set collision box size
+
+    // Create input controls
+    this.cursors = this.input.keyboard?.createCursorKeys()
+    this.wasd = this.input.keyboard?.addKeys("W,S,A,D") as any
+
+    // Camera follows the cat
+    this.cameras.main.startFollow(this.cat)
+    this.cameras.main.setBounds(0, 0, 1200, 800)
   }
 
   createParticleSystems() {
@@ -614,6 +725,32 @@ class CityScene extends Phaser.Scene {
       tint: [0xffd700, 0x00ff00, 0x4ecdc4],
     })
     this.unlockParticles.stop()
+  }
+
+  update() {
+    if (!this.cat || !this.cursors || !this.wasd) return
+
+    const catBody = (this.cat as any).body as Phaser.Physics.Arcade.Body
+    const speed = 200 // Reset velocity
+    catBody.setVelocity(0)
+
+    // Handle keyboard input for cat movement
+    if (this.cursors.left?.isDown || this.wasd.A.isDown) {
+      catBody.setVelocityX(-speed)
+    } else if (this.cursors.right?.isDown || this.wasd.D.isDown) {
+      catBody.setVelocityX(speed)
+    }
+
+    if (this.cursors.up?.isDown || this.wasd.W.isDown) {
+      catBody.setVelocityY(-speed)
+    } else if (this.cursors.down?.isDown || this.wasd.S.isDown) {
+      catBody.setVelocityY(speed)
+    }
+
+    // Normalize diagonal movement
+    if (catBody.velocity.x !== 0 && catBody.velocity.y !== 0) {
+      catBody.velocity.normalize().scale(speed)
+    }
   }
 
   // Public method to trigger unlock animation
@@ -729,7 +866,7 @@ class CityScene extends Phaser.Scene {
         // Update internal position tracking immediately for smooth experience
         const buildingId = this.draggedBuilding.getData("buildingId")
         this.buildingPositions[buildingId] = { x: gridX, y: gridY }
-        
+
         // Add a subtle visual feedback during dragging
         this.draggedBuilding.setScale(1.05)
       }
@@ -820,14 +957,8 @@ class CityScene extends Phaser.Scene {
     Object.entries(positions).forEach(([buildingId, position]) => {
       const buildingContainer = this.buildingSprites.get(buildingId)
       if (buildingContainer) {
-        // Smoothly animate the building to its new position
-        this.tweens.add({
-          targets: buildingContainer,
-          x: position.x,
-          y: position.y,
-          duration: 300,
-          ease: "Power2",
-        })
+        // Set position immediately without animation to prevent blinking
+        buildingContainer.setPosition(position.x, position.y)
       }
     })
   }
@@ -849,7 +980,9 @@ export class CityGame {
     studentStats: StudentStats,
     buildingPositions?: { [buildingId: string]: { x: number; y: number } },
   ) {
-    console.log("CityGame constructor called with building positions:", buildingPositions)
+    // Ensure buildingPositions is always an object
+    const safeBuildingPositions = typeof buildingPositions === 'object' && buildingPositions !== null ? buildingPositions : {}
+    console.log("CityGame constructor called with building positions:", safeBuildingPositions)
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
@@ -873,7 +1006,7 @@ export class CityGame {
     this.game.scene.start("CityScene", {
       buildings,
       studentStats,
-      buildingPositions: buildingPositions || {},
+      buildingPositions: safeBuildingPositions,
       onBuildingSelect: (buildingId: string, isUnlocked: boolean) => {
         if (this.onBuildingSelect) {
           this.onBuildingSelect(buildingId, isUnlocked)

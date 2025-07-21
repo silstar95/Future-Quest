@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
 import dynamic from "next/dynamic"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/components/providers/auth-provider"
 import { useRouter, useSearchParams } from "next/navigation"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
@@ -28,14 +28,14 @@ const GameifiedCityViewer = dynamic(
         </div>
       </div>
     ),
-  }
+  },
 )
 
 interface UserData {
   completedSimulations: string[]
-  totalXP: number
   cityLevel: number
   unlockedBuildings: string[]
+  simulationProgress?: { [simulationId: string]: number }
 }
 
 interface Simulation {
@@ -45,13 +45,12 @@ interface Simulation {
   duration: string
   difficulty: "Beginner" | "Intermediate" | "Advanced"
   category: string
-  xpReward: number
   isCompleted: boolean
   isUnlocked: boolean
-  completionRate?: number
+  progress?: number // Student's progress in this simulation (0-100)
 }
 
-export default function SimulationsPage() {
+function SimulationsPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -78,10 +77,9 @@ export default function SimulationsPage() {
       duration: "4-6 hours",
       difficulty: "Beginner",
       category: "Marketing",
-      xpReward: 250,
       isCompleted: userData?.completedSimulations?.includes("brand-marketing") || false,
       isUnlocked: true,
-      completionRate: 85,
+      progress: userData?.simulationProgress?.["brand-marketing"] || 0,
     },
     {
       id: "material-science",
@@ -91,10 +89,9 @@ export default function SimulationsPage() {
       duration: "50-70 min",
       difficulty: "Intermediate",
       category: "Science",
-      xpReward: 350,
       isCompleted: userData?.completedSimulations?.includes("material-science") || false,
       isUnlocked: userData?.completedSimulations?.includes("brand-marketing") || false,
-      completionRate: 72,
+      progress: userData?.simulationProgress?.["material-science"] || 0,
     },
     {
       id: "finance-simulation",
@@ -104,10 +101,9 @@ export default function SimulationsPage() {
       duration: "60-80 min",
       difficulty: "Advanced",
       category: "Finance",
-      xpReward: 450,
       isCompleted: userData?.completedSimulations?.includes("finance-simulation") || false,
       isUnlocked: userData?.completedSimulations?.includes("material-science") || false,
-      completionRate: 68,
+      progress: userData?.simulationProgress?.["finance-simulation"] || 0,
     },
     {
       id: "healthcare-simulation",
@@ -117,10 +113,9 @@ export default function SimulationsPage() {
       duration: "55-75 min",
       difficulty: "Advanced",
       category: "Healthcare",
-      xpReward: 400,
       isCompleted: userData?.completedSimulations?.includes("healthcare-simulation") || false,
       isUnlocked: userData?.completedSimulations?.includes("finance-simulation") || false,
-      completionRate: 74,
+      progress: userData?.simulationProgress?.["healthcare-simulation"] || 0,
     },
   ]
 
@@ -135,6 +130,7 @@ export default function SimulationsPage() {
       const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
         if (doc.exists()) {
           const data = doc.data() as UserData
+          console.log("📊 Real-time user data update:", data)
           setUserData(data)
         }
         setLoadingData(false)
@@ -144,6 +140,32 @@ export default function SimulationsPage() {
     }
   }, [user, loading, router])
 
+  // Helper function to calculate progress percentage based on current phase
+  const calculateProgressPercentage = (simulationId: string): number => {
+    const progressData = userData?.simulationProgress?.[simulationId]
+    if (!progressData) return 0
+    
+    // If it's already a number, return it
+    if (typeof progressData === 'number') return progressData
+    
+    // If it's an object with currentPhase, calculate based on phase
+    if (typeof progressData === 'object' && progressData !== null) {
+      const phaseProgress = {
+        intro: 5,
+        "pre-reflection": 15,
+        exploration: 35,
+        experience: 75,
+        "post-reflection": 90,
+        complete: 100,
+      }
+      
+      const currentPhase = (progressData as any).currentPhase
+      return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
+    }
+    
+    return 0
+  }
+
   // Update simulations with real user data
   const simulations = allSimulations.map((sim) => ({
     ...sim,
@@ -151,6 +173,7 @@ export default function SimulationsPage() {
     isUnlocked:
       sim.id === "brand-marketing" ||
       (userData?.completedSimulations?.length || 0) >= allSimulations.findIndex((s) => s.id === sim.id),
+    progress: calculateProgressPercentage(sim.id),
   }))
 
   const filteredSimulations = simulations.filter((simulation) => {
@@ -164,6 +187,7 @@ export default function SimulationsPage() {
   })
 
   const handleSimulationStart = (simulationId: string) => {
+    console.log("🚀 Starting/Continuing simulation:", simulationId)
     router.push(`/simulation/${simulationId}`)
   }
 
@@ -176,16 +200,19 @@ export default function SimulationsPage() {
   const getProgressStats = () => {
     const completed = simulations.filter((s) => s.isCompleted).length
     const total = simulations.length
-    const totalXP = userData?.totalXP || 0
-    const cityLevel = userData?.cityLevel || 1
 
-    return { completed, total, totalXP, cityLevel }
+    return { completed, total }
   }
 
   if (loading || loadingData) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <DashboardHeader />
+        <DashboardHeader
+          title="Simulations"
+          subtitle="Explore career paths through immersive simulations"
+          showBackButton={true}
+          backUrl="/dashboard/student"
+        />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -208,9 +235,20 @@ export default function SimulationsPage() {
     setTabLoading(false)
   }
 
+  const handleBackToDashboard = () => {
+    // Determine the appropriate dashboard based on user type
+    // For now, default to student dashboard since this is primarily for students
+    router.push("/dashboard/student")
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
+      <DashboardHeader
+        title="Simulations"
+        subtitle="Explore career paths through immersive simulations"
+        showBackButton={true}
+        backUrl="/dashboard/student"
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
@@ -223,31 +261,37 @@ export default function SimulationsPage() {
           </p>
 
           {/* Progress Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-2xl font-bold text-blue-600">
-                {stats.completed}/{stats.total}
+          <div className="grid grid-cols-2 gap-6 max-w-md mx-auto">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-xl shadow-lg text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-3xl font-bold">
+                    {stats.completed}/{stats.total}
+                  </div>
+                  <div className="text-blue-100 font-medium">Simulations</div>
+                </div>
+                <div className="text-4xl opacity-80">🎯</div>
               </div>
-              <div className="text-sm text-gray-600">Completed</div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-2xl font-bold text-purple-600">{stats.totalXP.toLocaleString()}</div>
-              <div className="text-sm text-gray-600">Total XP</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-2xl font-bold text-green-600">{stats.cityLevel}</div>
-              <div className="text-sm text-gray-600">City Level</div>
-            </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <div className="text-2xl font-bold text-orange-600">{userData?.unlockedBuildings?.length || 1}</div>
-              <div className="text-sm text-gray-600">Buildings</div>
+            <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-xl shadow-lg text-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-3xl font-bold">{userData?.unlockedBuildings?.length || 1}</div>
+                  <div className="text-orange-100 font-medium">Buildings</div>
+                </div>
+                <div className="text-4xl opacity-80">🏗️</div>
+              </div>
             </div>
           </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
-            <TabsTrigger value="simulations" className="flex items-center gap-2" disabled={tabLoading}>
+          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8 bg-white shadow-lg border-2 border-gray-200">
+            <TabsTrigger
+              value="simulations"
+              className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+              disabled={tabLoading}
+            >
               {tabLoading && activeTab === "simulations" ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
               ) : (
@@ -255,7 +299,11 @@ export default function SimulationsPage() {
               )}
               Simulations
             </TabsTrigger>
-            <TabsTrigger value="city" className="flex items-center gap-2" disabled={tabLoading}>
+            <TabsTrigger
+              value="city"
+              className="flex items-center gap-2 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              disabled={tabLoading}
+            >
               {tabLoading && activeTab === "city" ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
               ) : (
@@ -277,7 +325,7 @@ export default function SimulationsPage() {
               <>
                 {/* Search and Filters */}
                 <Card>
-                  <CardContent className="p-6">
+                  <CardContent className="p-6 w-2/3 mx-auto">
                     <div className="flex flex-col md:flex-row gap-4">
                       <div className="flex-1 relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -287,32 +335,6 @@ export default function SimulationsPage() {
                           onChange={(e) => setSearchTerm(e.target.value)}
                           className="pl-10"
                         />
-                      </div>
-
-                      <div className="flex gap-4">
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {categories.map((category) => (
-                            <option key={category} value={category}>
-                              {category}
-                            </option>
-                          ))}
-                        </select>
-
-                        <select
-                          value={selectedDifficulty}
-                          onChange={(e) => setSelectedDifficulty(e.target.value)}
-                          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {difficulties.map((difficulty) => (
-                            <option key={difficulty} value={difficulty}>
-                              {difficulty}
-                            </option>
-                          ))}
-                        </select>
                       </div>
                     </div>
                   </CardContent>
@@ -326,9 +348,11 @@ export default function SimulationsPage() {
                       className={`transition-all hover:shadow-lg ${
                         simulation.isCompleted
                           ? "border-green-200 bg-green-50"
-                          : simulation.isUnlocked
-                            ? "border-blue-200 hover:border-blue-300"
-                            : "border-gray-200 bg-gray-50 opacity-75"
+                          : simulation.progress > 0
+                            ? "border-blue-200 bg-blue-50 hover:border-blue-300"
+                            : simulation.isUnlocked
+                              ? "border-gray-200 hover:border-gray-300"
+                              : "border-gray-200 bg-gray-50 opacity-75"
                       }`}
                     >
                       <CardHeader>
@@ -337,6 +361,11 @@ export default function SimulationsPage() {
                             <CardTitle className="flex items-center gap-2 text-lg">
                               {simulation.title}
                               {simulation.isCompleted && <Trophy className="w-5 h-5 text-yellow-500" />}
+                              {simulation.progress > 0 && simulation.progress < 100 && (
+                                <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
+                                  In Progress
+                                </Badge>
+                              )}
                               {!simulation.isUnlocked && <span className="text-gray-400">🔒</span>}
                             </CardTitle>
                             <CardDescription className="mt-2">{simulation.description}</CardDescription>
@@ -365,25 +394,19 @@ export default function SimulationsPage() {
                               {simulation.difficulty}
                             </Badge>
                             <Badge variant="outline">{simulation.category}</Badge>
-                            <Badge
-                              variant="outline"
-                              className="flex items-center gap-1 text-purple-700 border-purple-500"
-                            >
-                              <Star className="w-3 h-3" />
-                              {simulation.xpReward} XP
-                            </Badge>
                           </div>
 
-                          {/* Progress Bar for Completion Rate */}
-                          {simulation.completionRate && (
-                            <div>
-                              <div className="flex justify-between text-sm mb-1">
-                                <span className="text-gray-600">Student Success Rate</span>
-                                <span className="font-medium">{simulation.completionRate}%</span>
-                              </div>
-                              <Progress value={simulation.completionRate} className="h-2" />
+                          {/* Progress Bar for Student Progress */}
+                          <div>
+                            <div className="flex justify-between text-sm mb-1">
+                              <span className="text-gray-600">Your Progress</span>
+                              <span className="font-medium">{Math.round(simulation.progress)}%</span>
                             </div>
-                          )}
+                            <Progress
+                              value={simulation.progress}
+                              className={`h-2 ${simulation.progress > 0 ? "bg-blue-100" : "bg-gray-100"}`}
+                            />
+                          </div>
 
                           {/* Action Button */}
                           <Button
@@ -392,9 +415,11 @@ export default function SimulationsPage() {
                             className={`w-full ${
                               simulation.isCompleted
                                 ? "bg-green-600 hover:bg-green-700"
-                                : simulation.isUnlocked
-                                  ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                  : ""
+                                : simulation.progress > 0
+                                  ? "bg-blue-600 hover:bg-blue-700"
+                                  : simulation.isUnlocked
+                                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                    : ""
                             }`}
                             variant={simulation.isUnlocked ? "default" : "outline"}
                           >
@@ -403,13 +428,18 @@ export default function SimulationsPage() {
                                 <Trophy className="mr-2 h-4 w-4" />
                                 Replay Simulation
                               </>
+                            ) : simulation.progress > 0 ? (
+                              <>
+                                <Play className="mr-2 h-4 w-4" />
+                                Continue Simulation ({Math.round(simulation.progress)}%)
+                              </>
                             ) : simulation.isUnlocked ? (
                               <>
                                 <Play className="mr-2 h-4 w-4" />
                                 Start Simulation
                               </>
                             ) : (
-                              <>🔒 Complete Previous Simulation</>
+                              "🔒 Complete previous simulation to unlock"
                             )}
                           </Button>
                         </div>
@@ -419,39 +449,68 @@ export default function SimulationsPage() {
                 </div>
 
                 {filteredSimulations.length === 0 && (
-                  <Card>
-                    <CardContent className="p-12 text-center">
-                      <div className="text-gray-400 mb-4">
-                        <Search className="w-12 h-12 mx-auto" />
-                      </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No simulations found</h3>
-                      <p className="text-gray-600">Try adjusting your search terms or filters.</p>
-                    </CardContent>
-                  </Card>
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <Search className="w-12 h-12 mx-auto" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No simulations found</h3>
+                    <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
+                  </div>
                 )}
               </>
             )}
           </TabsContent>
 
-          <TabsContent value="city">
+          <TabsContent value="city" className="space-y-6">
             {tabLoading ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
                   <p className="text-gray-600">Loading city builder...</p>
                 </div>
               </div>
             ) : (
-              <GameifiedCityViewer
-                userProgress={{
-                  completedSimulations: userData?.completedSimulations || [],
-                  unlockedBuildings: userData?.unlockedBuildings || [],
-                  cityLevel: userData?.cityLevel || 1,
-                  totalXP: userData?.totalXP || 0,
-                }}
-                onBuildingClick={handleBuildingClick}
-                onSimulationStart={handleSimulationStart}
-              />
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building className="w-6 h-6 text-orange-600" />
+                      Build Your Future City
+                    </CardTitle>
+                    <CardDescription>
+                      Design your career city as you unlock new paths through simulations. Each completed simulation
+                      unlocks a new building representing different career opportunities.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Star className="w-5 h-5 text-blue-600" />
+                        <span className="font-medium text-blue-800">City Stats</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <div className="text-4xl font-bold text-green-600">{stats.completed}</div>
+                          <div className="text-md text-green-700">Buildings Unlocked</div>
+                        </div>
+                        <div>
+                          <div className="text-4xl font-bold text-orange-600">{stats.total - stats.completed}</div>
+                          <div className="text-md text-orange-700">Buildings Locked</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <GameifiedCityViewer
+                      userProgress={{
+                        completedSimulations: userData?.completedSimulations || [],
+                        unlockedBuildings: userData?.unlockedBuildings || [],
+                        cityLevel: userData?.cityLevel || 1,
+                      }}
+                      onBuildingClick={handleBuildingClick}
+                    />
+                  </CardContent>
+                </Card>
+              </>
             )}
           </TabsContent>
         </Tabs>
@@ -459,3 +518,22 @@ export default function SimulationsPage() {
     </div>
   )
 }
+
+function SimulationsPageContent() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading simulations...</p>
+          </div>
+        </div>
+      }
+    >
+      <SimulationsPage />
+    </Suspense>
+  )
+}
+
+export default SimulationsPageContent

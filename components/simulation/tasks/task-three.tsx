@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +34,9 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
     },
   )
 
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const canComplete = () => {
     return (
       formData.weeklyMessage.trim() !== "" &&
@@ -44,6 +49,16 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
   const handleComplete = () => {
     if (canComplete()) {
       onComplete(formData)
+    }
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "application/pdf")) {
+      setUploadedFile(file)
+      setFormData((prev) => ({ ...prev, samplePost: `Uploaded file: ${file.name}` }))
+    } else {
+      alert("Please upload a PNG, JPG, or PDF file.")
     }
   }
 
@@ -179,12 +194,36 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
             <p className="text-gray-600 ml-11 mb-2">
               Create a sample post. You can use Canva.com or describe what the visual would look like.
             </p>
-            <Textarea
-              value={formData.samplePost}
-              onChange={(e) => setFormData((prev) => ({ ...prev, samplePost: e.target.value }))}
-              placeholder="Describe your sample post design, or paste a link if you created one..."
-              className="ml-11 min-h-[80px]"
-            />
+            <div className="ml-11 space-y-3">
+              <Textarea
+                value={formData.samplePost}
+                onChange={(e) => setFormData((prev) => ({ ...prev, samplePost: e.target.value }))}
+                placeholder="Describe your sample post design, or upload a file below..."
+                className="min-h-[80px]"
+              />
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">Or upload your sample post</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.pdf"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mb-2"
+                  >
+                    Choose File (PNG, JPG, PDF)
+                  </Button>
+                  {uploadedFile && <p className="text-sm text-green-600">✓ Uploaded: {uploadedFile.name}</p>}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

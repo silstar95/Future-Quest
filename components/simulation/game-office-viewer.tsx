@@ -1,17 +1,19 @@
 "use client"
-
-import type React from "react"
-
 import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Keyboard, MousePointer, RefreshCw } from "lucide-react"
 
 interface GameOfficeViewerProps {
   currentLocation: string
   onLocationChange: (location: string) => void
   tasks: any[]
   completedTasks: string[]
-  currentTask: any
+  currentTask?: any
+  taskData?: any
+  onTaskSelect?: (taskId: string) => void
+  onTaskReview?: (taskId: string) => void
 }
 
 export function GameOfficeViewer({
@@ -20,310 +22,254 @@ export function GameOfficeViewer({
   tasks,
   completedTasks,
   currentTask,
+  taskData,
+  onTaskSelect,
+  onTaskReview,
 }: GameOfficeViewerProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [hoveredRoom, setHoveredRoom] = useState<string | null>(null)
-  const [characterPos, setCharacterPos] = useState({ x: 400, y: 500 })
+  const gameRef = useRef<HTMLDivElement>(null)
+  const officeGameRef = useRef<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const rooms = {
+  // Room information with task mappings
+  const roomInfo = {
     lobby: {
-      x: 400,
-      y: 500,
-      width: 120,
-      height: 80,
-      label: "Lobby",
-      color: "#E3F2FD",
+      name: "Lobby",
       description: "Welcome area and reception",
+      tasks: [],
     },
     whiteboard: {
-      x: 150,
-      y: 200,
-      width: 140,
-      height: 100,
-      label: "Strategy Room",
-      color: "#F3E5F5",
-      description: "Brand strategy and planning",
+      name: "Strategy Room",
+      description: "Brand strategy and planning workspace",
+      tasks: ["task-1"],
     },
     research: {
-      x: 600,
-      y: 200,
-      width: 140,
-      height: 100,
-      label: "Research Center",
-      color: "#E8F5E8",
-      description: "Market research and analytics",
+      name: "Research Center",
+      description: "Market research and analytics hub",
+      tasks: ["task-2", "task-4"], // Both Partnership Strategy and Competitive Intelligence
     },
     creative: {
-      x: 150,
-      y: 350,
-      width: 140,
-      height: 100,
-      label: "Creative Studio",
-      color: "#FFF3E0",
-      description: "Design and content creation",
+      name: "Creative Studio",
+      description: "Design and content creation space",
+      tasks: ["task-3"],
     },
     media: {
-      x: 600,
-      y: 350,
-      width: 140,
-      height: 100,
-      label: "Media Room",
-      color: "#FFEBEE",
-      description: "PR and media relations",
+      name: "Media Room",
+      description: "PR and media relations center",
+      tasks: ["task-5"],
     },
   }
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    if (!gameRef.current) return
 
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
+    const initializeGame = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
+        // Clean up existing game
+        if (officeGameRef.current) {
+          officeGameRef.current.destroy()
+          officeGameRef.current = null
+        }
 
-    // Draw office background
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height)
-    gradient.addColorStop(0, "#f8fafc")
-    gradient.addColorStop(1, "#e2e8f0")
-    ctx.fillStyle = gradient
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+        // Clear the container
+        gameRef.current!.innerHTML = ""
 
-    // Draw grid pattern
-    ctx.strokeStyle = "#e2e8f0"
-    ctx.lineWidth = 1
-    for (let i = 0; i < canvas.width; i += 40) {
-      ctx.beginPath()
-      ctx.moveTo(i, 0)
-      ctx.lineTo(i, canvas.height)
-      ctx.stroke()
-    }
-    for (let i = 0; i < canvas.height; i += 40) {
-      ctx.beginPath()
-      ctx.moveTo(0, i)
-      ctx.lineTo(canvas.width, i)
-      ctx.stroke()
-    }
+        // Dynamically import OfficeGame to avoid SSR issues
+        const { OfficeGame } = await import("@/lib/office-game")
+        const game = new OfficeGame(gameRef.current!, tasks, completedTasks, currentTask)
 
-    // Draw rooms
-    Object.entries(rooms).forEach(([roomId, room]) => {
-      const isCurrentLocation = currentLocation === roomId
-      const isHovered = hoveredRoom === roomId
-      const hasCurrentTask = currentTask && currentTask.location === roomId
-      const hasCompletedTask = tasks.some((task) => task.location === roomId && completedTasks.includes(task.id))
+        // Set up event handlers
+        game.onLocationChange = (location: string) => {
+          onLocationChange(location)
+        }
 
-      // Room background
-      ctx.fillStyle = room.color
-      if (isCurrentLocation) {
-        ctx.fillStyle = "#3b82f6"
-      } else if (hasCurrentTask) {
-        ctx.fillStyle = "#10b981"
+        game.onTaskSelect = (taskId: string) => {
+          if (onTaskSelect) {
+            onTaskSelect(taskId)
+          }
+        }
+
+        game.onTaskReview = (taskId: string) => {
+          if (onTaskReview) {
+            onTaskReview(taskId)
+          }
+        }
+
+        officeGameRef.current = game
+        setIsLoading(false)
+      } catch (err) {
+        console.error("Error initializing office game:", err)
+        setError("Failed to load office viewer. Please refresh the page.")
+        setIsLoading(false)
       }
-
-      ctx.fillRect(room.x, room.y, room.width, room.height)
-
-      // Room border
-      ctx.strokeStyle = isCurrentLocation ? "#1d4ed8" : hasCurrentTask ? "#059669" : "#94a3b8"
-      ctx.lineWidth = isHovered ? 4 : 2
-      ctx.strokeRect(room.x, room.y, room.width, room.height)
-
-      // Room label
-      ctx.fillStyle = isCurrentLocation ? "#ffffff" : "#1f2937"
-      ctx.font = "bold 14px Arial"
-      ctx.textAlign = "center"
-      ctx.fillText(room.label, room.x + room.width / 2, room.y + room.height / 2)
-
-      // Task indicators
-      if (hasCurrentTask) {
-        // Current task indicator
-        ctx.beginPath()
-        ctx.arc(room.x + room.width - 15, room.y + 15, 8, 0, 2 * Math.PI)
-        ctx.fillStyle = "#ef4444"
-        ctx.fill()
-        ctx.fillStyle = "#ffffff"
-        ctx.font = "bold 10px Arial"
-        ctx.fillText("!", room.x + room.width - 15, room.y + 19)
-      } else if (hasCompletedTask) {
-        // Completed task indicator
-        ctx.beginPath()
-        ctx.arc(room.x + room.width - 15, room.y + 15, 8, 0, 2 * Math.PI)
-        ctx.fillStyle = "#22c55e"
-        ctx.fill()
-        ctx.fillStyle = "#ffffff"
-        ctx.font = "bold 10px Arial"
-        ctx.fillText("✓", room.x + room.width - 15, room.y + 19)
-      }
-
-      // Room icons
-      ctx.font = "20px Arial"
-      const icons = {
-        lobby: "🏢",
-        whiteboard: "📋",
-        research: "📊",
-        creative: "🎨",
-        media: "📺",
-      }
-      ctx.fillText(icons[roomId as keyof typeof icons], room.x + 20, room.y + 30)
-    })
-
-    // Draw character
-    const currentRoom = rooms[currentLocation as keyof typeof rooms]
-    if (currentRoom) {
-      const charX = currentRoom.x + currentRoom.width / 2
-      const charY = currentRoom.y + currentRoom.height / 2
-
-      // Character shadow
-      ctx.beginPath()
-      ctx.ellipse(charX, charY + 15, 12, 6, 0, 0, 2 * Math.PI)
-      ctx.fillStyle = "rgba(0, 0, 0, 0.2)"
-      ctx.fill()
-
-      // Character body
-      ctx.beginPath()
-      ctx.arc(charX, charY, 12, 0, 2 * Math.PI)
-      ctx.fillStyle = "#3b82f6"
-      ctx.fill()
-      ctx.strokeStyle = "#1d4ed8"
-      ctx.lineWidth = 2
-      ctx.stroke()
-
-      // Character face
-      ctx.fillStyle = "#ffffff"
-      ctx.font = "16px Arial"
-      ctx.textAlign = "center"
-      ctx.fillText("😊", charX, charY + 5)
     }
 
-    // Draw connecting paths
-    ctx.strokeStyle = "#cbd5e1"
-    ctx.lineWidth = 3
-    ctx.setLineDash([5, 5])
+    // Add a small delay to ensure DOM is ready
+    const timer = setTimeout(initializeGame, 100)
 
-    // Connect lobby to other rooms
-    const lobby = rooms.lobby
-    Object.entries(rooms).forEach(([roomId, room]) => {
-      if (roomId !== "lobby") {
-        ctx.beginPath()
-        ctx.moveTo(lobby.x + lobby.width / 2, lobby.y + lobby.height / 2)
-        ctx.lineTo(room.x + room.width / 2, room.y + room.height / 2)
-        ctx.stroke()
+    return () => {
+      clearTimeout(timer)
+      if (officeGameRef.current) {
+        officeGameRef.current.destroy()
+        officeGameRef.current = null
       }
-    })
+    }
+  }, [tasks, completedTasks, currentTask])
 
-    ctx.setLineDash([])
-  }, [currentLocation, hoveredRoom, currentTask, completedTasks])
-
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
-
-    // Check which room was clicked
-    Object.entries(rooms).forEach(([roomId, room]) => {
-      if (x >= room.x && x <= room.x + room.width && y >= room.y && y <= room.y + room.height) {
-        onLocationChange(roomId)
-      }
-    })
+  const handleRoomNavigation = (roomId: string) => {
+    if (officeGameRef.current) {
+      officeGameRef.current.moveCatToRoom(roomId)
+    }
   }
 
-  const handleCanvasMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+  const handleRefresh = () => {
+    if (gameRef.current) {
+      // Force re-initialization
+      const event = new Event("refresh")
+      gameRef.current.dispatchEvent(event)
+      window.location.reload()
+    }
+  }
 
-    const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
+  const getCurrentRoomTasks = () => {
+    const room = roomInfo[currentLocation as keyof typeof roomInfo]
+    if (!room) return []
 
-    let hoveredRoomId = null
-    Object.entries(rooms).forEach(([roomId, room]) => {
-      if (x >= room.x && x <= room.x + room.width && y >= room.y && y <= room.y + room.height) {
-        hoveredRoomId = roomId
-      }
-    })
+    return room.tasks
+      .map((taskId) => tasks.find((t) => t.id === taskId))
+      .filter(Boolean)
+      .map((task) => ({
+        ...task,
+        isCompleted: completedTasks.includes(task.id),
+        hasData: taskData && taskData[task.id],
+      }))
+  }
 
-    setHoveredRoom(hoveredRoomId)
+  const currentRoomTasks = getCurrentRoomTasks()
+  const currentRoom = roomInfo[currentLocation as keyof typeof roomInfo]
+
+  if (error) {
+    return (
+      <div className="h-[600px] flex items-center justify-center bg-red-50 border-2 border-red-200 rounded-lg">
+        <div className="text-center">
+          <div className="text-red-600 mb-4">⚠️ {error}</div>
+          <Button onClick={handleRefresh} variant="outline">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
-      <canvas
-        ref={canvasRef}
-        width={900}
-        height={600}
-        onClick={handleCanvasClick}
-        onMouseMove={handleCanvasMouseMove}
-        className="border border-gray-300 rounded-lg cursor-pointer w-full bg-white shadow-inner"
-        style={{ maxHeight: "600px" }}
-      />
+      {/* Game Container */}
+      <div className="relative">
+        <div
+          ref={gameRef}
+          className="w-full h-[600px] bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg border-2 border-gray-200 overflow-hidden"
+          style={{ minHeight: "600px" }}
+        />
 
-      {/* Room Info */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-        {Object.entries(rooms).map(([roomId, room]) => {
-          const isCurrentLocation = currentLocation === roomId
-          const hasCurrentTask = currentTask && currentTask.location === roomId
-          const hasCompletedTask = tasks.some((task) => task.location === roomId && completedTasks.includes(task.id))
-
-          return (
-            <Card
-              key={roomId}
-              className={`cursor-pointer transition-all ${
-                isCurrentLocation
-                  ? "border-blue-500 bg-blue-50"
-                  : hasCurrentTask
-                    ? "border-green-500 bg-green-50"
-                    : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => onLocationChange(roomId)}
-            >
-              <CardContent className="p-3 text-center">
-                <div className="text-lg mb-1">
-                  {roomId === "lobby" && "🏢"}
-                  {roomId === "whiteboard" && "📋"}
-                  {roomId === "research" && "📊"}
-                  {roomId === "creative" && "🎨"}
-                  {roomId === "media" && "📺"}
-                </div>
-                <h4 className="font-medium text-xs mb-1">{room.label}</h4>
-                <p className="text-xs text-gray-600 mb-2">{room.description}</p>
-                <div className="flex justify-center gap-1">
-                  {isCurrentLocation && (
-                    <Badge variant="default" className="text-xs">
-                      Current
-                    </Badge>
-                  )}
-                  {hasCurrentTask && (
-                    <Badge variant="secondary" className="text-xs">
-                      Active
-                    </Badge>
-                  )}
-                  {hasCompletedTask && (
-                    <Badge variant="outline" className="text-xs">
-                      ✓
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading office environment...</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Navigation Help */}
-      <div className="text-center text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-        <p>
-          <strong>💡 Navigation:</strong> Click on rooms to move around the office.
-          {currentTask && (
-            <span className="text-green-600 font-medium">
-              {" "}
-              Go to the <strong>{currentTask.location}</strong> to start your next mission!
-            </span>
-          )}
-        </p>
+      {/* Controls and Room Info */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Controls */}
+        <Card>
+          <CardContent className="p-4">
+            <h4 className="font-semibold mb-3 flex items-center">
+              <Keyboard className="mr-2 h-4 w-4" />
+              Controls
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span>Move Cat:</span>
+                <Badge variant="outline">WASD or Arrow Keys</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Enter Room:</span>
+                <Badge variant="outline">Click or Walk Close</Badge>
+              </div>           
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Current Room Info */}
+        <Card>
+          <CardContent className="p-4">
+            <h4 className="font-semibold mb-3 flex items-center">
+              <MousePointer className="mr-2 h-4 w-4" />
+              Current Location: {currentRoom?.name || "Unknown"}
+            </h4>
+            <p className="text-sm text-gray-600 mb-3">{currentRoom?.description}</p>
+
+            {currentRoomTasks.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="font-medium text-sm">Available Tasks:</h5>
+                {currentRoomTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between text-sm">
+                    <span className={task.isCompleted ? "text-green-600" : "text-blue-600"}>{task.title}</span>
+                    <div className="flex items-center gap-2">
+                      {task.isCompleted && <Badge variant="outline">✓ Completed</Badge>}
+                      {task.hasData && <Badge variant="secondary">Has Data</Badge>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Quick Room Navigation */}
+      <Card>
+        <CardContent className="p-4">
+          <h4 className="font-semibold mb-3">Quick Room Navigation</h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+            {Object.entries(roomInfo).map(([roomId, room]) => {
+              const roomTasks = room.tasks.map((taskId) => tasks.find((t) => t.id === taskId)).filter(Boolean)
+              const hasCompletedTasks = roomTasks.some((task) => completedTasks.includes(task.id))
+              const hasActiveTasks = roomTasks.some((task) => !completedTasks.includes(task.id))
+
+              return (
+                <Button
+                  key={roomId}
+                  variant={currentLocation === roomId ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handleRoomNavigation(roomId)}
+                  className="flex flex-col items-center p-3 h-auto"
+                >
+                  <div className="text-lg mb-1">
+                    {roomId === "lobby" && "🏢"}
+                    {roomId === "whiteboard" && "📋"}
+                    {roomId === "research" && "📊"}
+                    {roomId === "creative" && "🎨"}
+                    {roomId === "media" && "📺"}
+                  </div>
+                  <div className="text-xs font-medium">{room.name}</div>
+                  <div className="flex gap-1 mt-1">
+                    {hasCompletedTasks && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
+                    {hasActiveTasks && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
+                  </div>
+                </Button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

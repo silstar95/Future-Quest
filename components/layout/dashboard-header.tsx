@@ -96,8 +96,13 @@ export function DashboardHeader({
 
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                <Globe className="h-6 w-6 text-indigo-600" />
-                <span className="font-bold text-lg text-indigo-600">Future Quest</span>
+                <img 
+                  src="/images/logo.png" 
+                  alt="Future Quest Logo" 
+                  className="h-28 w-auto object-contain"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => router.push("/dashboard/student")}
+                />
               </div>
 
               <div className="hidden md:block h-6 w-px bg-gray-300" />

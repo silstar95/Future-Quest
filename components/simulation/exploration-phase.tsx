@@ -6,7 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Search, Clock, Lightbulb, ArrowRight } from "lucide-react"
+import { Search, Clock, Lightbulb, ArrowRight, AlertTriangle } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface ExplorationPhaseProps {
   onComplete: (data: any) => void
@@ -14,22 +25,23 @@ interface ExplorationPhaseProps {
 }
 
 export function ExplorationPhase({ onComplete, initialData }: ExplorationPhaseProps) {
-  const [timeSpent, setTimeSpent] = useState(0)
-  const [isResearching, setIsResearching] = useState(false)
+  const [timeSpent, setTimeSpent] = useState(initialData?.timeSpent || 0)
+  const [isResearching, setIsResearching] = useState(initialData?.isResearching || false)
   const [answers, setAnswers] = useState({
     summary: initialData?.summary || "",
     roles: initialData?.roles || "",
     companies: initialData?.companies || "",
   })
+  const [showWarning, setShowWarning] = useState(false)
 
-  const minResearchTime = 10 * 60 // 10 minutes in seconds
-  const recommendedTime = 15 * 60 // 15 minutes in seconds
+  const minResearchTime = 1 * 60 // 1 minute in seconds
+  const recommendedTime = 5 * 60 // 5 minutes in seconds
 
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isResearching) {
       interval = setInterval(() => {
-        setTimeSpent((prev) => prev + 1)
+        setTimeSpent((prev: any) => prev + 1)
       }, 1000)
     }
     return () => clearInterval(interval)
@@ -58,14 +70,19 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
       ...answers,
       timeSpent,
       researchCompleted: timeSpent >= minResearchTime,
+      completedAt: new Date().toISOString(),
     })
   }
 
-  const canComplete =
-    timeSpent >= minResearchTime &&
-    answers.summary.trim() !== "" &&
-    answers.roles.trim() !== "" &&
-    answers.companies.trim() !== ""
+  const handleContinueWithWarning = () => {
+    if (timeSpent < recommendedTime) {
+      setShowWarning(true)
+    } else {
+      handleComplete()
+    }
+  }
+
+  const canComplete = answers.summary.trim() !== "" && answers.roles.trim() !== "" && answers.companies.trim() !== ""
 
   const researchProgress = Math.min((timeSpent / recommendedTime) * 100, 100)
 
@@ -97,8 +114,8 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
           </CardTitle>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Minimum: 10 minutes</span>
-              <span>Recommended: 15 minutes</span>
+              <span>Suggested: 5 minutes</span>
+              <span>{Math.round(researchProgress)}%</span>
             </div>
             <Progress value={researchProgress} className="h-2" />
           </div>
@@ -171,7 +188,8 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
             <CardHeader>
               <CardTitle>Research Questions</CardTitle>
               <p className="text-gray-600">
-                Once you've spent about 10-15 minutes researching, fill in your responses to the questions below.
+                Review the questions below and take notes that will help you answer them. Once you've spent about 10-15
+                minutes researching, fill in your responses to the questions in this section.
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -223,15 +241,41 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                 <div>
                   <h4 className="font-semibold text-green-800">Ready to Continue?</h4>
                   <p className="text-sm text-green-700">
-                    {timeSpent >= minResearchTime
-                      ? "Great job! You've completed the minimum research time."
-                      : `Continue researching for ${Math.ceil((minResearchTime - timeSpent) / 60)} more minutes.`}
+                    {timeSpent >= recommendedTime
+                      ? "Great job! You've completed the recommended research time."
+                      : `Continue researching for ${Math.ceil((recommendedTime - timeSpent) / 60)} more minutes for best results.`}
                   </p>
                 </div>
-                <Button onClick={handleComplete} disabled={!canComplete} className="bg-green-600 hover:bg-green-700">
-                  Complete Exploration
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        disabled={!canComplete}
+                        onClick={handleContinueWithWarning}
+                      >
+                        Complete Exploration
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center">
+                          <AlertTriangle className="mr-2 h-5 w-5 text-yellow-500" />
+                          Quick Check-In
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to move ahead? You have only spent {formatTime(timeSpent)}. We suggest
+                          spending at least 5 minutes to get the most out of this experience.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Continue Researching</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleComplete}>Yes, I'm Ready to Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             </CardContent>
           </Card>

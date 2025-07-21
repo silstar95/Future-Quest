@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/providers/auth-provider"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 import {
   Trophy,
   Target,
@@ -26,7 +26,11 @@ import {
   Lightbulb,
 } from "lucide-react"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
-import { getStudentProgressCloudFunction } from "@/lib/firebase-service"
+import {
+  getStudentProgressCloudFunction,
+  getCurrentSimulationProgress,
+  getSimulationProgress,
+} from "@/lib/firebase-service"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 
@@ -35,12 +39,15 @@ interface UserData {
   lastName: string
   email: string
   completedSimulations: string[]
-  totalXP: number
   cityLevel: number
   badges: string[]
   unlockedBuildings: string[]
   onboardingAnswers?: any
   interests?: string[]
+  currentSimulation?: string
+  lastActiveSimulation?: string
+  simulationProgress?: { [simulationId: string]: number }
+  lastActiveAt?: string
 }
 
 interface Simulation {
@@ -52,12 +59,12 @@ interface Simulation {
   category: string
   isCompleted: boolean
   isUnlocked: boolean
+  progress?: number
 }
 
 interface StudentProgress {
   completedSimulations: string[]
   totalHours: number
-  level: number
   badges: string[]
   currentStreak: number
   weeklyGoal: number
@@ -68,7 +75,6 @@ interface StudentProgress {
   interests: string[]
   cityLevel: number
   unlockedBuildings: any[]
-  totalXP: number
   insights?: {
     industries: string[]
     careers: string[]
@@ -78,6 +84,7 @@ interface StudentProgress {
     workStyles: string[]
     nextSteps: string[]
   }
+  simulationProgress?: { [simulationId: string]: number }
 }
 
 export function StudentDashboard() {
@@ -88,6 +95,37 @@ export function StudentDashboard() {
   const [dataLoading, setDataLoading] = useState(true)
   const [insights, setInsights] = useState<any>(null)
   const [isNavigating, setIsNavigating] = useState(false)
+  const [currentSimulationData, setCurrentSimulationData] = useState<{
+    simulationId: string
+    progress: number
+    title: string
+  } | null>(null)
+
+  // Helper function to calculate progress percentage based on current phase
+  const calculateProgressPercentage = (simulationId: string): number => {
+    const progressData = userData?.simulationProgress?.[simulationId] || studentProgress?.simulationProgress?.[simulationId]
+    if (!progressData) return 0
+    
+    // If it's already a number, return it
+    if (typeof progressData === 'number') return progressData
+    
+    // If it's an object with currentPhase, calculate based on phase
+    if (typeof progressData === 'object' && progressData !== null) {
+      const phaseProgress = {
+        intro: 5,
+        "pre-reflection": 15,
+        exploration: 35,
+        experience: 75,
+        "post-reflection": 90,
+        complete: 100,
+      }
+      
+      const currentPhase = (progressData as any).currentPhase
+      return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
+    }
+    
+    return 0
+  }
 
   const simulations: Simulation[] = [
     {
@@ -99,16 +137,18 @@ export function StudentDashboard() {
       category: "Marketing",
       isCompleted: userData?.completedSimulations?.includes("brand-marketing") || false,
       isUnlocked: true,
+      progress: calculateProgressPercentage("brand-marketing"),
     },
     {
       id: "material-science",
       title: "Future Materials Lab",
       description: "Explore cutting-edge material science and innovation",
-      duration: "",
+      duration: "50-70 min",
       difficulty: "Intermediate",
       category: "Science",
       isCompleted: userData?.completedSimulations?.includes("material-science") || false,
       isUnlocked: userData?.completedSimulations?.includes("brand-marketing") || false,
+      progress: calculateProgressPercentage("material-science"),
     },
     {
       id: "finance-simulation",
@@ -119,6 +159,7 @@ export function StudentDashboard() {
       category: "Finance",
       isCompleted: userData?.completedSimulations?.includes("finance-simulation") || false,
       isUnlocked: userData?.completedSimulations?.includes("material-science") || false,
+      progress: calculateProgressPercentage("finance-simulation"),
     },
     {
       id: "healthcare-simulation",
@@ -129,6 +170,7 @@ export function StudentDashboard() {
       category: "Healthcare",
       isCompleted: userData?.completedSimulations?.includes("healthcare-simulation") || false,
       isUnlocked: userData?.completedSimulations?.includes("finance-simulation") || false,
+      progress: calculateProgressPercentage("healthcare-simulation"),
     },
   ]
 
@@ -138,37 +180,78 @@ export function StudentDashboard() {
     try {
       setDataLoading(true)
 
+      // Get current simulation progress from database
+      const currentProgress = await getCurrentSimulationProgress(user.uid)
+      if (currentProgress.success) {
+        const { lastActiveSimulation, simulationProgress } = currentProgress.data
+
+        // Find the last active simulation that's not completed
+        if (
+          lastActiveSimulation &&
+          simulationProgress[lastActiveSimulation] > 0 &&
+          simulationProgress[lastActiveSimulation] < 100
+        ) {
+          const simulation = simulations.find((s) => s.id === lastActiveSimulation)
+          if (simulation) {
+            setCurrentSimulationData({
+              simulationId: lastActiveSimulation,
+              progress: simulationProgress[lastActiveSimulation],
+              title: simulation.title,
+            })
+          }
+        }
+      }
+
+      // Get detailed simulation progress for each simulation
+      const simulationProgressPromises = simulations.map(async (sim) => {
+        try {
+          const progress = await getSimulationProgress(user.uid, sim.id)
+          return {
+            simulationId: sim.id,
+            progress: progress.success && progress.data ? Math.round((progress.data.currentStep / progress.data.totalSteps) * 100) : 0,
+            data: progress.success ? progress.data : null,
+          }
+        } catch (error) {
+          console.error(`Error getting progress for ${sim.id}:`, error)
+          return {
+            simulationId: sim.id,
+            progress: 0,
+            data: null,
+          }
+        }
+      })
+
+      const progressResults = await Promise.all(simulationProgressPromises)
+
+      // Update userData with actual progress from database
+      const progressMap: { [key: string]: number } = {}
+      progressResults.forEach((result) => {
+        progressMap[result.simulationId] = result.progress
+      })
+
       // Calculate stats based ONLY on completed simulations
       const completedSimulations = userProfile?.completedSimulations || []
       const completedCount = completedSimulations.length
-
-      // Level up every 2 simulations, starting at level 1
-      const level = Math.floor(completedCount / 2) + 1
-
-      // 250 XP per completed simulation
-      const totalXP = completedCount * 250
 
       // Each simulation takes ~1.5 hours
       const totalHours = completedCount * 1.5
 
       // Fetch student progress data
-      const progressResult = await getStudentProgressCloudFunction({ studentId: user.uid })
+      const progressResult = await getStudentProgressCloudFunction(user.uid)
 
       if (progressResult.data?.success) {
         setStudentProgress({
           ...progressResult.data.data,
           totalHours: totalHours, // Use calculated hours
-          level: level, // Use calculated level
-          totalXP: totalXP, // Use calculated XP
           completedSimulations: completedSimulations,
+          cityLevel: completedCount,
+          simulationProgress: progressMap, // Add actual progress from database
         })
       } else {
         // Set default data if no progress found
         setStudentProgress({
           completedSimulations: completedSimulations,
           totalHours: totalHours,
-          level: level,
-          totalXP: totalXP,
           badges: completedCount > 0 ? ["First Steps"] : [],
           currentStreak: 1,
           weeklyGoal: 3,
@@ -184,8 +267,9 @@ export function StudentDashboard() {
             "Financial Analyst",
           ],
           interests: userProfile?.interests || [],
-          cityLevel: level,
+          cityLevel: completedCount,
           unlockedBuildings: completedSimulations,
+          simulationProgress: progressMap, // Add actual progress from database
           insights: {
             industries: ["Technology", "Healthcare", "Creative Arts", "Finance", "Engineering", "Education"],
             careers: [
@@ -241,16 +325,12 @@ export function StudentDashboard() {
       // Calculate fallback data using the same logic
       const completedSimulations = userProfile?.completedSimulations || []
       const completedCount = completedSimulations.length
-      const level = Math.floor(completedCount / 2) + 1
-      const totalXP = completedCount * 250
       const totalHours = completedCount * 1.5
 
       // Set fallback data
       setStudentProgress({
         completedSimulations: completedSimulations,
         totalHours: totalHours,
-        level: level,
-        totalXP: totalXP,
         badges: completedCount > 0 ? ["First Steps"] : [],
         currentStreak: 1,
         weeklyGoal: 3,
@@ -264,8 +344,9 @@ export function StudentDashboard() {
           "Superconductor Engineer",
         ],
         interests: userProfile?.interests || [],
-        cityLevel: level,
+        cityLevel: completedCount,
         unlockedBuildings: completedSimulations,
+        simulationProgress: {}, // Empty progress map as fallback
       })
     } finally {
       setDataLoading(false)
@@ -274,7 +355,7 @@ export function StudentDashboard() {
 
   useEffect(() => {
     console.log("StudentDashboard useEffect - user:", user?.uid, "userProfile:", userProfile, "loading:", loading)
-    
+
     if (!loading && !user) {
       console.log("No user, redirecting to login")
       router.push("/auth/login")
@@ -304,10 +385,25 @@ export function StudentDashboard() {
           const data = doc.data() as UserData
           setUserData(data)
 
+          // Update current simulation data
+          if (data.lastActiveSimulation && data.simulationProgress) {
+            const progress = data.simulationProgress[data.lastActiveSimulation] || 0
+            if (progress > 0 && progress < 100) {
+              const simulation = simulations.find((s) => s.id === data.lastActiveSimulation)
+              if (simulation) {
+                setCurrentSimulationData({
+                  simulationId: data.lastActiveSimulation,
+                  progress,
+                  title: simulation.title,
+                })
+              }
+            } else {
+              setCurrentSimulationData(null)
+            }
+          }
+
           // Calculate stats based on completed simulations only
           const completedCount = data.completedSimulations?.length || 0
-          const calculatedLevel = Math.floor(completedCount / 2) + 1
-          const calculatedXP = completedCount * 250
           const calculatedHours = completedCount * 1.5
 
           // Update student progress with calculated data
@@ -318,9 +414,7 @@ export function StudentDashboard() {
                 ...prev,
                 completedSimulations: data.completedSimulations || prev.completedSimulations,
                 totalHours: calculatedHours,
-                level: calculatedLevel,
-                totalXP: calculatedXP,
-                cityLevel: calculatedLevel,
+                cityLevel: completedCount,
                 unlockedBuildings: data.completedSimulations || prev.unlockedBuildings,
                 // Keep other fields unchanged
                 badges: prev.badges,
@@ -405,18 +499,25 @@ export function StudentDashboard() {
     return simulations.find((sim) => sim.isUnlocked && !sim.isCompleted)
   }
 
+  const handleContinueSimulation = () => {
+    if (currentSimulationData) {
+      console.log("🔄 Continuing simulation:", currentSimulationData.simulationId)
+      router.push(`/simulation/${currentSimulationData.simulationId}`)
+    }
+  }
+
   const handleStartSimulation = (simulationId: string) => {
-    console.log("Starting simulation:", simulationId)
-    router.push(`/simulations?start=${encodeURIComponent(simulationId)}`)
+    console.log("▶️ Starting simulation:", simulationId)
+    router.push(`/simulation/${simulationId}`)
   }
 
   const handleViewAllSimulations = () => {
-    console.log("Viewing all simulations")
+    console.log("👀 Viewing all simulations")
     router.push("/simulations")
   }
 
   const handleViewCity = async () => {
-    console.log("Viewing city")
+    console.log("🏙️ Viewing city")
     setIsNavigating(true)
     // Add a small delay for smooth transition
     await new Promise((resolve) => setTimeout(resolve, 300))
@@ -439,8 +540,6 @@ export function StudentDashboard() {
   const fallbackProgress: StudentProgress = {
     completedSimulations: userProfile?.completedSimulations || [],
     totalHours: 0,
-    level: 1,
-    totalXP: 0,
     badges: [],
     currentStreak: 1,
     weeklyGoal: 3,
@@ -470,14 +569,7 @@ export function StudentDashboard() {
         "Marketing Manager",
         "Project Manager",
       ],
-      colleges: [
-        "MIT",
-        "Stanford University",
-        "Harvard University",
-        "UC Berkeley",
-        "Carnegie Mellon",
-        "Georgia Tech",
-      ],
+      colleges: ["MIT", "Stanford University", "Harvard University", "UC Berkeley", "Carnegie Mellon", "Georgia Tech"],
       degrees: [
         "Computer Science",
         "Business Administration",
@@ -486,12 +578,7 @@ export function StudentDashboard() {
         "Digital Media",
         "Data Science",
       ],
-      strengths: [
-        "Creative Problem Solving",
-        "Analytical Thinking",
-        "Communication Skills",
-        "Leadership Potential",
-      ],
+      strengths: ["Creative Problem Solving", "Analytical Thinking", "Communication Skills", "Leadership Potential"],
       workStyles: [
         "Collaborative Team Environment",
         "Independent Project Work",
@@ -511,8 +598,6 @@ export function StudentDashboard() {
   const displayProgress = studentProgress || fallbackProgress
 
   const completedCount = userData?.completedSimulations?.length || displayProgress.completedSimulations.length || 0
-  const calculatedLevel = Math.floor(completedCount / 2) + 1
-  const calculatedXP = completedCount * 250
   const nextSimulation = getNextSimulation()
 
   return (
@@ -522,12 +607,12 @@ export function StudentDashboard() {
         subtitle="Continue your Future Quest journey"
       />
 
-      {/* Welcome Message */}
+      {/* Welcome Message with Logo */}
       <div className="container mx-auto px-4 pt-6">
         <Card className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white border-0 shadow-xl mb-8">
           <CardContent className="p-8">
             <div className="flex items-center mb-4">
-              <Globe className="mr-3 h-8 w-8" />
+              <Globe className="h-8 w-8 text-indigo-600 mr-2" />
               <h2 className="text-2xl font-bold">Welcome to Future Quest</h2>
             </div>
             <p className="text-lg text-indigo-100 leading-relaxed">
@@ -542,91 +627,150 @@ export function StudentDashboard() {
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-8">
-            {/* Continue Where You Left Off */}
-            <Card className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-2xl">
-              <CardHeader>
-                <CardTitle className="text-3xl flex items-center">
-                  <Play className="mr-4 h-8 w-8" />
-                  Continue Where You Left Off
-                </CardTitle>
-                <CardDescription className="text-emerald-100 text-lg">
-                  Jump back into your career exploration journey
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {nextSimulation ? (
-                  <div className="space-y-6">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6">
-                      <h4 className="font-bold text-xl mb-3 flex items-center">
-                        <Star className="mr-2 h-6 w-6" />🎯 Recommended for You
-                      </h4>
-                      <p className="text-sm opacity-90 mb-6">
-                        Based on your interests:{" "}
-                        {userData?.interests?.join(", ") ||
-                          displayProgress.interests.join(", ") ||
-                          "General exploration"}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
+            {/* Side-by-side cards */}
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Continue Where You Left Off */}
+              <Card className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0 shadow-2xl">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center">
+                    <Play className="mr-3 h-6 w-6" />
+                    Continue Where You Left Off
+                  </CardTitle>
+                  <CardDescription className="text-emerald-100">
+                    Jump back into your career exploration journey
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {currentSimulationData ? (
+                    <div className="space-y-4">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                        <h4 className="font-bold text-lg mb-2 flex items-center">
+                          <Star className="mr-2 h-5 w-5" />🎯 Continue Your Progress
+                        </h4>
+                        <div className="space-y-3">
+                          <h3 className="text-lg font-semibold text-white">{currentSimulationData.title}</h3>
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span>Progress</span>
+                              <span>{Math.round(currentSimulationData.progress)}%</span>
+                            </div>
+                            <Progress value={currentSimulationData.progress} className="h-2 bg-white/20" />
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-white/70">
+                            <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
+                              In Progress
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleContinueSimulation}
+                        className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20"
+                      >
+                        Continue Simulation
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : nextSimulation ? (
+                    <div className="space-y-4">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                        <h4 className="font-bold text-lg mb-2 flex items-center">
+                          <Star className="mr-2 h-5 w-5" />🎯 Recommended for You
+                        </h4>
+                        <p className="text-sm opacity-90 mb-4">
+                          Based on your interests:{" "}
+                          {userData?.interests?.join(", ") ||
+                            displayProgress.interests.join(", ") ||
+                            "General exploration"}
+                        </p>
+                        <div className="space-y-3">
                           <h3 className="text-lg font-semibold text-white">{nextSimulation.title}</h3>
-                          <p className="text-white/80 mb-2">{nextSimulation.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-white/70">
+                          <p className="text-white/80 text-sm">{nextSimulation.description}</p>
+                          <div className="flex items-center gap-3 text-xs text-white/70">
                             <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
+                              <Clock className="w-3 h-3" />
                               {nextSimulation.duration}
                             </div>
-                            <Badge variant="outline" className="bg-white/20 text-white border-white/30">
+                            <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
                               {nextSimulation.difficulty}
                             </Badge>
-                            <Badge variant="outline" className="bg-white/20 text-white border-white/30">
+                            <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
                               {nextSimulation.category}
                             </Badge>
                           </div>
                         </div>
-                        <Button
-                          onClick={() => handleStartSimulation(nextSimulation.id)}
-                          size="lg"
-                          className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                        >
-                          Start Simulation
-                          <ChevronRight className="ml-2 h-4 w-4" />
-                        </Button>
+                      </div>
+                      <Button
+                        onClick={() => handleStartSimulation(nextSimulation.id)}
+                        className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20"
+                      >
+                        Start Simulation
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Globe className="mx-auto h-12 w-12 mb-4 opacity-70" />
+                      <p className="text-lg mb-4">Ready to start your Future Quest?</p>
+                      <Button
+                        variant="outline"
+                        className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                        onClick={() => router.push("/onboarding")}
+                      >
+                        Complete Your Profile
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Build Your Future City */}
+              <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-2xl">
+                <CardHeader>
+                  <CardTitle className="text-2xl flex items-center">
+                    <Building className="mr-3 h-6 w-6" />
+                    Build Your Future City
+                  </CardTitle>
+                  <CardDescription className="text-orange-100">
+                    Design your career city as you unlock new paths
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                      <h4 className="font-bold text-lg mb-2">🏗️ City Progress</h4>
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <div className="text-2xl font-bold">{completedCount}</div>
+                          <div className="text-xs opacity-90">City Level</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold">{completedCount}</div>
+                          <div className="text-xs opacity-90">Buildings</div>
+                        </div>
                       </div>
                     </div>
                     <Button
-                      variant="outline"
-                      className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20 h-14 text-lg"
                       onClick={handleViewCity}
                       disabled={isNavigating}
+                      className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20"
                     >
                       {isNavigating ? (
                         <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3" />
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                           Loading City...
                         </>
                       ) : (
                         <>
-                          <Building className="mr-3 h-6 w-6" />
-                          Build Your Future City
+                          <Building className="mr-2 h-4 w-4" />
+                          Open City Builder
                         </>
                       )}
                     </Button>
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Globe className="mx-auto h-16 w-16 mb-6 opacity-70" />
-                    <p className="text-xl mb-6">Ready to start your Future Quest?</p>
-                    <Button
-                      variant="outline"
-                      className="bg-white/10 border-white/30 text-white hover:bg-white/20 h-12 px-8"
-                      onClick={() => router.push("/onboarding")}
-                    >
-                      Complete Your Profile
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Your Exploration Journey */}
             <Card>
@@ -644,11 +788,11 @@ export function StudentDashboard() {
                     <div className="text-sm font-medium text-blue-800">Simulations Completed</div>
                   </div>
                   <div className="text-center p-6 bg-green-50 rounded-xl">
-                                      <div className="text-4xl font-bold text-green-600 mb-2">{displayProgress.totalHours || 0}</div>
-                  <div className="text-sm font-medium text-green-800">Hours Experienced</div>
-                </div>
-                <div className="text-center p-6 bg-purple-50 rounded-xl">
-                  <div className="text-4xl font-bold text-purple-600 mb-2">{displayProgress.interests.length}</div>
+                    <div className="text-4xl font-bold text-green-600 mb-2">{displayProgress.totalHours || 0}</div>
+                    <div className="text-sm font-medium text-green-800">Hours Experienced</div>
+                  </div>
+                  <div className="text-center p-6 bg-purple-50 rounded-xl">
+                    <div className="text-4xl font-bold text-purple-600 mb-2">{displayProgress.interests.length}</div>
                     <div className="text-sm font-medium text-purple-800">Careers Explored</div>
                   </div>
                 </div>
@@ -693,6 +837,18 @@ export function StudentDashboard() {
                             {!simulation.isUnlocked && <span className="text-gray-400">🔒</span>}
                           </div>
                           <p className="text-sm text-gray-600 mb-2">{simulation.description}</p>
+
+                          {/* Progress Bar */}
+                          {(simulation.progress ?? 0) > 0 && (
+                            <div className="mb-2">
+                              <div className="flex justify-between text-xs mb-1">
+                                <span className="text-gray-500">Progress</span>
+                                <span className="font-medium">{Math.round(simulation.progress ?? 0)}%</span>
+                              </div>
+                              <Progress value={simulation.progress ?? 0} className="h-1" />
+                            </div>
+                          )}
+
                           <div className="flex items-center gap-4 text-xs text-gray-500">
                             <div className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
@@ -712,7 +868,13 @@ export function StudentDashboard() {
                           variant={simulation.isCompleted ? "outline" : "default"}
                           size="sm"
                         >
-                          {simulation.isCompleted ? "Replay" : simulation.isUnlocked ? "Start" : "Locked"}
+                          {simulation.isCompleted
+                            ? "Replay"
+                            : (simulation.progress ?? 0) > 0
+                              ? "Continue"
+                              : simulation.isUnlocked
+                                ? "Start"
+                                : "Locked"}
                         </Button>
                       </div>
                     </div>
@@ -810,16 +972,6 @@ export function StudentDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Level Progress */}
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Level {displayProgress.level}</span>
-                    <span className="text-sm text-gray-500">Explorer</span>
-                  </div>
-                  <Progress value={(completedCount % 3) * 33.33} className="h-3" />
-                  <p className="text-xs text-gray-500">{3 - (completedCount % 3)} simulations to next level</p>
-                </div>
-
                 {/* Current Streak */}
                 <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600 mb-1">{displayProgress.currentStreak}</div>

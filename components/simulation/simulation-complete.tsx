@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Trophy, Star, TrendingUp, Award, Home, RotateCcw, Building, Sparkles, Zap } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/components/providers/auth-provider"
 import { completeSimulation } from "@/lib/firebase-service"
 import { useToast } from "@/hooks/use-toast"
 
@@ -19,7 +19,7 @@ interface SimulationCompleteProps {
 export function SimulationComplete({ simulationData, onReturnToDashboard, onViewCity }: SimulationCompleteProps) {
   const [isProcessing, setIsProcessing] = useState(true)
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false)
-  const { user, refreshUserProfile } = useAuth()
+  const { user } = useAuth()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -33,9 +33,6 @@ export function SimulationComplete({ simulationData, onReturnToDashboard, onView
             xpEarned: simulationData.totalXP || 875,
             badgesEarned: ["Brand Strategist", "Social Media Expert", "PR Professional"],
           })
-
-          // Refresh user profile to get updated data
-          await refreshUserProfile()
 
           // Show unlock animation
           setTimeout(() => {
@@ -60,7 +57,7 @@ export function SimulationComplete({ simulationData, onReturnToDashboard, onView
     }
 
     processCompletion()
-  }, [user, simulationData, refreshUserProfile, toast])
+  }, [user, simulationData, toast])
 
   const getCompletionTime = () => {
     if (simulationData.startTime) {
@@ -118,14 +115,7 @@ export function SimulationComplete({ simulationData, onReturnToDashboard, onView
           </p>
         </CardHeader>
         <CardContent className="text-center relative z-10">
-          <div className="grid md:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold flex items-center justify-center">
-                <Zap className="mr-2 h-6 w-6 text-yellow-300" />
-                {simulationData.totalXP || 875}
-              </div>
-              <div className="text-purple-100">XP Earned</div>
-            </div>
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
               <div className="text-3xl font-bold">{getCompletionTime()}</div>
               <div className="text-purple-100">Time Spent</div>
@@ -134,10 +124,7 @@ export function SimulationComplete({ simulationData, onReturnToDashboard, onView
               <div className="text-3xl font-bold">5/5</div>
               <div className="text-purple-100">Tasks Completed</div>
             </div>
-            <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">Level {simulationData.playerLevel || 5}</div>
-              <div className="text-purple-100">Final Level</div>
-            </div>
+            
           </div>
         </CardContent>
       </Card>
@@ -229,11 +216,11 @@ export function SimulationComplete({ simulationData, onReturnToDashboard, onView
                   <Badge variant="outline">Partnership Development</Badge>
                 </div>
               </div>
-              <div>
+              {/* <div>
                 <h4 className="font-semibold mb-2">Career Interest</h4>
-                <Progress value={85} className="h-2" />
+                <Progress value={90} className="h-2" />
                 <p className="text-sm text-gray-600 mt-1">High interest in marketing careers</p>
-              </div>
+              </div> */}
             </div>
           </div>
         </CardContent>

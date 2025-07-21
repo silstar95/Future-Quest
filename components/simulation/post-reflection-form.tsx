@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
-import { ChevronRight, ChevronLeft, Star, TrendingUp } from "lucide-react"
+import { ChevronRight, ChevronLeft, TrendingUp, BarChart3 } from "lucide-react"
 
 interface PostReflectionData {
   enjoymentRating: string
@@ -138,8 +138,8 @@ export function PostReflectionForm({ onComplete, initialData, preReflectionData 
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-2xl flex items-center">
-              <Star className="mr-3 h-6 w-6 text-yellow-500" />
-              Post-Reflection
+              <BarChart3 className="mr-3 h-6 w-6 text-green-500" />
+              Evaluate
             </CardTitle>
             <span className="text-sm text-gray-500">
               Question {currentQuestion + 1} of {questions.length}
@@ -150,11 +150,11 @@ export function PostReflectionForm({ onComplete, initialData, preReflectionData 
 
         <CardContent className="p-8">
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-lg mb-6">
-              <h3 className="text-lg font-semibold mb-2">🎉 Congratulations!</h3>
+            <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-6 rounded-lg mb-6">
+              <h3 className="text-lg font-semibold mb-2">📊 Time to Evaluate</h3>
               <p className="text-gray-700">
-                You've completed your task. Take a moment to reflect on how you felt working on this task and the wider
-                project.
+                Now that you've engaged with professionals in the field, it's time to evaluate your experience and
+                reflect on what you've learned throughout this simulation.
               </p>
             </div>
 

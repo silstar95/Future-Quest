@@ -54,13 +54,12 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
         <div className="bg-purple-50 border border-purple-200 p-6 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3">🎯 Your Mission</h3>
           <p className="text-gray-700 mb-4">
-            Your task today is to select a celebrity as a team that you want to make even more famous. This could be
+            Select a celebrity as a team that you want to make even more famous. This could be
             Taylor Swift, Bad Bunny, Serena Williams, Mr. Beast, Greta Thunberg, Alexandria Ocasio-Cortez (AOC), or
             anyone else. You can also make up your own celebrity!
           </p>
           <p className="text-gray-700">
-            Before you dive into your individual tasks, complete the following steps to establish your celebrity's
-            identity. Use your responses to inform all future tasks.
+            Complete the following steps to establish your celebrity's identity. Use your responses to inform all future tasks.
           </p>
         </div>
 
