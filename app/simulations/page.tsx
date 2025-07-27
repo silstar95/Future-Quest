@@ -78,8 +78,20 @@ function SimulationsPage() {
       difficulty: "Beginner",
       category: "Marketing",
       isCompleted: userData?.completedSimulations?.includes("brand-marketing") || false,
-      isUnlocked: true,
+      isUnlocked: true, // Always unlocked
       progress: userData?.simulationProgress?.["brand-marketing"] || 0,
+    },
+    {
+      id: "finance-simulation",
+      title: "Risk, Reward, and Real World Finance",
+      description:
+        "Navigate the risks and rewards of managing company finances while exploring finance careers. Experience real-world financial decision making.",
+      duration: "3-4 hours",
+      difficulty: "Intermediate",
+      category: "Finance",
+      isCompleted: userData?.completedSimulations?.includes("finance-simulation") || false,
+      isUnlocked: true, // Always unlocked
+      progress: userData?.simulationProgress?.["finance-simulation"] || 0,
     },
     {
       id: "material-science",
@@ -90,20 +102,8 @@ function SimulationsPage() {
       difficulty: "Intermediate",
       category: "Science",
       isCompleted: userData?.completedSimulations?.includes("material-science") || false,
-      isUnlocked: userData?.completedSimulations?.includes("brand-marketing") || false,
+      isUnlocked: true, // Always unlocked
       progress: userData?.simulationProgress?.["material-science"] || 0,
-    },
-    {
-      id: "finance-simulation",
-      title: "Financial Strategist",
-      description:
-        "Learn investment strategies and financial planning. Navigate complex financial markets and make strategic investment decisions.",
-      duration: "60-80 min",
-      difficulty: "Advanced",
-      category: "Finance",
-      isCompleted: userData?.completedSimulations?.includes("finance-simulation") || false,
-      isUnlocked: userData?.completedSimulations?.includes("material-science") || false,
-      progress: userData?.simulationProgress?.["finance-simulation"] || 0,
     },
     {
       id: "healthcare-simulation",
@@ -114,7 +114,7 @@ function SimulationsPage() {
       difficulty: "Advanced",
       category: "Healthcare",
       isCompleted: userData?.completedSimulations?.includes("healthcare-simulation") || false,
-      isUnlocked: userData?.completedSimulations?.includes("finance-simulation") || false,
+      isUnlocked: true, // Always unlocked
       progress: userData?.simulationProgress?.["healthcare-simulation"] || 0,
     },
   ]
@@ -144,12 +144,12 @@ function SimulationsPage() {
   const calculateProgressPercentage = (simulationId: string): number => {
     const progressData = userData?.simulationProgress?.[simulationId]
     if (!progressData) return 0
-    
+
     // If it's already a number, return it
-    if (typeof progressData === 'number') return progressData
-    
+    if (typeof progressData === "number") return progressData
+
     // If it's an object with currentPhase, calculate based on phase
-    if (typeof progressData === 'object' && progressData !== null) {
+    if (typeof progressData === "object" && progressData !== null) {
       const phaseProgress = {
         intro: 5,
         "pre-reflection": 15,
@@ -158,11 +158,11 @@ function SimulationsPage() {
         "post-reflection": 90,
         complete: 100,
       }
-      
+
       const currentPhase = (progressData as any).currentPhase
       return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
     }
-    
+
     return 0
   }
 
@@ -170,9 +170,7 @@ function SimulationsPage() {
   const simulations = allSimulations.map((sim) => ({
     ...sim,
     isCompleted: userData?.completedSimulations?.includes(sim.id) || false,
-    isUnlocked:
-      sim.id === "brand-marketing" ||
-      (userData?.completedSimulations?.length || 0) >= allSimulations.findIndex((s) => s.id === sim.id),
+    isUnlocked: true, // All simulations are now unlocked
     progress: calculateProgressPercentage(sim.id),
   }))
 
@@ -350,9 +348,7 @@ function SimulationsPage() {
                           ? "border-green-200 bg-green-50"
                           : simulation.progress > 0
                             ? "border-blue-200 bg-blue-50 hover:border-blue-300"
-                            : simulation.isUnlocked
-                              ? "border-gray-200 hover:border-gray-300"
-                              : "border-gray-200 bg-gray-50 opacity-75"
+                            : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
                       <CardHeader>
@@ -411,17 +407,15 @@ function SimulationsPage() {
                           {/* Action Button */}
                           <Button
                             onClick={() => handleSimulationStart(simulation.id)}
-                            disabled={!simulation.isUnlocked}
+                            disabled={false} // Remove disabled state since all are unlocked
                             className={`w-full ${
                               simulation.isCompleted
                                 ? "bg-green-600 hover:bg-green-700"
                                 : simulation.progress > 0
                                   ? "bg-blue-600 hover:bg-blue-700"
-                                  : simulation.isUnlocked
-                                    ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                    : ""
+                                  : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                             }`}
-                            variant={simulation.isUnlocked ? "default" : "outline"}
+                            variant="default" // Always use default variant since all are unlocked
                           >
                             {simulation.isCompleted ? (
                               <>
@@ -433,13 +427,11 @@ function SimulationsPage() {
                                 <Play className="mr-2 h-4 w-4" />
                                 Continue Simulation ({Math.round(simulation.progress)}%)
                               </>
-                            ) : simulation.isUnlocked ? (
+                            ) : (
                               <>
                                 <Play className="mr-2 h-4 w-4" />
                                 Start Simulation
                               </>
-                            ) : (
-                              "🔒 Complete previous simulation to unlock"
                             )}
                           </Button>
                         </div>
@@ -507,6 +499,7 @@ function SimulationsPage() {
                         cityLevel: userData?.cityLevel || 1,
                       }}
                       onBuildingClick={handleBuildingClick}
+                      onSimulationStart={handleSimulationStart}
                     />
                   </CardContent>
                 </Card>

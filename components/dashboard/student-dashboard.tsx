@@ -24,6 +24,7 @@ import {
   Eye,
   Clock,
   Lightbulb,
+  Lock,
 } from "lucide-react"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
 import {
@@ -33,6 +34,7 @@ import {
 } from "@/lib/firebase-service"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { ChangePasswordModal } from "./change-password-modal"
 
 interface UserData {
   firstName: string
@@ -46,7 +48,16 @@ interface UserData {
   interests?: string[]
   currentSimulation?: string
   lastActiveSimulation?: string
-  simulationProgress?: { [simulationId: string]: number }
+  simulationProgress?: {
+    [simulationId: string]: {
+      completed: boolean
+      completedAt?: string
+      currentPhase: string
+      currentStep: number
+      lastUpdated: string
+      totalSteps: number
+    }
+  }
   lastActiveAt?: string
 }
 
@@ -100,31 +111,48 @@ export function StudentDashboard() {
     progress: number
     title: string
   } | null>(null)
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
+
+  // Helper function to get completed simulations from simulationProgress
+  const getCompletedSimulationsFromProgress = (simulationProgress?: UserData["simulationProgress"]): string[] => {
+    if (!simulationProgress) return []
+
+    const completed: string[] = []
+    Object.entries(simulationProgress).forEach(([simulationId, progress]) => {
+      if (progress && progress.completed === true) {
+        completed.push(simulationId)
+      }
+    })
+
+    console.log("📊 Completed simulations from progress:", completed)
+    return completed
+  }
 
   // Helper function to calculate progress percentage based on current phase
   const calculateProgressPercentage = (simulationId: string): number => {
-    const progressData = userData?.simulationProgress?.[simulationId] || studentProgress?.simulationProgress?.[simulationId]
+    const progressData = userData?.simulationProgress?.[simulationId]
     if (!progressData) return 0
-    
-    // If it's already a number, return it
-    if (typeof progressData === 'number') return progressData
-    
-    // If it's an object with currentPhase, calculate based on phase
-    if (typeof progressData === 'object' && progressData !== null) {
-      const phaseProgress = {
-        intro: 5,
-        "pre-reflection": 15,
-        exploration: 35,
-        experience: 75,
-        "post-reflection": 90,
-        complete: 100,
-      }
-      
-      const currentPhase = (progressData as any).currentPhase
-      return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
+
+    // If simulation is completed, return 100%
+    if (progressData.completed) return 100
+
+    // Calculate based on current step and total steps
+    if (progressData.currentStep && progressData.totalSteps) {
+      return Math.round((progressData.currentStep / progressData.totalSteps) * 100)
     }
-    
-    return 0
+
+    // Fallback: calculate based on phase
+    const phaseProgress = {
+      intro: 5,
+      "pre-reflection": 15,
+      exploration: 35,
+      experience: 75,
+      "post-reflection": 90,
+      complete: 100,
+    }
+
+    const currentPhase = progressData.currentPhase
+    return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
   }
 
   const simulations: Simulation[] = [
@@ -135,31 +163,31 @@ export function StudentDashboard() {
       duration: "4-6 hours",
       difficulty: "Beginner",
       category: "Marketing",
-      isCompleted: userData?.completedSimulations?.includes("brand-marketing") || false,
-      isUnlocked: true,
+      isCompleted: userData?.simulationProgress?.["brand-marketing"]?.completed || false,
+      isUnlocked: true, // Always unlocked
       progress: calculateProgressPercentage("brand-marketing"),
     },
     {
-      id: "material-science",
-      title: "Future Materials Lab",
-      description: "Explore cutting-edge material science and innovation",
-      duration: "50-70 min",
+      id: "finance-simulation",
+      title: "Risk, Reward, and Real World Finance",
+      description: "Navigate the risks and rewards of managing company finances while exploring finance careers",
+      duration: "3-4 hours",
       difficulty: "Intermediate",
-      category: "Science",
-      isCompleted: userData?.completedSimulations?.includes("material-science") || false,
-      isUnlocked: userData?.completedSimulations?.includes("brand-marketing") || false,
-      progress: calculateProgressPercentage("material-science"),
+      category: "Finance",
+      isCompleted: userData?.simulationProgress?.["finance-simulation"]?.completed || false,
+      isUnlocked: true, // Always unlocked
+      progress: calculateProgressPercentage("finance-simulation"),
     },
     {
-      id: "finance-simulation",
-      title: "Financial Strategist",
-      description: "Learn investment strategies and financial planning",
-      duration: "60-80 min",
-      difficulty: "Advanced",
-      category: "Finance",
-      isCompleted: userData?.completedSimulations?.includes("finance-simulation") || false,
-      isUnlocked: userData?.completedSimulations?.includes("material-science") || false,
-      progress: calculateProgressPercentage("finance-simulation"),
+      id: "material-science",
+      title: "MagLev Makers: Engineering a Superconductor",
+      description: "Explore cutting-edge material science and innovation",
+      duration: "1-2 hours",
+      difficulty: "Intermediate",
+      category: "Science",
+      isCompleted: userData?.simulationProgress?.["material-science"]?.completed || false,
+      isUnlocked: true, // Always unlocked
+      progress: calculateProgressPercentage("material-science"),
     },
     {
       id: "healthcare-simulation",
@@ -168,8 +196,8 @@ export function StudentDashboard() {
       duration: "55-75 min",
       difficulty: "Advanced",
       category: "Healthcare",
-      isCompleted: userData?.completedSimulations?.includes("healthcare-simulation") || false,
-      isUnlocked: userData?.completedSimulations?.includes("finance-simulation") || false,
+      isCompleted: userData?.simulationProgress?.["healthcare-simulation"]?.completed || false,
+      isUnlocked: true, // Always unlocked
       progress: calculateProgressPercentage("healthcare-simulation"),
     },
   ]
@@ -208,7 +236,10 @@ export function StudentDashboard() {
           const progress = await getSimulationProgress(user.uid, sim.id)
           return {
             simulationId: sim.id,
-            progress: progress.success && progress.data ? Math.round((progress.data.currentStep / progress.data.totalSteps) * 100) : 0,
+            progress:
+              progress.success && progress.data
+                ? Math.round((progress.data.currentStep / progress.data.totalSteps) * 100)
+                : 0,
             data: progress.success ? progress.data : null,
           }
         } catch (error) {
@@ -229,12 +260,58 @@ export function StudentDashboard() {
         progressMap[result.simulationId] = result.progress
       })
 
-      // Calculate stats based ONLY on completed simulations
-      const completedSimulations = userProfile?.completedSimulations || []
+      // Calculate stats based ONLY on completed simulations from simulationProgress
+      const completedSimulations = getCompletedSimulationsFromProgress(
+        userProfile?.simulationProgress || userData?.simulationProgress,
+      )
       const completedCount = completedSimulations.length
 
-      // Each simulation takes ~1.5 hours
-      const totalHours = completedCount * 1.5
+      // Each simulation takes different hours based on duration
+      const getSimulationHours = (simulationId: string) => {
+        switch (simulationId) {
+          case "brand-marketing":
+            return 5 // 4-6 hours average
+          case "finance-simulation":
+            return 3.5 // 3-4 hours average
+          case "material-science":
+            return 1 // 50-70 min average
+          case "healthcare-simulation":
+            return 1.1 // 55-75 min average
+          default:
+            return 1
+        }
+      }
+
+      const totalHours = completedSimulations.reduce((total, simId) => {
+        return total + getSimulationHours(simId)
+      }, 0)
+
+      // Calculate unique careers explored based on completed simulations
+      const getCareersExplored = (completedSims: string[]) => {
+        if (completedSims.length === 0) return []
+
+        const careersBySimulation = {
+          "brand-marketing": ["Brand Strategist", "Social Media Manager", "Marketing Director", "PR Manager"],
+          "finance-simulation": ["Financial Analyst", "Investment Advisor", "Risk Manager", "Corporate Treasurer"],
+          "material-science": ["Materials Engineer", "Research Scientist", "Product Developer", "Quality Engineer"],
+          "healthcare-simulation": [
+            "Healthcare Administrator",
+            "Medical Manager",
+            "Health Analyst",
+            "Care Coordinator",
+          ],
+        }
+
+        const allCareers = new Set<string>()
+        completedSims.forEach((simId) => {
+          const careers = careersBySimulation[simId as keyof typeof careersBySimulation] || []
+          careers.forEach((career) => allCareers.add(career))
+        })
+
+        return Array.from(allCareers)
+      }
+
+      const careersExplored = getCareersExplored(completedSimulations)
 
       // Fetch student progress data
       const progressResult = await getStudentProgressCloudFunction(user.uid)
@@ -245,7 +322,8 @@ export function StudentDashboard() {
           totalHours: totalHours, // Use calculated hours
           completedSimulations: completedSimulations,
           cityLevel: completedCount,
-          simulationProgress: progressMap, // Add actual progress from database
+          simulationProgress: progressMap,
+          interests: careersExplored, // Use careers explored instead of interests
         })
       } else {
         // Set default data if no progress found
@@ -266,22 +344,25 @@ export function StudentDashboard() {
             "Creative Director",
             "Financial Analyst",
           ],
-          interests: userProfile?.interests || [],
+          interests: careersExplored, // Use actual careers explored
           cityLevel: completedCount,
           unlockedBuildings: completedSimulations,
-          simulationProgress: progressMap, // Add actual progress from database
+          simulationProgress: progressMap,
           insights: {
             industries: ["Technology", "Healthcare", "Creative Arts", "Finance", "Engineering", "Education"],
-            careers: [
-              "Software Developer",
-              "UX Designer",
-              "Data Scientist",
-              "Healthcare Administrator",
-              "Creative Director",
-              "Financial Analyst",
-              "Marketing Manager",
-              "Project Manager",
-            ],
+            careers:
+              careersExplored.length > 0
+                ? careersExplored
+                : [
+                    "Software Developer",
+                    "UX Designer",
+                    "Data Scientist",
+                    "Healthcare Administrator",
+                    "Creative Director",
+                    "Financial Analyst",
+                    "Marketing Manager",
+                    "Project Manager",
+                  ],
             colleges: [
               "MIT",
               "Stanford University",
@@ -323,9 +404,51 @@ export function StudentDashboard() {
       console.error("Error fetching student data:", error)
 
       // Calculate fallback data using the same logic
-      const completedSimulations = userProfile?.completedSimulations || []
+      const completedSimulations = getCompletedSimulationsFromProgress(userProfile?.simulationProgress)
       const completedCount = completedSimulations.length
-      const totalHours = completedCount * 1.5
+      const getSimulationHours = (simulationId: string) => {
+        switch (simulationId) {
+          case "brand-marketing":
+            return 5 // 4-6 hours average
+          case "finance-simulation":
+            return 3.5 // 3-4 hours average
+          case "material-science":
+            return 1 // 50-70 min average
+          case "healthcare-simulation":
+            return 1.1 // 55-75 min average
+          default:
+            return 1
+        }
+      }
+
+      const totalHours = completedSimulations.reduce((total, simId) => {
+        return total + getSimulationHours(simId)
+      }, 0)
+
+      // Calculate unique careers explored based on completed simulations
+      const getCareersExplored = (completedSims: string[]) => {
+        const careersBySimulation = {
+          "brand-marketing": ["Brand Strategist", "Social Media Manager", "Marketing Director", "PR Manager"],
+          "finance-simulation": ["Financial Analyst", "Investment Advisor", "Risk Manager", "Corporate Treasurer"],
+          "material-science": ["Materials Engineer", "Research Scientist", "Product Developer", "Quality Engineer"],
+          "healthcare-simulation": [
+            "Healthcare Administrator",
+            "Medical Manager",
+            "Health Analyst",
+            "Care Coordinator",
+          ],
+        }
+
+        const allCareers = new Set<string>()
+        completedSims.forEach((simId) => {
+          const careers = careersBySimulation[simId as keyof typeof careersBySimulation] || []
+          careers.forEach((career) => allCareers.add(career))
+        })
+
+        return Array.from(allCareers)
+      }
+
+      const careersExplored = getCareersExplored(completedSimulations)
 
       // Set fallback data
       setStudentProgress({
@@ -343,7 +466,7 @@ export function StudentDashboard() {
           "Brand Manager",
           "Superconductor Engineer",
         ],
-        interests: userProfile?.interests || [],
+        interests: careersExplored, // Use careers explored
         cityLevel: completedCount,
         unlockedBuildings: completedSimulations,
         simulationProgress: {}, // Empty progress map as fallback
@@ -385,26 +508,78 @@ export function StudentDashboard() {
           const data = doc.data() as UserData
           setUserData(data)
 
+          console.log("🔄 Real-time user data update:", data)
+
           // Update current simulation data
           if (data.lastActiveSimulation && data.simulationProgress) {
-            const progress = data.simulationProgress[data.lastActiveSimulation] || 0
-            if (progress > 0 && progress < 100) {
-              const simulation = simulations.find((s) => s.id === data.lastActiveSimulation)
-              if (simulation) {
-                setCurrentSimulationData({
-                  simulationId: data.lastActiveSimulation,
-                  progress,
-                  title: simulation.title,
-                })
+            const progressData = data.simulationProgress[data.lastActiveSimulation]
+            if (progressData && !progressData.completed) {
+              const progress = calculateProgressPercentage(data.lastActiveSimulation)
+              if (progress > 0 && progress < 100) {
+                const simulation = simulations.find((s) => s.id === data.lastActiveSimulation)
+                if (simulation) {
+                  setCurrentSimulationData({
+                    simulationId: data.lastActiveSimulation,
+                    progress,
+                    title: simulation.title,
+                  })
+                }
               }
             } else {
               setCurrentSimulationData(null)
             }
           }
 
-          // Calculate stats based on completed simulations only
-          const completedCount = data.completedSimulations?.length || 0
-          const calculatedHours = completedCount * 1.5
+          // Calculate stats based on completed simulations from simulationProgress
+          const completedSimulations = getCompletedSimulationsFromProgress(data.simulationProgress)
+          const completedCount = completedSimulations.length
+
+          // Calculate hours based on actual completed simulations
+          const getSimulationHours = (simulationId: string) => {
+            switch (simulationId) {
+              case "brand-marketing":
+                return 5 // 4-6 hours average
+              case "finance-simulation":
+                return 3.5 // 3-4 hours average
+              case "material-science":
+                return 1 // 50-70 min average
+              case "healthcare-simulation":
+                return 1.1 // 55-75 min average
+              default:
+                return 1
+            }
+          }
+
+          const calculatedHours = completedSimulations.reduce((total, simId) => {
+            return total + getSimulationHours(simId)
+          }, 0)
+
+          // Calculate careers explored
+          const getCareersExplored = (completedSims: string[]) => {
+            if (completedSims.length === 0) return []
+
+            const careersBySimulation = {
+              "brand-marketing": ["Brand Strategist", "Social Media Manager", "Marketing Director", "PR Manager"],
+              "finance-simulation": ["Financial Analyst", "Investment Advisor", "Risk Manager", "Corporate Treasurer"],
+              "material-science": ["Materials Engineer", "Research Scientist", "Product Developer", "Quality Engineer"],
+              "healthcare-simulation": [
+                "Healthcare Administrator",
+                "Medical Manager",
+                "Health Analyst",
+                "Care Coordinator",
+              ],
+            }
+
+            const allCareers = new Set<string>()
+            completedSims.forEach((simId) => {
+              const careers = careersBySimulation[simId as keyof typeof careersBySimulation] || []
+              careers.forEach((career) => allCareers.add(career))
+            })
+
+            return Array.from(allCareers)
+          }
+
+          const careersExplored = getCareersExplored(completedSimulations)
 
           // Update student progress with calculated data
           if (studentProgress) {
@@ -412,10 +587,11 @@ export function StudentDashboard() {
               if (!prev) return prev
               return {
                 ...prev,
-                completedSimulations: data.completedSimulations || prev.completedSimulations,
+                completedSimulations: completedSimulations,
                 totalHours: calculatedHours,
                 cityLevel: completedCount,
-                unlockedBuildings: data.completedSimulations || prev.unlockedBuildings,
+                unlockedBuildings: completedSimulations,
+                interests: careersExplored,
                 // Keep other fields unchanged
                 badges: prev.badges,
                 currentStreak: prev.currentStreak,
@@ -424,14 +600,13 @@ export function StudentDashboard() {
                 recentActivity: prev.recentActivity,
                 upcomingDeadlines: prev.upcomingDeadlines,
                 recommendedSimulations: prev.recommendedSimulations,
-                interests: prev.interests,
                 insights: prev.insights,
               }
             })
           }
 
           // Generate insights if user has completed at least one simulation
-          if (data.completedSimulations && data.completedSimulations.length > 0 && !insights) {
+          if (completedSimulations.length > 0 && !insights) {
             generateInsights(data)
           }
         }
@@ -453,8 +628,9 @@ export function StudentDashboard() {
 
   const generateInsights = (data: UserData) => {
     // AI-generated insights based on completed simulations and interests
+    const completedSimulations = getCompletedSimulationsFromProgress(data.simulationProgress)
     const completedCategories = simulations
-      .filter((sim) => data.completedSimulations?.includes(sim.id))
+      .filter((sim) => completedSimulations.includes(sim.id))
       .map((sim) => sim.category)
 
     const mockInsights = {
@@ -538,7 +714,7 @@ export function StudentDashboard() {
 
   // Create fallback data if studentProgress is null
   const fallbackProgress: StudentProgress = {
-    completedSimulations: userProfile?.completedSimulations || [],
+    completedSimulations: getCompletedSimulationsFromProgress(userProfile?.simulationProgress),
     totalHours: 0,
     badges: [],
     currentStreak: 1,
@@ -597,7 +773,11 @@ export function StudentDashboard() {
   // Use studentProgress if available, otherwise use fallback
   const displayProgress = studentProgress || fallbackProgress
 
-  const completedCount = userData?.completedSimulations?.length || displayProgress.completedSimulations.length || 0
+  // Get actual completed count from simulationProgress
+  const actualCompletedSimulations = getCompletedSimulationsFromProgress(
+    userData?.simulationProgress || userProfile?.simulationProgress,
+  )
+  const completedCount = actualCompletedSimulations.length
   const nextSimulation = getNextSimulation()
 
   return (
@@ -742,7 +922,7 @@ export function StudentDashboard() {
                       <div className="grid grid-cols-2 gap-4 text-center">
                         <div>
                           <div className="text-2xl font-bold">{completedCount}</div>
-                          <div className="text-xs opacity-90">City Level</div>
+                          <div className="text-xs opacity-90">Simulations</div>
                         </div>
                         <div>
                           <div className="text-2xl font-bold">{completedCount}</div>
@@ -788,11 +968,76 @@ export function StudentDashboard() {
                     <div className="text-sm font-medium text-blue-800">Simulations Completed</div>
                   </div>
                   <div className="text-center p-6 bg-green-50 rounded-xl">
-                    <div className="text-4xl font-bold text-green-600 mb-2">{displayProgress.totalHours || 0}</div>
+                    <div className="text-4xl font-bold text-green-600 mb-2">
+                      {(() => {
+                        // Calculate actual hours based on completed simulations only
+                        const getSimulationHours = (simulationId: string) => {
+                          switch (simulationId) {
+                            case "brand-marketing":
+                              return 5 // 4-6 hours average
+                            case "finance-simulation":
+                              return 3.5 // 3-4 hours average
+                            case "material-science":
+                              return 1 // 50-70 min average
+                            case "healthcare-simulation":
+                              return 1.1 // 55-75 min average
+                            default:
+                              return 1
+                          }
+                        }
+                        const actualHours = actualCompletedSimulations.reduce((total, simId) => {
+                          return total + getSimulationHours(simId)
+                        }, 0)
+                        return Math.round(actualHours * 10) / 10
+                      })()}
+                    </div>
                     <div className="text-sm font-medium text-green-800">Hours Experienced</div>
                   </div>
                   <div className="text-center p-6 bg-purple-50 rounded-xl">
-                    <div className="text-4xl font-bold text-purple-600 mb-2">{displayProgress.interests.length}</div>
+                    <div className="text-4xl font-bold text-purple-600 mb-2">
+                      {(() => {
+                        // Calculate actual careers explored based on completed simulations only
+                        const getCareersExplored = (completedSims: string[]) => {
+                          if (completedSims.length === 0) return 0
+
+                          const careersBySimulation = {
+                            "brand-marketing": [
+                              "Brand Strategist",
+                              "Social Media Manager",
+                              "Marketing Director",
+                              "PR Manager",
+                            ],
+                            "finance-simulation": [
+                              "Financial Analyst",
+                              "Investment Advisor",
+                              "Risk Manager",
+                              "Corporate Treasurer",
+                            ],
+                            "material-science": [
+                              "Materials Engineer",
+                              "Research Scientist",
+                              "Product Developer",
+                              "Quality Engineer",
+                            ],
+                            "healthcare-simulation": [
+                              "Healthcare Administrator",
+                              "Medical Manager",
+                              "Health Analyst",
+                              "Care Coordinator",
+                            ],
+                          }
+
+                          const allCareers = new Set<string>()
+                          completedSims.forEach((simId) => {
+                            const careers = careersBySimulation[simId as keyof typeof careersBySimulation] || []
+                            careers.forEach((career) => allCareers.add(career))
+                          })
+
+                          return allCareers.size
+                        }
+                        return getCareersExplored(actualCompletedSimulations)
+                      })()}
+                    </div>
                     <div className="text-sm font-medium text-purple-800">Careers Explored</div>
                   </div>
                 </div>
@@ -1058,11 +1303,21 @@ export function StudentDashboard() {
                   <Users className="mr-2 h-4 w-4" />
                   View Profile
                 </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-transparent"
+                  onClick={() => setChangePasswordOpen(true)}
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  Change Password
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+      {/* Change Password Modal */}
+      <ChangePasswordModal open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </div>
   )
 }

@@ -9,16 +9,17 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Lightbulb, ArrowRight } from "lucide-react"
 
-interface PreReflectionFormProps {
+interface MaterialSciencePreReflectionFormProps {
   onComplete: (data: any) => void
   initialData?: any
 }
 
-export function PreReflectionForm({ onComplete, initialData }: PreReflectionFormProps) {
+export function MaterialSciencePreReflectionForm({ onComplete, initialData }: MaterialSciencePreReflectionFormProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState({
     knowledge: initialData?.knowledge || "",
-    careers: initialData?.careers || "",
+    chemistryClass: initialData?.chemistryClass || "",
+    description: initialData?.description || "",
     considering: initialData?.considering || "",
     confidence: initialData?.confidence || "",
     steps: initialData?.steps || "",
@@ -28,27 +29,34 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
     {
       id: "knowledge",
       title: "Knowledge Assessment",
-      question: "How would you describe your knowledge about careers in branding and marketing?",
+      question: "How would you describe your knowledge about careers in materials science?",
       type: "radio",
       options: [
-        "I know nothing about careers in branding and marketing.",
-        "I have heard of branding and marketing but don't know much about individual roles.",
-        "I have some knowledge of branding and marketing roles but am not sure about the details.",
-        "I have a good understanding of branding and marketing roles.",
+        "I know nothing about careers in materials science.",
+        "I have heard of materials science but don't know much about individual roles.",
+        "I have some knowledge of materials science roles but am not sure about the details.",
+        "I have a good understanding of materials science roles.",
       ],
     },
     {
-      id: "careers",
-      title: "Career Awareness",
+      id: "chemistryClass",
+      title: "Chemistry Background",
+      question: "Have you taken a high school chemistry class yet?",
+      type: "radio",
+      options: ["Yes", "No"],
+    },
+    {
+      id: "description",
+      title: "Materials Scientist Role",
       question:
-        "In your own words, list a few careers in branding and marketing that you are aware of and give a brief explanation of what each role is.",
+        "In your own words, give a brief description of what you believe a materials scientist does. If you're not sure, it is fine to put \"I don't know\".",
       type: "textarea",
-      placeholder: "List careers and their descriptions...",
+      placeholder: "Describe what you think a materials scientist does...",
     },
     {
       id: "considering",
       title: "Career Interest",
-      question: "Are you currently considering pursuing a career in branding and marketing?",
+      question: "Are you currently considering pursuing a career in materials science?",
       type: "radio",
       options: [
         "Yes, I am actively considering it",
@@ -61,7 +69,7 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
       id: "confidence",
       title: "Confidence Level",
       question:
-        "If you were to pursue a career in branding and marketing, how confident do you feel in your ability to do so?",
+        "If you were to pursue a career in materials science, how confident do you feel in your ability to do so?",
       type: "radio",
       options: [
         "1 - Not at all confident",
@@ -75,7 +83,7 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
       id: "steps",
       title: "Learning Path",
       question:
-        "If you were to explore a career in branding and marketing, what steps would you take to learn more? Provide as many details as possible.",
+        "If you were to explore a career in materials science, what steps would you take to learn more? Provide as many details as possible.",
       type: "textarea",
       placeholder: "Describe the steps you would take...",
     },
@@ -119,7 +127,7 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
             <div>
               <CardTitle className="text-2xl">Pre-Reflection: Understanding Your Starting Point</CardTitle>
               <p className="text-blue-100 mt-1">
-                Let's understand your current knowledge about branding and marketing careers
+                Let's understand your current knowledge about materials science careers
               </p>
             </div>
           </div>

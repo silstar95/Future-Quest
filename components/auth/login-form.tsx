@@ -43,7 +43,7 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
 
     try {
       const user = await signIn(formData.email, formData.password)
-      
+
       // Get user profile to determine userType
       const profile = await getUserProfile(user.uid)
       const userType = profile.success ? profile.data?.userType : "student"
@@ -69,7 +69,7 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
     setGoogleLoading(true)
     try {
       const user = await signInWithGoogle()
-      
+
       // Get user profile to determine userType
       const profile = await getUserProfile(user.uid)
       const userType = profile.success ? profile.data?.userType : "student"
@@ -194,7 +194,11 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
             </div>
           </div>
 
-                      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "student" | "educator")} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "student" | "educator")}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="student" className="flex items-center space-x-2">
                 <GraduationCap className="h-4 w-4" />
@@ -230,6 +234,15 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
                     onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                     className="border-2 focus:border-brand-primary transition-colors"
                   />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/auth/reset-password")}
+                      className="text-sm text-brand-primary hover:text-brand-secondary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
 
                 <Button
@@ -276,6 +289,15 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
                     onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                     className="border-2 focus:border-brand-primary transition-colors"
                   />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/auth/reset-password")}
+                      className="text-sm text-brand-primary hover:text-brand-secondary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
 
                 <Button

@@ -117,7 +117,7 @@ export function EnvisionPhase({ onComplete, initialData }: EnvisionPhaseProps) {
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-2xl flex items-center">
-              <Target className="mr-3 h-6 w-6 text-purple-500" />
+              <Target className="mr-3 h-6 w-6 text-blue-500" />
               Envision
             </CardTitle>
             <span className="text-sm text-gray-500">
@@ -129,7 +129,7 @@ export function EnvisionPhase({ onComplete, initialData }: EnvisionPhaseProps) {
 
         <CardContent className="p-8">
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-lg mb-6">
+            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-lg mb-6">
               <h3 className="text-lg font-semibold mb-2">🚀 Envision Your Future</h3>
               <p className="text-gray-700">
                 The last step in the 5 E's of Career Exploration is to Envision your path forward. Envisioning includes
@@ -233,7 +233,7 @@ export function EnvisionPhase({ onComplete, initialData }: EnvisionPhaseProps) {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex items-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="flex items-center bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
             >
               {currentQuestion === questions.length - 1 ? "Complete Simulation" : "Next"}
               <ChevronRight className="ml-2 h-4 w-4" />

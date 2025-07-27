@@ -238,7 +238,7 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Experience Header */}
-      <Card className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white border-0 shadow-2xl">
+      <Card className="bg-gradient-to-r from-blue-600 via-blue-600 to-green-600 text-white border-0 shadow-2xl">
         <CardHeader>
           <CardTitle className="flex items-center text-3xl">
             <Play className="mr-3 h-8 w-8" />
@@ -395,11 +395,11 @@ export function ExperiencePhase({ onComplete, initialData }: ExperiencePhaseProp
                   })
                 }
                 size="lg"
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
               >
                 <Trophy className="mr-2 h-5 w-5" />
                 Complete All Missions
-            </Button>
+              </Button>
             )}
           </div>
         </CardContent>

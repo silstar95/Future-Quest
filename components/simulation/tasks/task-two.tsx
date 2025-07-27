@@ -51,7 +51,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
       <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
         <CardTitle className="flex items-center text-2xl">
           <Users className="mr-3 h-6 w-6" />
-          Task #2: The Fame Formula - Long-Term Roadmap
+          Task 2: The Fame Formula - Long-Term Roadmap
         </CardTitle>
         <p className="text-blue-100">Role: Partnerships Manager | Location: Research Room</p>
       </CardHeader>
@@ -92,7 +92,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.productCategories}
               onChange={(e) => setFormData((prev) => ({ ...prev, productCategories: e.target.value }))}
               placeholder="List product categories and explain why they align with your celebrity..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -112,7 +112,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.brandCollaborations}
               onChange={(e) => setFormData((prev) => ({ ...prev, brandCollaborations: e.target.value }))}
               placeholder="List specific brands and explain why they would be good partnerships..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -132,7 +132,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.mediaOutlets}
               onChange={(e) => setFormData((prev) => ({ ...prev, mediaOutlets: e.target.value }))}
               placeholder="List media outlets, shows, podcasts and explain the strategic value..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -152,7 +152,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.trendAlignment}
               onChange={(e) => setFormData((prev) => ({ ...prev, trendAlignment: e.target.value }))}
               placeholder="Identify current trends and how your celebrity can authentically participate..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -172,7 +172,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.roadmapDiagram}
               onChange={(e) => setFormData((prev) => ({ ...prev, roadmapDiagram: e.target.value }))}
               placeholder="Describe your strategic roadmap or create a visual plan..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
         </div>

@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Skillscape - Future Quest",
+  title: "Future Quest",
   description: "Explore your future through immersive career simulations",
 }
 

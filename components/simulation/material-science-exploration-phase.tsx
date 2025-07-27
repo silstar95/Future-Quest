@@ -19,12 +19,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-interface ExplorationPhaseProps {
+interface MaterialScienceExplorationPhaseProps {
   onComplete: (data: any) => void
   initialData?: any
 }
 
-export function ExplorationPhase({ onComplete, initialData }: ExplorationPhaseProps) {
+export function MaterialScienceExplorationPhase({ onComplete, initialData }: MaterialScienceExplorationPhaseProps) {
   const [timeSpent, setTimeSpent] = useState(initialData?.timeSpent || 0)
   const [isResearching, setIsResearching] = useState(initialData?.isResearching || false)
   const [answers, setAnswers] = useState({
@@ -93,11 +93,12 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
         <CardHeader>
           <CardTitle className="flex items-center text-2xl">
             <Search className="mr-3 h-6 w-6 text-blue-600" />
-            Explore: Research Branding & Marketing Careers
+            Explore: Research Materials Science Careers
           </CardTitle>
           <p className="text-gray-600 leading-relaxed">
-            To begin, we'll start with the first E of Career Exploration - <strong>Explore</strong>. Exploring means
-            researching to learn more about a specific industry.
+            Let's start out by exploring the field of materials science. Take some time to search online what a
+            materials scientist does. Then, in the text box below, write what you believe a materials scientist does and
+            a few places they may work or projects they might work on.
           </p>
         </CardHeader>
       </Card>
@@ -124,8 +125,8 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
           {!isResearching ? (
             <div className="text-center space-y-4">
               <p className="text-gray-600">
-                Begin by doing an internet search of Branding and Marketing careers. See what you can find about the
-                industry and individual roles.
+                Begin by doing an internet search of Materials Science careers. See what you can find about the industry
+                and individual roles.
               </p>
               <Button onClick={handleStartResearch} className="bg-blue-600 hover:bg-blue-700">
                 <Search className="mr-2 h-4 w-4" />
@@ -140,8 +141,8 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                   Research Tip
                 </h4>
                 <p className="text-blue-700 text-sm">
-                  Try searching for job boards, company career pages, and industry websites to find current openings and
-                  detailed role descriptions.
+                  Try searching for materials engineering jobs, research positions, and industry websites to find
+                  current openings and detailed role descriptions in materials science.
                 </p>
               </div>
 
@@ -152,11 +153,11 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                   </CardHeader>
                   <CardContent>
                     <ul className="text-sm space-y-1 text-gray-600">
-                      <li>• "Brand manager jobs"</li>
-                      <li>• "Marketing coordinator roles"</li>
-                      <li>• "Digital marketing careers"</li>
-                      <li>• "Creative director positions"</li>
-                      <li>• "Social media manager"</li>
+                      <li>• "Materials scientist jobs"</li>
+                      <li>• "Materials engineer careers"</li>
+                      <li>• "Superconductor research"</li>
+                      <li>• "Nanotechnology positions"</li>
+                      <li>• "Metallurgist roles"</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -169,9 +170,9 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                     <ul className="text-sm space-y-1 text-gray-600">
                       <li>• LinkedIn Jobs</li>
                       <li>• Indeed.com</li>
-                      <li>• Company career pages</li>
+                      <li>• Materials Research Society</li>
                       <li>• Bureau of Labor Statistics</li>
-                      <li>• Marketing industry blogs</li>
+                      <li>• University research pages</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -195,12 +196,12 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
             <CardContent className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  1. Give a 1-2 sentence summary of what Branding & Marketing is.
+                  1. Give a 1-2 sentence summary of what Materials Science is.
                 </label>
                 <Textarea
                   value={answers.summary}
                   onChange={(e) => handleAnswerChange("summary", e.target.value)}
-                  placeholder="Describe what branding and marketing involves..."
+                  placeholder="Describe what materials science involves..."
                   className="min-h-20"
                   rows={3}
                 />
@@ -221,12 +222,12 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  3. Name a few companies that are actively hiring for Branding & Marketing roles.
+                  3. Name a few companies that are actively hiring for Materials Science roles.
                 </label>
                 <Textarea
                   value={answers.companies}
                   onChange={(e) => handleAnswerChange("companies", e.target.value)}
-                  placeholder="List companies and what types of marketing roles they're hiring for..."
+                  placeholder="List companies and what types of materials science roles they're hiring for..."
                   className="min-h-20"
                   rows={3}
                 />

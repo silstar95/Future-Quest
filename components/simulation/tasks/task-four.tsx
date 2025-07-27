@@ -44,7 +44,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
       <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
         <CardTitle className="flex items-center text-2xl">
           <Megaphone className="mr-3 h-6 w-6" />
-          Task #4: Outsmart, Outshine, Outlast
+          Task 4: Outsmart, Outshine, Outlast
         </CardTitle>
         <p className="text-green-100">Role: Brand Strategist | Location: Research Room</p>
       </CardHeader>
@@ -87,7 +87,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.competitors}
               onChange={(e) => setFormData((prev) => ({ ...prev, competitors: e.target.value }))}
               placeholder="List 3 competitors and briefly explain why they compete with your celebrity..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -106,7 +106,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.competitorStrengths}
               onChange={(e) => setFormData((prev) => ({ ...prev, competitorStrengths: e.target.value }))}
               placeholder="For each competitor, identify their key strengths and what they do well..."
-              className="ml-11 min-h-[150px]"
+              className="ml-4 min-h-[150px]"
             />
           </div>
 
@@ -126,7 +126,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.uniqueFactors}
               onChange={(e) => setFormData((prev) => ({ ...prev, uniqueFactors: e.target.value }))}
               placeholder="Explain how your celebrity stands out from each competitor..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -149,7 +149,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.uniqueSellingProposition}
               onChange={(e) => setFormData((prev) => ({ ...prev, uniqueSellingProposition: e.target.value }))}
               placeholder="Write a compelling 1-2 sentence unique selling proposition..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
         </div>

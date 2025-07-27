@@ -612,14 +612,6 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Reset
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/10 border-white/30 text-white hover:bg-white/20"
-                >
-                  <Share className="mr-2 h-4 w-4" />
-                  Share
-                </Button>
               </div>
             </div>
           </CardContent>
@@ -766,12 +758,6 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
                 </p>
                 <p>
                   🔓 <strong>Unlock More:</strong> Complete simulations to unlock new buildings
-                </p>
-                <p>
-                  💾 <strong>Auto-Save:</strong> Your building positions are automatically saved as you move them (no visual interruption)
-                </p>
-                <p>
-                  🔄 <strong>Persistent:</strong> Your city layout is saved and will be restored when you return
                 </p>
               </CardContent>
             </Card>

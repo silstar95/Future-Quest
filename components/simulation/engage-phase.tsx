@@ -98,7 +98,7 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
 
         <CardContent className="p-8">
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-100 to-indigo-100 p-6 rounded-lg mb-6">
+            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-lg mb-6">
               <h3 className="text-lg font-semibold mb-2">🎉 Congratulations!</h3>
               <p className="text-gray-700">
                 You've finished experiencing a range of projects encountered by branding and marketing roles. Now, it's
@@ -166,7 +166,7 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="flex items-center bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
             >
               {currentQuestion === questions.length - 1 ? "Continue to Evaluation" : "Next"}
               <ChevronRight className="ml-2 h-4 w-4" />

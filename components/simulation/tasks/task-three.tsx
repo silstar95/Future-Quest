@@ -67,7 +67,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
       <CardHeader className="bg-gradient-to-r from-pink-500 to-red-500 text-white">
         <CardTitle className="flex items-center text-2xl">
           <Target className="mr-3 h-6 w-6" />
-          Task #3: #GoingViral
+          Task 3: #GoingViral
         </CardTitle>
         <p className="text-pink-100">Role: Social Media Strategist | Location: Creative Studio</p>
       </CardHeader>
@@ -110,7 +110,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
               value={formData.weeklyMessage}
               onChange={(e) => setFormData((prev) => ({ ...prev, weeklyMessage: e.target.value }))}
               placeholder="Describe the key message and themes for this week's content..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -130,7 +130,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
               value={formData.contentStrategy}
               onChange={(e) => setFormData((prev) => ({ ...prev, contentStrategy: e.target.value }))}
               placeholder="Detail your content mix, posting frequency, and engagement strategy based on research..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -179,7 +179,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
               value={formData.sampleCaptions}
               onChange={(e) => setFormData((prev) => ({ ...prev, sampleCaptions: e.target.value }))}
               placeholder="Write engaging captions that match your celebrity's personality and brand voice..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 

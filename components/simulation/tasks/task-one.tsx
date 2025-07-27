@@ -45,7 +45,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
       <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
         <CardTitle className="flex items-center text-2xl">
           <Star className="mr-3 h-6 w-6" />
-          Task #1: Crafting Your Celebrity's Identity
+          Task 1: Crafting Your Celebrity's Identity
         </CardTitle>
         <p className="text-purple-100">Role: Brand Strategist | Location: Whiteboard Room</p>
       </CardHeader>
@@ -76,7 +76,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.celebrityName}
               onChange={(e) => setFormData((prev) => ({ ...prev, celebrityName: e.target.value }))}
               placeholder="e.g., Taylor Swift, Mr. Beast, or create your own celebrity..."
-              className="ml-11"
+              className="ml-4"
             />
           </div>
 
@@ -95,7 +95,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.industry}
               onChange={(e) => setFormData((prev) => ({ ...prev, industry: e.target.value }))}
               placeholder="Describe their industry and specific area of expertise..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
 
@@ -115,7 +115,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.targetAudience}
               onChange={(e) => setFormData((prev) => ({ ...prev, targetAudience: e.target.value }))}
               placeholder="Describe your target audience demographics, interests, and characteristics..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
 
@@ -134,7 +134,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.values}
               onChange={(e) => setFormData((prev) => ({ ...prev, values: e.target.value }))}
               placeholder="List and explain their core values and what they stand for..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
         </div>

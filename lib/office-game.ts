@@ -60,8 +60,8 @@ class OfficeScene extends Phaser.Scene {
       {
         id: "lobby",
         name: "Lobby",
-        x: 400,
-        y: 500,
+        x: 450,
+        y: 550,
         width: 120,
         height: 80,
         description: "Welcome area and reception",
@@ -78,7 +78,7 @@ class OfficeScene extends Phaser.Scene {
       },
       {
         id: "research",
-        name: "Research Center",
+        name: "Research Room",
         x: 600,
         y: 200,
         width: 140,
@@ -202,9 +202,6 @@ class OfficeScene extends Phaser.Scene {
     cat.lineBetween(12, -24, 18, -25)
     cat.lineBetween(12, -22, 18, -22)
 
-    // Tail
-    cat.fillStyle(0xff8c42)
-    cat.fillEllipse(18, 8, 6, 20)
 
     // Paws
     cat.fillStyle(0xff8c42)
@@ -228,16 +225,16 @@ class OfficeScene extends Phaser.Scene {
       const container = this.add.container(room.x, room.y)
 
       // Room background (semi-transparent)
-      const roomBg = this.add.rectangle(0, 0, room.width, room.height, 0x4a90e2, 0.3)
+      const roomBg = this.add.rectangle(0, 0, room.width, room.height, 0x4a0e2, 0.3)
       roomBg.setStrokeStyle(2, 0x2c5aa0)
       container.add(roomBg)
 
       // Room label
       const label = this.add
-        .text(0, -room.height / 2 + 15, room.name, {
+        .text(0, -room.height / 2 + 30, room.name, {
           fontSize: "14px",
           fontFamily: "Arial",
-          color: "#2c5aa0",
+          color: "#ffffff",
           fontStyle: "bold",
         })
         .setOrigin(0.5)

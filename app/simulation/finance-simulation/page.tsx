@@ -3,11 +3,6 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "@/components/providers/auth-provider"
 import { useRouter } from "next/navigation"
-import { PreReflectionForm } from "@/components/simulation/pre-reflection-form"
-import { FrameworkExplanation } from "@/components/simulation/framework-explanation"
-import { ExplorationPhase } from "@/components/simulation/exploration-phase"
-import { ExperiencePhase } from "@/components/simulation/experience-phase"
-import { EngagePhase } from "@/components/simulation/engage-phase"
 import { PostReflectionForm } from "@/components/simulation/post-reflection-form"
 import { EnvisionPhase } from "@/components/simulation/envision-phase"
 import { SimulationComplete } from "@/components/simulation/simulation-complete"
@@ -17,7 +12,11 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { Megaphone, Clock, Users, Star, ArrowLeft, Save, CheckCircle, AlertCircle } from "lucide-react"
+import { DollarSign, Clock, Users, Star, ArrowLeft, Save, CheckCircle, AlertCircle } from "lucide-react"
+import FinancePreReflectionForm from "@/components/simulation/finance-pre-reflection-form"
+import FinanceExplorationPhase from "@/components/simulation/finance-exploration-phase"
+import FinanceExperiencePhase from "@/components/simulation/finance-experience-phase"
+import { FrameworkExplanation } from "@/components/simulation/framework-explanation"
 
 type SimulationPhase =
   | "intro"
@@ -25,7 +24,6 @@ type SimulationPhase =
   | "framework"
   | "exploration"
   | "experience"
-  | "engage"
   | "post-reflection"
   | "envision"
   | "complete"
@@ -35,7 +33,6 @@ interface SimulationData {
   preReflectionAnswers?: any
   explorationAnswers?: any
   experienceAnswers?: any
-  engageAnswers?: any
   postReflectionAnswers?: any
   envisionAnswers?: any
   startedAt?: string
@@ -45,7 +42,7 @@ interface SimulationData {
   lastUpdated?: string
 }
 
-export default function BrandMarketingSimulation() {
+export default function FinanceSimulation() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
@@ -86,7 +83,7 @@ export default function BrandMarketingSimulation() {
         console.log("🔄 Loading simulation progress for user:", user.uid)
         setIsLoading(true)
 
-        const result = await getSimulationProgress(user.uid, "brand-marketing")
+        const result = await getSimulationProgress(user.uid, "finance-simulation")
 
         if (result.success && result.data) {
           console.log("✅ Loaded existing progress:", result.data)
@@ -154,7 +151,7 @@ export default function BrandMarketingSimulation() {
 
       const simulationProgressData = {
         userId: user.uid,
-        simulationId: "brand-marketing",
+        simulationId: "finance-simulation",
         currentPhase: progressData.phase,
         currentStep: getPhaseStep(progressData.phase),
         totalSteps: 8, // Updated to include framework phase
@@ -218,7 +215,7 @@ export default function BrandMarketingSimulation() {
 
         const simulationProgressData = {
           userId: user.uid,
-          simulationId: "brand-marketing",
+          simulationId: "finance-simulation",
           currentPhase: updatedData.phase,
           currentStep: getPhaseStep(updatedData.phase),
           totalSteps: 8, // Updated to include framework phase
@@ -280,7 +277,7 @@ export default function BrandMarketingSimulation() {
       try {
         console.log("🏆 Completing simulation...")
 
-        const completionResult = await completeSimulation(user!.uid, "brand-marketing", 100, [])
+        const completionResult = await completeSimulation(user!.uid, "finance-simulation", 100, [])
 
         if (completionResult.success) {
           console.log("✅ Simulation completed:", completionResult)
@@ -334,10 +331,9 @@ export default function BrandMarketingSimulation() {
       framework: 3,
       exploration: 4,
       experience: 5,
-      engage: 6,
-      "post-reflection": 7,
-      envision: 8,
-      complete: 8,
+      "post-reflection": 6,
+      envision: 7,
+      complete: 7,
     }
     return phaseSteps[phase] || 1
   }
@@ -349,8 +345,7 @@ export default function BrandMarketingSimulation() {
       framework: 25,
       exploration: 35,
       experience: 55,
-      engage: 70,
-      "post-reflection": 85,
+      "post-reflection": 80,
       envision: 95,
       complete: 100,
     }
@@ -360,17 +355,15 @@ export default function BrandMarketingSimulation() {
   const getPhaseTitle = () => {
     switch (currentPhase) {
       case "intro":
-        return "Welcome to Make Your Star Shine"
+        return "Welcome to Risk, Reward, and Real World Finance"
       case "pre-reflection":
         return "Pre-Reflection Assessment"
       case "framework":
         return "Understanding the 5 E's Framework"
       case "exploration":
-        return "Explore Branding & Marketing"
+        return "Explore Finance Careers"
       case "experience":
-        return "Experience Career Roles"
-      case "engage":
-        return "Engage with Professionals"
+        return "Experience Finance Roles"
       case "post-reflection":
         return "Evaluate Your Experience"
       case "envision":
@@ -378,7 +371,7 @@ export default function BrandMarketingSimulation() {
       case "complete":
         return "Simulation Complete"
       default:
-        return "Brand & Marketing Simulation"
+        return "Finance Simulation"
     }
   }
 
@@ -395,7 +388,7 @@ export default function BrandMarketingSimulation() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-pink-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading your simulation...</p>
           <p className="text-gray-500 text-sm mt-2">Retrieving your progress from database...</p>
         </div>
@@ -417,11 +410,11 @@ export default function BrandMarketingSimulation() {
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-green-600 flex items-center justify-center">
-                  <Megaphone className="w-6 h-6 text-white" />
+                  <DollarSign className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-800">Make Your Star Shine</h1>
-                  <p className="text-sm text-gray-600">Branding & Marketing Career Simulation</p>
+                  <h1 className="text-xl font-bold text-gray-800">Risk, Reward, and Real World Finance</h1>
+                  <p className="text-sm text-gray-600">Finance Career Simulation</p>
                 </div>
               </div>
             </div>
@@ -429,9 +422,9 @@ export default function BrandMarketingSimulation() {
             <div className="flex items-center gap-6 text-sm text-gray-500">
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />
-                4-6 hours
+                3-4 hours
               </div>
-              <Badge className="bg-gradient-to-r from-blue-500 to-green-600 text-white">Branding & Marketing</Badge>
+              <Badge className="bg-gradient-to-r from-blue-500 to-green-600 text-white">Finance</Badge>
 
               {/* Save Status */}
               <div className="flex items-center gap-2">
@@ -487,13 +480,15 @@ export default function BrandMarketingSimulation() {
             <Card className="border-2 border-blue-200 shadow-lg">
               <CardContent className="p-8 text-center">
                 <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
-                  <Megaphone className="w-12 h-12 text-white" />
+                  <DollarSign className="w-12 h-12 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome to "Make Your Star Shine"</h2>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                  Welcome to "Risk, Reward, and Real World Finance"
+                </h2>
                 <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-                  🌟 You're about to embark on an exciting journey through the 5 E's of Career Exploration! In this
-                  immersive simulation, you'll strategize to make your chosen celebrity the biggest hit in their
-                  industry while exploring branding and marketing careers.
+                  💰 You're about to embark on an exciting journey through the world of finance! In this immersive
+                  simulation, you'll navigate the risks and rewards of managing company finances while exploring various
+                  finance careers.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
                   <div className="bg-gradient-to-br from-blue-50 to-green-50 p-6 rounded-xl border border-blue-200">
@@ -503,33 +498,33 @@ export default function BrandMarketingSimulation() {
                     </h3>
                     <ul className="text-sm text-blue-700 space-y-2">
                       <li>
-                        • 🔍 <strong>Explore</strong> - Discover career roles
+                        • 🔍 <strong>Explore</strong> - Discover finance career roles
                       </li>
                       <li>
-                        • 🎯 <strong>Experience</strong> - Complete real tasks
+                        • 🎯 <strong>Experience</strong> - Complete real-world financial tasks
                       </li>
                       <li>
-                        • 🤝 <strong>Engage</strong> - Connect with professionals
+                        • 🤝 <strong>Engage</strong> - Connect with finance professionals
                       </li>
                       <li>
                         • 📊 <strong>Evaluate</strong> - Reflect on your journey
                       </li>
                       <li>
-                        • 🚀 <strong>Envision</strong> - Plan your future path
+                        • 🚀 <strong>Envision</strong> - Plan your future path in finance
                       </li>
                     </ul>
                   </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+                  <div className="bg-gradient-to-br from-blue-50 to-green-50 p-6 rounded-xl border border-blue-200">
                     <h3 className="font-bold text-blue-800 mb-3 flex items-center">
                       <Users className="w-5 h-5 mr-2" />
-                      Career Roles You'll Master:
+                      Finance Roles You'll Master:
                     </h3>
                     <ul className="text-sm text-blue-700 space-y-2">
-                      <li>• 🎯 Brand Strategist</li>
-                      <li>• 🤝 Partnerships Manager</li>
-                      <li>• 📢 Social Media Strategist</li>
-                      <li>• 🛡️ Public Relations Manager</li>
-                      <li>• 📊 Competitive Analyst</li>
+                      <li>• 📊 Financial Analyst</li>
+                      <li>• 💼 Investment Advisor</li>
+                      <li>• 💰 Corporate Treasurer</li>
+                      <li>• 📈 Risk Manager</li>
+                      <li>• 🏦 Financial Health Specialist</li>
                     </ul>
                   </div>
                 </div>
@@ -545,37 +540,27 @@ export default function BrandMarketingSimulation() {
           )}
 
           {currentPhase === "pre-reflection" && (
-            <PreReflectionForm
+            <FinancePreReflectionForm
               onComplete={(data) => handlePhaseComplete(data, "framework")}
               initialData={simulationData.preReflectionAnswers}
             />
           )}
 
           {currentPhase === "framework" && (
-            <FrameworkExplanation
-              simulationType="brand-marketing"
-              onComplete={() => handlePhaseComplete({}, "exploration")}
-            />
+            <FrameworkExplanation simulationType="finance" onComplete={() => handlePhaseComplete({}, "exploration")} />
           )}
 
           {currentPhase === "exploration" && (
-            <ExplorationPhase
+            <FinanceExplorationPhase
               onComplete={(data) => handlePhaseComplete(data, "experience")}
               initialData={simulationData.explorationAnswers}
             />
           )}
 
           {currentPhase === "experience" && (
-            <ExperiencePhase
-              onComplete={(data) => handlePhaseComplete(data, "engage")}
-              initialData={simulationData.experienceAnswers}
-            />
-          )}
-
-          {currentPhase === "engage" && (
-            <EngagePhase
+            <FinanceExperiencePhase
               onComplete={(data) => handlePhaseComplete(data, "post-reflection")}
-              initialData={simulationData.engageAnswers}
+              initialData={simulationData.experienceAnswers}
             />
           )}
 
@@ -584,7 +569,7 @@ export default function BrandMarketingSimulation() {
               onComplete={(data) => handlePhaseComplete(data, "envision")}
               initialData={simulationData.postReflectionAnswers}
               preReflectionData={simulationData.preReflectionAnswers}
-              simulationType="brand-marketing"
+              simulationType="finance"
             />
           )}
 
@@ -592,7 +577,7 @@ export default function BrandMarketingSimulation() {
             <EnvisionPhase
               onComplete={(data) => handlePhaseComplete(data, "complete")}
               initialData={simulationData.envisionAnswers}
-              simulationType="brand-marketing"
+              simulationType="finance"
             />
           )}
 
@@ -601,7 +586,7 @@ export default function BrandMarketingSimulation() {
               simulationData={simulationData}
               onReturnToDashboard={handleReturnToDashboard}
               onViewCity={handleViewCity}
-              simulationType="brand-marketing"
+              simulationType="finance"
             />
           )}
         </div>
