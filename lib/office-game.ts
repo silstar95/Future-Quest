@@ -103,15 +103,6 @@ class OfficeScene extends Phaser.Scene {
     // Positions are scaled to match the canvas size (888x596)
     this.rooms = [
       {
-        id: "lobby",
-        name: "Lobby",
-        x: 433, // 500 * SCALE_X
-        y: 328, // 600 * SCALE_Y
-        width: 104, // 120 * SCALE_X
-        height: 44, // 80 * SCALE_Y
-        description: "Welcome area and reception",
-      },
-      {
         id: "whiteboard",
         name: "Strategy Room",
         x: 357, // 43 + 628/2 (center of the room area)
