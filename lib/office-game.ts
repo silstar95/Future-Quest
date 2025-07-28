@@ -22,28 +22,28 @@ interface TaskData {
 
 const UNREACHABLE_AREAS = [
   // Top left corner
-  { x: 0, y: 0, width: 44, height: 264 },
+  { x: 21, y: 25, width: 23, height: 239 },
   // Top strip
-  { x: 0, y: 0, width: 1024, height: 128 },
+  { x: 21, y: 25, width: 1003, height: 103 },
   // Left side bottom
-  { x: 0, y: 398, width: 44, height: 690 },
+  { x: 21, y: 423, width: 23, height: 665 },
   // Left middle section
-  { x: 0, y: 662, width: 244, height: 426 },
+  { x: 21, y: 687, width: 223, height: 401 },
   // Middle section
-  { x: 244, y: 662, width: 400, height: 130 },
+  { x: 265, y: 687, width: 400, height: 105 },
   // Right middle section
-  { x: 710, y: 662, width: 314, height: 130 },
+  { x: 731, y: 687, width: 314, height: 105 },
   // Bottom strip
-  { x: 0, y: 1056, width: 1024, height: 32 },
+  { x: 21, y: 1081, width: 1003, height: 7 },
   // Right side
-  { x: 976, y: 0, width: 48, height: 1088 },
+  { x: 997, y: 25, width: 27, height: 1063 },
   // Additional unreachable areas
-  { x: 106, y: 467, width: 800, height: 111 },
-  { x: 176, y: 170, width: 596, height: 142 },
-  { x: 446, y: 912, width: 130, height: 64 },
-  { x: 512, y: 762, width: 64, height: 214 },
-  { x: 780, y: 862, width: 126, height: 60 },
-  { x: 780, y: 862, width: 58, height: 194 }
+  { x: 127, y: 492, width: 779, height: 86 },
+  { x: 197, y: 195, width: 575, height: 117 },
+  { x: 467, y: 937, width: 109, height: 39 },
+  { x: 533, y: 787, width: 43, height: 189 },
+  { x: 801, y: 887, width: 105, height: 35 },
+  { x: 801, y: 887, width: 37, height: 169 }
 ]
 
 // Debug mode to show collision boundaries (set to true to visualize)
