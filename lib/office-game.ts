@@ -39,7 +39,7 @@ const UNREACHABLE_AREAS = [
   { x: 997, y: 25, width: 27, height: 1063 },
   // Additional unreachable areas
   { x: 127, y: 492, width: 779, height: 86 },
-  { x: 197, y: 195, width: 575, height: 117 },
+  { x: 197, y: 215, width: 575, height: 97 },
   { x: 467, y: 937, width: 109, height: 39 },
   { x: 533, y: 787, width: 43, height: 189 },
   { x: 801, y: 887, width: 105, height: 35 },
@@ -207,7 +207,7 @@ class OfficeScene extends Phaser.Scene {
     this.collisionBodies = this.physics.add.staticGroup()
 
     // Add invisible collision bodies for unreachable areas
-    UNREACHABLE_AREAS.forEach(area => {
+    UNREACHABLE_AREAS.forEach((area, index) => {
       // Scale the coordinates and dimensions to match the canvas size
       const scaledX = area.x * SCALE_X
       const scaledY = area.y * SCALE_Y
@@ -222,6 +222,23 @@ class OfficeScene extends Phaser.Scene {
         DEBUG_COLLISION_AREAS ? 0xff0000 : 0x000000, // Red if debug mode, invisible otherwise
         DEBUG_COLLISION_AREAS ? 0.3 : 0 // Semi-transparent red if debug mode
       )
+      
+      // Add position and size text on each area in debug mode
+      if (DEBUG_COLLISION_AREAS) {
+        const infoText = this.add.text(
+          scaledX + scaledWidth / 2,
+          scaledY + scaledHeight / 2,
+          `Area ${index + 1}\n(${Math.round(scaledX)}, ${Math.round(scaledY)})\n${Math.round(scaledWidth)}x${Math.round(scaledHeight)}`,
+          {
+            fontSize: '8px',
+            color: '#ffffff',
+            fontStyle: 'bold',
+            backgroundColor: '#000000',
+            padding: { x: 2, y: 2 }
+          }
+        )
+        infoText.setOrigin(0.5)
+      }
       
       // Enable physics for collision detection
       this.physics.add.existing(collisionBody, true)
@@ -479,7 +496,7 @@ class OfficeScene extends Phaser.Scene {
 
   createDebugDisplay() {
     const debugText = this.add.text(10, 10, '', {
-      fontSize: '12px',
+      fontSize: '10px',
       color: '#ffffff',
       backgroundColor: '#000000',
       padding: { x: 5, y: 5 }
@@ -495,11 +512,24 @@ class OfficeScene extends Phaser.Scene {
           const catX = Math.round(this.cat.x)
           const catY = Math.round(this.cat.y)
           const inUnreachable = this.isCatInUnreachableArea(catX, catY)
+          
+          // Create detailed unreachable areas info
+          const areasInfo = UNREACHABLE_AREAS.map((area, index) => {
+            const scaledX = Math.round(area.x * SCALE_X)
+            const scaledY = Math.round(area.y * SCALE_Y)
+            const scaledWidth = Math.round(area.width * SCALE_X)
+            const scaledHeight = Math.round(area.height * SCALE_Y)
+            return `Area ${index + 1}: (${scaledX}, ${scaledY}) ${scaledWidth}x${scaledHeight}`
+          }).join('\n')
+          
           debugText.setText([
             `Cat Position: (${catX}, ${catY})`,
             `In Unreachable Area: ${inUnreachable ? 'YES' : 'NO'}`,
             `Canvas Size: ${CANVAS_WIDTH}x${CANVAS_HEIGHT}`,
-            `Scale Factors: X=${SCALE_X.toFixed(3)}, Y=${SCALE_Y.toFixed(3)}`
+            `Scale Factors: X=${SCALE_X.toFixed(3)}, Y=${SCALE_Y.toFixed(3)}`,
+            '',
+            'Unreachable Areas (Scaled):',
+            areasInfo
           ])
         }
       },
