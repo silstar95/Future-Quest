@@ -27,11 +27,7 @@ import {
   Lock,
 } from "lucide-react"
 import { DashboardHeader } from "@/components/layout/dashboard-header"
-import {
-  getStudentProgressCloudFunction,
-  getCurrentSimulationProgress,
-  getSimulationProgress,
-} from "@/lib/firebase-service"
+import { getStudentProgressCloudFunction, getSimulationProgress } from "@/lib/firebase-service"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { ChangePasswordModal } from "./change-password-modal"
@@ -128,31 +124,66 @@ export function StudentDashboard() {
     return completed
   }
 
-  // Helper function to calculate progress percentage based on current phase
-  const calculateProgressPercentage = (simulationId: string): number => {
-    const progressData = userData?.simulationProgress?.[simulationId]
-    if (!progressData) return 0
+  // Helper function to calculate progress percentage based on current phase and step
+  const calculateProgressPercentage = async (simulationId: string): Promise<number> => {
+    if (!user?.uid) return 0
 
-    // If simulation is completed, return 100%
-    if (progressData.completed) return 100
+    try {
+      // Get detailed progress from database
+      const result = await getSimulationProgress(user.uid, simulationId)
 
-    // Calculate based on current step and total steps
-    if (progressData.currentStep && progressData.totalSteps) {
-      return Math.round((progressData.currentStep / progressData.totalSteps) * 100)
+      if (result.success && result.data) {
+        const progressData = result.data
+
+        // If simulation is completed, return 100%
+        if (progressData.completed) return 100
+
+        // Calculate based on current step and total steps
+        if (progressData.currentStep && progressData.totalSteps) {
+          const percentage = Math.round((progressData.currentStep / progressData.totalSteps) * 100)
+          console.log(
+            `📊 ${simulationId} progress: ${progressData.currentStep}/${progressData.totalSteps} = ${percentage}%`,
+          )
+          return percentage
+        }
+
+        // Fallback: calculate based on phase for government simulation
+        if (simulationId === "government-simulation" && progressData.currentPhase) {
+          const phaseProgress = {
+            intro: 12.5,
+            framework: 25,
+            "pre-reflection": 37.5,
+            exploration: 50,
+            experience: 62.5,
+            envision: 75,
+            "post-reflection": 87.5,
+            complete: 100,
+          }
+          const percentage = phaseProgress[progressData.currentPhase as keyof typeof phaseProgress] || 0
+          console.log(`📊 ${simulationId} phase progress: ${progressData.currentPhase} = ${percentage}%`)
+          return percentage
+        }
+
+        // For other simulations, use existing logic
+        const phaseProgress = {
+          intro: 5,
+          "pre-reflection": 15,
+          exploration: 35,
+          experience: 75,
+          "post-reflection": 90,
+          complete: 100,
+        }
+
+        const currentPhase = progressData.currentPhase
+        const percentage = phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
+        console.log(`📊 ${simulationId} fallback progress: ${currentPhase} = ${percentage}%`)
+        return percentage
+      }
+    } catch (error) {
+      console.error(`❌ Error calculating progress for ${simulationId}:`, error)
     }
 
-    // Fallback: calculate based on phase
-    const phaseProgress = {
-      intro: 5,
-      "pre-reflection": 15,
-      exploration: 35,
-      experience: 75,
-      "post-reflection": 90,
-      complete: 100,
-    }
-
-    const currentPhase = progressData.currentPhase
-    return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
+    return 0
   }
 
   const simulations: Simulation[] = [
@@ -165,7 +196,7 @@ export function StudentDashboard() {
       category: "Marketing",
       isCompleted: userData?.simulationProgress?.["brand-marketing"]?.completed || false,
       isUnlocked: true, // Always unlocked
-      progress: calculateProgressPercentage("brand-marketing"),
+      progress: 0, // Will be calculated async
     },
     {
       id: "finance-simulation",
@@ -176,7 +207,7 @@ export function StudentDashboard() {
       category: "Finance",
       isCompleted: userData?.simulationProgress?.["finance-simulation"]?.completed || false,
       isUnlocked: true, // Always unlocked
-      progress: calculateProgressPercentage("finance-simulation"),
+      progress: 0, // Will be calculated async
     },
     {
       id: "material-science",
@@ -187,18 +218,19 @@ export function StudentDashboard() {
       category: "Science",
       isCompleted: userData?.simulationProgress?.["material-science"]?.completed || false,
       isUnlocked: true, // Always unlocked
-      progress: calculateProgressPercentage("material-science"),
+      progress: 0, // Will be calculated async
     },
     {
-      id: "healthcare-simulation",
-      title: "Healthcare Hero",
-      description: "Navigate healthcare management and patient care",
-      duration: "55-75 min",
+      id: "government-simulation",
+      title: "Inside the Hill",
+      description:
+        "Navigate congressional processes and stakeholder engagement to pass the WATER Act through strategic political maneuvering",
+      duration: "2-3 hours",
       difficulty: "Advanced",
-      category: "Healthcare",
-      isCompleted: userData?.simulationProgress?.["healthcare-simulation"]?.completed || false,
+      category: "Government",
+      isCompleted: userData?.simulationProgress?.["government-simulation"]?.completed || false,
       isUnlocked: true, // Always unlocked
-      progress: calculateProgressPercentage("healthcare-simulation"),
+      progress: 0, // Will be calculated async
     },
   ]
 
@@ -208,57 +240,47 @@ export function StudentDashboard() {
     try {
       setDataLoading(true)
 
-      // Get current simulation progress from database
-      const currentProgress = await getCurrentSimulationProgress(user.uid)
-      if (currentProgress.success) {
-        const { lastActiveSimulation, simulationProgress } = currentProgress.data
-
-        // Find the last active simulation that's not completed
-        if (
-          lastActiveSimulation &&
-          simulationProgress[lastActiveSimulation] > 0 &&
-          simulationProgress[lastActiveSimulation] < 100
-        ) {
-          const simulation = simulations.find((s) => s.id === lastActiveSimulation)
-          if (simulation) {
-            setCurrentSimulationData({
-              simulationId: lastActiveSimulation,
-              progress: simulationProgress[lastActiveSimulation],
-              title: simulation.title,
-            })
-          }
-        }
-      }
-
-      // Get detailed simulation progress for each simulation
+      // Calculate progress for all simulations
       const simulationProgressPromises = simulations.map(async (sim) => {
         try {
-          const progress = await getSimulationProgress(user.uid, sim.id)
+          const progress = await calculateProgressPercentage(sim.id)
           return {
             simulationId: sim.id,
-            progress:
-              progress.success && progress.data
-                ? Math.round((progress.data.currentStep / progress.data.totalSteps) * 100)
-                : 0,
-            data: progress.success ? progress.data : null,
+            progress: progress,
           }
         } catch (error) {
           console.error(`Error getting progress for ${sim.id}:`, error)
           return {
             simulationId: sim.id,
             progress: 0,
-            data: null,
           }
         }
       })
 
       const progressResults = await Promise.all(simulationProgressPromises)
 
-      // Update userData with actual progress from database
+      // Update simulations with actual progress from database
       const progressMap: { [key: string]: number } = {}
       progressResults.forEach((result) => {
         progressMap[result.simulationId] = result.progress
       })
+
+      // Find current simulation (one with progress > 0 and < 100)
+      let currentSimulationData = null
+      for (const result of progressResults) {
+        if (result.progress > 0 && result.progress < 100) {
+          const simulation = simulations.find((s) => s.id === result.simulationId)
+          if (simulation) {
+            currentSimulationData = {
+              simulationId: result.simulationId,
+              progress: result.progress,
+              title: simulation.title,
+            }
+            break
+          }
+        }
+      }
+      setCurrentSimulationData(currentSimulationData)
 
       // Calculate stats based ONLY on completed simulations from simulationProgress
       const completedSimulations = getCompletedSimulationsFromProgress(
@@ -275,8 +297,8 @@ export function StudentDashboard() {
             return 3.5 // 3-4 hours average
           case "material-science":
             return 1 // 50-70 min average
-          case "healthcare-simulation":
-            return 1.1 // 55-75 min average
+          case "government-simulation":
+            return 2.5 // 2-3 hours average
           default:
             return 1
         }
@@ -294,11 +316,11 @@ export function StudentDashboard() {
           "brand-marketing": ["Brand Strategist", "Social Media Manager", "Marketing Director", "PR Manager"],
           "finance-simulation": ["Financial Analyst", "Investment Advisor", "Risk Manager", "Corporate Treasurer"],
           "material-science": ["Materials Engineer", "Research Scientist", "Product Developer", "Quality Engineer"],
-          "healthcare-simulation": [
-            "Healthcare Administrator",
-            "Medical Manager",
-            "Health Analyst",
-            "Care Coordinator",
+          "government-simulation": [
+            "Legislative Assistant",
+            "Policy Analyst",
+            "Congressional Staffer",
+            "Government Relations Specialist",
           ],
         }
 
@@ -414,8 +436,8 @@ export function StudentDashboard() {
             return 3.5 // 3-4 hours average
           case "material-science":
             return 1 // 50-70 min average
-          case "healthcare-simulation":
-            return 1.1 // 55-75 min average
+          case "government-simulation":
+            return 2.5 // 2-3 hours average
           default:
             return 1
         }
@@ -431,11 +453,11 @@ export function StudentDashboard() {
           "brand-marketing": ["Brand Strategist", "Social Media Manager", "Marketing Director", "PR Manager"],
           "finance-simulation": ["Financial Analyst", "Investment Advisor", "Risk Manager", "Corporate Treasurer"],
           "material-science": ["Materials Engineer", "Research Scientist", "Product Developer", "Quality Engineer"],
-          "healthcare-simulation": [
-            "Healthcare Administrator",
-            "Medical Manager",
-            "Health Analyst",
-            "Care Coordinator",
+          "government-simulation": [
+            "Legislative Assistant",
+            "Policy Analyst",
+            "Congressional Staffer",
+            "Government Relations Specialist",
           ],
         }
 
@@ -503,18 +525,18 @@ export function StudentDashboard() {
       fetchStudentData()
 
       // Set up real-time listener for user data
-      const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      const unsubscribe = onSnapshot(doc(db, "users", user.uid), async (doc) => {
         if (doc.exists()) {
           const data = doc.data() as UserData
           setUserData(data)
 
           console.log("🔄 Real-time user data update:", data)
 
-          // Update current simulation data
+          // Update current simulation data with fresh progress calculation
           if (data.lastActiveSimulation && data.simulationProgress) {
             const progressData = data.simulationProgress[data.lastActiveSimulation]
             if (progressData && !progressData.completed) {
-              const progress = calculateProgressPercentage(data.lastActiveSimulation)
+              const progress = await calculateProgressPercentage(data.lastActiveSimulation)
               if (progress > 0 && progress < 100) {
                 const simulation = simulations.find((s) => s.id === data.lastActiveSimulation)
                 if (simulation) {
@@ -543,8 +565,8 @@ export function StudentDashboard() {
                 return 3.5 // 3-4 hours average
               case "material-science":
                 return 1 // 50-70 min average
-              case "healthcare-simulation":
-                return 1.1 // 55-75 min average
+              case "government-simulation":
+                return 2.5 // 2-3 hours average
               default:
                 return 1
             }
@@ -562,11 +584,11 @@ export function StudentDashboard() {
               "brand-marketing": ["Brand Strategist", "Social Media Manager", "Marketing Director", "PR Manager"],
               "finance-simulation": ["Financial Analyst", "Investment Advisor", "Risk Manager", "Corporate Treasurer"],
               "material-science": ["Materials Engineer", "Research Scientist", "Product Developer", "Quality Engineer"],
-              "healthcare-simulation": [
-                "Healthcare Administrator",
-                "Medical Manager",
-                "Health Analyst",
-                "Care Coordinator",
+              "government-simulation": [
+                "Legislative Assistant",
+                "Policy Analyst",
+                "Congressional Staffer",
+                "Government Relations Specialist",
               ],
             }
 
@@ -979,8 +1001,8 @@ export function StudentDashboard() {
                               return 3.5 // 3-4 hours average
                             case "material-science":
                               return 1 // 50-70 min average
-                            case "healthcare-simulation":
-                              return 1.1 // 55-75 min average
+                            case "government-simulation":
+                              return 2.5 // 2-3 hours average
                             default:
                               return 1
                           }
@@ -1019,11 +1041,11 @@ export function StudentDashboard() {
                               "Product Developer",
                               "Quality Engineer",
                             ],
-                            "healthcare-simulation": [
-                              "Healthcare Administrator",
-                              "Medical Manager",
-                              "Health Analyst",
-                              "Care Coordinator",
+                            "government-simulation": [
+                              "Legislative Assistant",
+                              "Policy Analyst",
+                              "Congressional Staffer",
+                              "Government Relations Specialist",
                             ],
                           }
 
@@ -1063,67 +1085,72 @@ export function StudentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
-                  {simulations.map((simulation) => (
-                    <div
-                      key={simulation.id}
-                      className={`p-4 rounded-lg border transition-all ${
-                        simulation.isCompleted
-                          ? "border-green-200 bg-green-50"
-                          : simulation.isUnlocked
-                            ? "border-blue-200 bg-blue-50 hover:bg-blue-100"
-                            : "border-gray-200 bg-gray-50 opacity-60"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium">{simulation.title}</h4>
-                            {simulation.isCompleted && <Trophy className="w-4 h-4 text-yellow-500" />}
-                            {!simulation.isUnlocked && <span className="text-gray-400">🔒</span>}
-                          </div>
-                          <p className="text-sm text-gray-600 mb-2">{simulation.description}</p>
+                  {simulations.map((simulation) => {
+                    // Calculate progress for this simulation
+                    const progressPercentage = displayProgress.simulationProgress?.[simulation.id] || 0
 
-                          {/* Progress Bar */}
-                          {(simulation.progress ?? 0) > 0 && (
-                            <div className="mb-2">
-                              <div className="flex justify-between text-xs mb-1">
-                                <span className="text-gray-500">Progress</span>
-                                <span className="font-medium">{Math.round(simulation.progress ?? 0)}%</span>
+                    return (
+                      <div
+                        key={simulation.id}
+                        className={`p-4 rounded-lg border transition-all ${
+                          simulation.isCompleted
+                            ? "border-green-200 bg-green-50"
+                            : simulation.isUnlocked
+                              ? "border-blue-200 bg-blue-50 hover:bg-blue-100"
+                              : "border-gray-200 bg-gray-50 opacity-60"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium">{simulation.title}</h4>
+                              {simulation.isCompleted && <Trophy className="w-4 h-4 text-yellow-500" />}
+                              {!simulation.isUnlocked && <span className="text-gray-400">🔒</span>}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{simulation.description}</p>
+
+                            {/* Progress Bar */}
+                            {progressPercentage > 0 && (
+                              <div className="mb-2">
+                                <div className="flex justify-between text-xs mb-1">
+                                  <span className="text-gray-500">Progress</span>
+                                  <span className="font-medium">{Math.round(progressPercentage)}%</span>
+                                </div>
+                                <Progress value={progressPercentage} className="h-1" />
                               </div>
-                              <Progress value={simulation.progress ?? 0} className="h-1" />
-                            </div>
-                          )}
+                            )}
 
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {simulation.duration}
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {simulation.duration}
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {simulation.difficulty}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {simulation.category}
+                              </Badge>
                             </div>
-                            <Badge variant="outline" className="text-xs">
-                              {simulation.difficulty}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {simulation.category}
-                            </Badge>
                           </div>
+                          <Button
+                            onClick={() => handleStartSimulation(simulation.id)}
+                            disabled={!simulation.isUnlocked}
+                            variant={simulation.isCompleted ? "outline" : "default"}
+                            size="sm"
+                          >
+                            {simulation.isCompleted
+                              ? "Replay"
+                              : progressPercentage > 0
+                                ? "Continue"
+                                : simulation.isUnlocked
+                                  ? "Start"
+                                  : "Locked"}
+                          </Button>
                         </div>
-                        <Button
-                          onClick={() => handleStartSimulation(simulation.id)}
-                          disabled={!simulation.isUnlocked}
-                          variant={simulation.isCompleted ? "outline" : "default"}
-                          size="sm"
-                        >
-                          {simulation.isCompleted
-                            ? "Replay"
-                            : (simulation.progress ?? 0) > 0
-                              ? "Continue"
-                              : simulation.isUnlocked
-                                ? "Start"
-                                : "Locked"}
-                        </Button>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </CardContent>
             </Card>

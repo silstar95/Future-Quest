@@ -38,6 +38,7 @@ import {
   Wind,
   Sparkles,
   TestTubes,
+  ChevronDown,
 } from "lucide-react"
 import { MaterialSciencePeriodicTable } from "./material-science-periodic-table"
 
@@ -73,6 +74,8 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
     coolingMethod: "Quench",
     additive: "Zinc Oxide",
   })
+
+  const [expandedCard, setExpandedCard] = useState<string | null>(null)
 
   const [simulationRunning, setSimulationRunning] = useState(false)
   const [simulationStage, setSimulationStage] = useState(0)
@@ -383,6 +386,14 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
   const hintButtonStyle =
     "flex items-center justify-center h-7 w-7 rounded-full bg-blue-100 text-blue-500 hover:bg-blue-200 hover:text-blue-700 transition-colors"
 
+  const toggleCardExpansion = (cardId: string) => {
+    if (expandedCard === cardId) {
+      setExpandedCard(null)
+    } else {
+      setExpandedCard(cardId)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-slate-50">
       {/* Header */}
@@ -418,8 +429,6 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
             exit={{ opacity: 0, y: -20 }}
             className="max-w-4xl w-full relative z-10"
           >
-            
-
             {/* Floating title - appears before the card */}
             <motion.div
               initial={{ opacity: 0, y: -50 }}
@@ -862,11 +871,15 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   {/* Precursors Variable */}
                   <motion.div
-                    className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer"
+                    className={`bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer ${
+                      expandedCard === "precursors" ? "md:col-span-2" : ""
+                    }`}
                     whileHover={{ y: -5, backgroundColor: "#f8faff" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.6 }}
+                    onClick={() => toggleCardExpansion("precursors")}
+                    layout
                   >
                     <div className="p-5">
                       <div className="flex items-center justify-between mb-3">
@@ -876,6 +889,13 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                           <h4 className="text-lg font-bold text-slate-800">Precursors</h4>
                         </div>
+                        <motion.div
+                          animate={{ rotate: expandedCard === "precursors" ? 180 : 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-slate-400"
+                        >
+                          <ChevronDown size={16} />
+                        </motion.div>
                       </div>
                       <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
@@ -923,16 +943,99 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                         </div>
                       </div>
+
+                      {/* Expanded content */}
+                      <AnimatePresence>
+                        {expandedCard === "precursors" && (
+                          <motion.div
+                            className="mt-4 p-4 bg-gradient-to-br from-amber-500/5 to-amber-700/10 rounded-xl overflow-hidden"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <HelpCircle size={16} className="text-amber-600" />
+                                  What it is
+                                </h5>
+                                <p className="text-slate-700 mb-4">
+                                  Chemical compounds containing yttrium, barium, and copper that will combine to form
+                                  the YBCO crystal structure.
+                                </p>
+
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <AlertCircle size={16} className="text-amber-600" />
+                                  Why it matters
+                                </h5>
+                                <p className="text-slate-700">
+                                  The purity and stoichiometric ratio of precursors determine if you'll get perfect YBCO
+                                  or contaminated byproducts.
+                                </p>
+                              </div>
+
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <Atom size={16} className="text-amber-600" />
+                                  Examples
+                                </h5>
+                                <ul className="list-disc list-inside mb-4 text-slate-700">
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="mb-1"
+                                  >
+                                    Y₂O₃ (Yttrium oxide)
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mb-1"
+                                  >
+                                    BaCO₃ (Barium carbonate)
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="mb-1"
+                                  >
+                                    CuO (Copper oxide)
+                                  </motion.li>
+                                </ul>
+
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-md">
+                                  <h5 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                    <Sparkles size={16} className="text-yellow-500" />
+                                    Fun Fact
+                                  </h5>
+                                  <p className="text-slate-700 text-sm">
+                                    Some of the precursors for YBCO were originally considered worthless byproducts in
+                                    mining operations!
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
 
                   {/* Heating Profile Variable */}
                   <motion.div
-                    className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer"
+                    className={`bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer ${
+                      expandedCard === "heating" ? "md:col-span-2" : ""
+                    }`}
                     whileHover={{ y: -5, backgroundColor: "#f8faff" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.8 }}
+                    onClick={() => toggleCardExpansion("heating")}
+                    layout
                   >
                     <div className="p-5">
                       <div className="flex items-center justify-between mb-3">
@@ -942,6 +1045,13 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                           <h4 className="text-lg font-bold text-slate-800">Heating Profile</h4>
                         </div>
+                        <motion.div
+                          animate={{ rotate: expandedCard === "heating" ? 180 : 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-slate-400"
+                        >
+                          <ChevronDown size={16} />
+                        </motion.div>
                       </div>
                       <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
@@ -981,16 +1091,99 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                         </div>
                       </div>
+
+                      {/* Expanded content */}
+                      <AnimatePresence>
+                        {expandedCard === "heating" && (
+                          <motion.div
+                            className="mt-4 p-4 bg-gradient-to-br from-red-500/5 to-orange-500/10 rounded-xl overflow-hidden"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <HelpCircle size={16} className="text-red-600" />
+                                  What it is
+                                </h5>
+                                <p className="text-slate-700 mb-4">
+                                  The precise temperature path (ramp rate, max temperature, and duration) used to
+                                  convert precursors into YBCO.
+                                </p>
+
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <AlertCircle size={16} className="text-red-600" />
+                                  Why it matters
+                                </h5>
+                                <p className="text-slate-700">
+                                  Too little heat means incomplete reactions, while too much heat could damage the
+                                  crystal structure or cause unwanted side reactions.
+                                </p>
+                              </div>
+
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <Atom size={16} className="text-red-600" />
+                                  Examples
+                                </h5>
+                                <ul className="list-disc list-inside mb-4 text-slate-700">
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="mb-1"
+                                  >
+                                    Slow ramp (5°C/min) to 900°C
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mb-1"
+                                  >
+                                    Hold at 900°C for 24 hours
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="mb-1"
+                                  >
+                                    Flash heating to 1000°C for 1 hour
+                                  </motion.li>
+                                </ul>
+
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-md">
+                                  <h5 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                    <Sparkles size={16} className="text-yellow-500" />
+                                    Fun Fact
+                                  </h5>
+                                  <p className="text-slate-700 text-sm">
+                                    YBCO synthesis requires temperatures approaching 1000°C—that's hot enough to make
+                                    certain metals glow bright orange!
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
 
                   {/* Cooling Method Variable */}
                   <motion.div
-                    className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer"
+                    className={`bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer ${
+                      expandedCard === "cooling" ? "md:col-span-2" : ""
+                    }`}
                     whileHover={{ y: -5, backgroundColor: "#f8faff" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.0 }}
+                    onClick={() => toggleCardExpansion("cooling")}
+                    layout
                   >
                     <div className="p-5">
                       <div className="flex items-center justify-between mb-3">
@@ -1000,6 +1193,13 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                           <h4 className="text-lg font-bold text-slate-800">Cooling Method</h4>
                         </div>
+                        <motion.div
+                          animate={{ rotate: expandedCard === "cooling" ? 180 : 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-slate-400"
+                        >
+                          <ChevronDown size={16} />
+                        </motion.div>
                       </div>
                       <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
@@ -1057,16 +1257,99 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                         </div>
                       </div>
+
+                      {/* Expanded content */}
+                      <AnimatePresence>
+                        {expandedCard === "cooling" && (
+                          <motion.div
+                            className="mt-4 p-4 bg-gradient-to-br from-blue-500/5 to-cyan-500/10 rounded-xl overflow-hidden"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <HelpCircle size={16} className="text-blue-600" />
+                                  What it is
+                                </h5>
+                                <p className="text-slate-700 mb-4">
+                                  The controlled cooling strategy after high-temperature synthesis that impacts crystal
+                                  formation and oxygen content.
+                                </p>
+
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <AlertCircle size={16} className="text-blue-600" />
+                                  Why it matters
+                                </h5>
+                                <p className="text-slate-700">
+                                  The cooling rate determines crystal structure alignment and oxygen content, which
+                                  directly affects superconducting properties.
+                                </p>
+                              </div>
+
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <Atom size={16} className="text-blue-600" />
+                                  Examples
+                                </h5>
+                                <ul className="list-disc list-inside mb-4 text-slate-700">
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="mb-1"
+                                  >
+                                    Slow cooling (1°C/min)
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mb-1"
+                                  >
+                                    Quenching (rapid cooling in liquid)
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="mb-1"
+                                  >
+                                    Step cooling with oxygen annealing
+                                  </motion.li>
+                                </ul>
+
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-md">
+                                  <h5 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                    <Sparkles size={16} className="text-yellow-500" />
+                                    Fun Fact
+                                  </h5>
+                                  <p className="text-slate-700 text-sm">
+                                    Some superconductor researchers use liquid nitrogen at -196°C as part of their
+                                    cooling process—that's colder than the coldest place on Earth!
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
 
                   {/* Additives Variable */}
                   <motion.div
-                    className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer"
+                    className={`bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100 hover:shadow-xl transition-all cursor-pointer ${
+                      expandedCard === "additives" ? "md:col-span-2" : ""
+                    }`}
                     whileHover={{ y: -5, backgroundColor: "#f8faff" }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.2 }}
+                    onClick={() => toggleCardExpansion("additives")}
+                    layout
                   >
                     <div className="p-5">
                       <div className="flex items-center justify-between mb-3">
@@ -1076,6 +1359,13 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                           <h4 className="text-lg font-bold text-slate-800">Additives</h4>
                         </div>
+                        <motion.div
+                          animate={{ rotate: expandedCard === "additives" ? 180 : 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-slate-400"
+                        >
+                          <ChevronDown size={16} />
+                        </motion.div>
                       </div>
                       <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1">
@@ -1133,6 +1423,85 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                           </div>
                         </div>
                       </div>
+
+                      {/* Expanded content */}
+                      <AnimatePresence>
+                        {expandedCard === "additives" && (
+                          <motion.div
+                            className="mt-4 p-4 bg-gradient-to-br from-purple-500/5 to-fuchsia-500/10 rounded-xl overflow-hidden"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <HelpCircle size={16} className="text-purple-600" />
+                                  What it is
+                                </h5>
+                                <p className="text-slate-700 mb-4">
+                                  Substances added in small amounts to improve synthesis efficiency or modify the final
+                                  properties of YBCO.
+                                </p>
+
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <AlertCircle size={16} className="text-purple-600" />
+                                  Why it matters
+                                </h5>
+                                <p className="text-slate-700">
+                                  Additives can dramatically improve conductivity, current capacity, or magnetic field
+                                  strength tolerance.
+                                </p>
+                              </div>
+
+                              <div>
+                                <h5 className="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                  <Atom size={16} className="text-purple-600" />
+                                  Examples
+                                </h5>
+                                <ul className="list-disc list-inside mb-4 text-slate-700">
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="mb-1"
+                                  >
+                                    Silver oxide (Ag₂O)
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="mb-1"
+                                  >
+                                    Calcium oxide (CaO)
+                                  </motion.li>
+                                  <motion.li
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="mb-1"
+                                  >
+                                    Platinum particles (Pt)
+                                  </motion.li>
+                                </ul>
+
+                                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-md">
+                                  <h5 className="font-bold text-slate-800 mb-1 flex items-center gap-2">
+                                    <Sparkles size={16} className="text-yellow-500" />
+                                    Fun Fact
+                                  </h5>
+                                  <p className="text-slate-700 text-sm">
+                                    Adding just 1% of certain materials can double the current-carrying capacity of a
+                                    superconductor!
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </motion.div>
                 </div>
@@ -2265,7 +2634,6 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
                     Lab Notebook
                   </h2>
                   <div className="flex gap-3">
-                    
                     <Button
                       variant="outline"
                       size="sm"

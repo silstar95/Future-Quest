@@ -13,6 +13,7 @@ import { useAuth } from "@/components/providers/auth-provider"
 import { useRouter, useSearchParams } from "next/navigation"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/lib/firebase"
+import { getSimulationProgress } from "@/lib/firebase-service"
 import { Search, Clock, Trophy, Play, Building, Star } from "lucide-react"
 
 // Dynamically import the city viewer to prevent SSR issues
@@ -35,7 +36,7 @@ interface UserData {
   completedSimulations: string[]
   cityLevel: number
   unlockedBuildings: string[]
-  simulationProgress?: { [simulationId: string]: number }
+  simulationProgress?: { [simulationId: string]: any }
 }
 
 interface Simulation {
@@ -60,13 +61,76 @@ function SimulationsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [selectedDifficulty, setSelectedDifficulty] = useState("All")
   const [tabLoading, setTabLoading] = useState(false)
+  const [simulationProgress, setSimulationProgress] = useState<{ [key: string]: number }>({})
 
   // Get initial tab from URL params
   const initialTab = searchParams?.get("tab") || "simulations"
   const [activeTab, setActiveTab] = useState(initialTab)
 
-  const categories = ["All", "Marketing", "Science", "Finance", "Healthcare"]
+  const categories = ["All", "Marketing", "Science", "Finance", "Government"]
   const difficulties = ["All", "Beginner", "Intermediate", "Advanced"]
+
+  // Helper function to calculate progress percentage based on current phase and step
+  const calculateProgressPercentage = async (simulationId: string): Promise<number> => {
+    if (!user?.uid) return 0
+
+    try {
+      // Get detailed progress from database
+      const result = await getSimulationProgress(user.uid, simulationId)
+
+      if (result.success && result.data) {
+        const progressData = result.data
+
+        // If simulation is completed, return 100%
+        if (progressData.completed) return 100
+
+        // Calculate based on current step and total steps
+        if (progressData.currentStep && progressData.totalSteps) {
+          const percentage = Math.round((progressData.currentStep / progressData.totalSteps) * 100)
+          console.log(
+            `📊 ${simulationId} progress: ${progressData.currentStep}/${progressData.totalSteps} = ${percentage}%`,
+          )
+          return percentage
+        }
+
+        // Fallback: calculate based on phase for government simulation
+        if (simulationId === "government-simulation" && progressData.currentPhase) {
+          const phaseProgress = {
+            intro: 12.5,
+            framework: 25,
+            "pre-reflection": 37.5,
+            exploration: 50,
+            experience: 62.5,
+            envision: 75,
+            "post-reflection": 87.5,
+            complete: 100,
+          }
+          const percentage = phaseProgress[progressData.currentPhase as keyof typeof phaseProgress] || 0
+          console.log(`📊 ${simulationId} phase progress: ${progressData.currentPhase} = ${percentage}%`)
+          return percentage
+        }
+
+        // For other simulations, use existing logic
+        const phaseProgress = {
+          intro: 5,
+          "pre-reflection": 15,
+          exploration: 35,
+          experience: 75,
+          "post-reflection": 90,
+          complete: 100,
+        }
+
+        const currentPhase = progressData.currentPhase
+        const percentage = phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
+        console.log(`📊 ${simulationId} fallback progress: ${currentPhase} = ${percentage}%`)
+        return percentage
+      }
+    } catch (error) {
+      console.error(`❌ Error calculating progress for ${simulationId}:`, error)
+    }
+
+    return 0
+  }
 
   const allSimulations: Simulation[] = [
     {
@@ -79,7 +143,7 @@ function SimulationsPage() {
       category: "Marketing",
       isCompleted: userData?.completedSimulations?.includes("brand-marketing") || false,
       isUnlocked: true, // Always unlocked
-      progress: userData?.simulationProgress?.["brand-marketing"] || 0,
+      progress: simulationProgress["brand-marketing"] || 0,
     },
     {
       id: "finance-simulation",
@@ -91,7 +155,7 @@ function SimulationsPage() {
       category: "Finance",
       isCompleted: userData?.completedSimulations?.includes("finance-simulation") || false,
       isUnlocked: true, // Always unlocked
-      progress: userData?.simulationProgress?.["finance-simulation"] || 0,
+      progress: simulationProgress["finance-simulation"] || 0,
     },
     {
       id: "material-science",
@@ -103,19 +167,19 @@ function SimulationsPage() {
       category: "Science",
       isCompleted: userData?.completedSimulations?.includes("material-science") || false,
       isUnlocked: true, // Always unlocked
-      progress: userData?.simulationProgress?.["material-science"] || 0,
+      progress: simulationProgress["material-science"] || 0,
     },
     {
-      id: "healthcare-simulation",
-      title: "Healthcare Hero",
+      id: "government-simulation",
+      title: "Inside the Hill",
       description:
-        "Navigate healthcare management and patient care. Experience the challenges and rewards of working in healthcare systems.",
-      duration: "55-75 min",
+        "Navigate congressional processes and stakeholder engagement to pass the WATER Act. Experience real-world political strategy and legislative writing.",
+      duration: "2-3 hours",
       difficulty: "Advanced",
-      category: "Healthcare",
-      isCompleted: userData?.completedSimulations?.includes("healthcare-simulation") || false,
+      category: "Government",
+      isCompleted: userData?.completedSimulations?.includes("government-simulation") || false,
       isUnlocked: true, // Always unlocked
-      progress: userData?.simulationProgress?.["healthcare-simulation"] || 0,
+      progress: simulationProgress["government-simulation"] || 0,
     },
   ]
 
@@ -127,11 +191,26 @@ function SimulationsPage() {
 
     if (user) {
       // Set up real-time listener for user data
-      const unsubscribe = onSnapshot(doc(db, "users", user.uid), (doc) => {
+      const unsubscribe = onSnapshot(doc(db, "users", user.uid), async (doc) => {
         if (doc.exists()) {
           const data = doc.data() as UserData
           console.log("📊 Real-time user data update:", data)
           setUserData(data)
+
+          // Calculate progress for all simulations
+          const progressPromises = allSimulations.map(async (sim) => {
+            const progress = await calculateProgressPercentage(sim.id)
+            return { simulationId: sim.id, progress }
+          })
+
+          const progressResults = await Promise.all(progressPromises)
+          const progressMap: { [key: string]: number } = {}
+          progressResults.forEach((result) => {
+            progressMap[result.simulationId] = result.progress
+          })
+
+          setSimulationProgress(progressMap)
+          console.log("📊 Updated simulation progress:", progressMap)
         }
         setLoadingData(false)
       })
@@ -140,38 +219,12 @@ function SimulationsPage() {
     }
   }, [user, loading, router])
 
-  // Helper function to calculate progress percentage based on current phase
-  const calculateProgressPercentage = (simulationId: string): number => {
-    const progressData = userData?.simulationProgress?.[simulationId]
-    if (!progressData) return 0
-
-    // If it's already a number, return it
-    if (typeof progressData === "number") return progressData
-
-    // If it's an object with currentPhase, calculate based on phase
-    if (typeof progressData === "object" && progressData !== null) {
-      const phaseProgress = {
-        intro: 5,
-        "pre-reflection": 15,
-        exploration: 35,
-        experience: 75,
-        "post-reflection": 90,
-        complete: 100,
-      }
-
-      const currentPhase = (progressData as any).currentPhase
-      return phaseProgress[currentPhase as keyof typeof phaseProgress] || 0
-    }
-
-    return 0
-  }
-
   // Update simulations with real user data
   const simulations = allSimulations.map((sim) => ({
     ...sim,
     isCompleted: userData?.completedSimulations?.includes(sim.id) || false,
     isUnlocked: true, // All simulations are now unlocked
-    progress: calculateProgressPercentage(sim.id),
+    progress: simulationProgress[sim.id] || 0,
   }))
 
   const filteredSimulations = simulations.filter((simulation) => {

@@ -116,7 +116,7 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
       {/* Logo in top left */}
       <div className="absolute top-6 left-6 z-20">
         <Image
-          src="/images/logo.png"
+          src="/images/logo-white2.png"
           alt="Future Quest"
           width={200}
           height={80}

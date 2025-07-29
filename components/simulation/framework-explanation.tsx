@@ -7,7 +7,7 @@ import { BookOpen, ArrowRight, CheckCircle, Users, Target, Lightbulb, BarChart, 
 
 interface FrameworkExplanationProps {
   onComplete: () => void
-  simulationType: "brand-marketing" | "finance" | "material-science" | "healthcare"
+  simulationType: "brand-marketing" | "finance" | "material-science" | "healthcare" | "government"
 }
 
 export function FrameworkExplanation({ onComplete, simulationType }: FrameworkExplanationProps) {
@@ -133,6 +133,47 @@ export function FrameworkExplanation({ onComplete, simulationType }: FrameworkEx
               name: "Envision",
               icon: Rocket,
               description: "Plan your future path in material science based on your discoveries.",
+              activities: ["Goal setting", "Action planning", "Next steps identification"],
+            },
+          ],
+        }
+      case "government":
+        return {
+          title: "The 5 E's Framework for Career Exploration",
+          subtitle: "Your Journey Through Government & Public Policy Careers",
+          color: "from-blue-500 to-green-600",
+          bgColor: "from-blue-50 to-green-50",
+          borderColor: "border-blue-200",
+          icon: Target,
+          phases: [
+            {
+              name: "Explore",
+              icon: Lightbulb,
+              description: "Discover different government and public policy career paths and understand what each role involves.",
+              activities: ["Career role research", "Policy overview", "Skills assessment"],
+            },
+            {
+              name: "Experience",
+              icon: Users,
+              description: "Complete real-world tasks as a Congressional Staffer, Policy Analyst, and Legislative Assistant.",
+              activities: ["Bill drafting", "Stakeholder meetings", "Policy analysis"],
+            },
+            {
+              name: "Engage",
+              icon: Target,
+              description: "Connect with government professionals and learn from their career journeys.",
+              activities: ["Professional interviews", "Industry insights", "Career advice"],
+            },
+            {
+              name: "Evaluate",
+              icon: BarChart,
+              description: "Reflect on your experiences and assess your interest in government careers.",
+              activities: ["Self-reflection", "Skills evaluation", "Interest assessment"],
+            },
+            {
+              name: "Envision",
+              icon: Rocket,
+              description: "Plan your future path in government and public policy based on your discoveries.",
               activities: ["Goal setting", "Action planning", "Next steps identification"],
             },
           ],

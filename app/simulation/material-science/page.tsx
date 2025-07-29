@@ -18,7 +18,7 @@ import { MaterialScienceExplorationPhase } from "@/components/simulation/materia
 import { MaterialScienceExperiencePhase } from "@/components/simulation/material-science-experience-phase"
 import { MaterialScienceEngagePhase } from "@/components/simulation/material-science-engage-phase"
 import { MaterialScienceEnvisionPhase } from "@/components/simulation/material-science-envision-phase"
-import { PostReflectionForm } from "@/components/simulation/post-reflection-form"
+import { MaterialSciencePostReflectionForm } from "@/components/simulation/material-science-post-reflection-form"
 import { SimulationComplete } from "@/components/simulation/simulation-complete"
 
 type SimulationPhase =
@@ -100,7 +100,9 @@ export default function MaterialScienceSimulation() {
         currentStep: getPhaseStep(phase),
         totalSteps: 9,
         phaseProgress: updatedData,
-        startedAt: simulationData.startTime ? new Date(simulationData.startTime).toISOString() : new Date().toISOString(),
+        startedAt: simulationData.startTime
+          ? new Date(simulationData.startTime).toISOString()
+          : new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
         completed: phase === "complete",
       }
@@ -359,11 +361,10 @@ export default function MaterialScienceSimulation() {
 
         {/* Post-Reflection Phase */}
         {currentPhase === "post-reflection" && (
-          <PostReflectionForm
+          <MaterialSciencePostReflectionForm
             onComplete={(data) => handlePhaseComplete("post-reflection", { postReflectionData: data })}
             initialData={simulationData.postReflectionData}
             preReflectionData={simulationData.preReflectionData}
-            simulationType="material-science"
           />
         )}
 
