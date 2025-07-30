@@ -33,13 +33,13 @@ export function TaskReflection({ taskTitle, onComplete }: TaskReflectionProps) {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      <Card className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-2xl">
+      <Card className="bg-gradient-to-r from-[#2d407e] via-[#765889] to-[#a65f1c] text-white border-0 shadow-2xl">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl">
             <Star className="mr-3 h-6 w-6" />
             Task Reflection
           </CardTitle>
-          <p className="text-blue-100">Let's reflect on your experience with: {taskTitle}</p>
+          <p className="text-[#f0ad70]">Let's reflect on your experience with: {taskTitle}</p>
         </CardHeader>
       </Card>
 
@@ -105,7 +105,7 @@ export function TaskReflection({ taskTitle, onComplete }: TaskReflectionProps) {
               onClick={handleComplete}
               disabled={!canComplete()}
               size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              className="bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#1e2b4f] hover:to-[#5a4a6b]"
             >
               Complete Reflection
             </Button>

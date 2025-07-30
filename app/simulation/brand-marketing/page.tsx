@@ -395,7 +395,7 @@ export default function BrandMarketingSimulation() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-pink-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#2d407e] mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading your simulation...</p>
           <p className="text-gray-500 text-sm mt-2">Retrieving your progress from database...</p>
         </div>
@@ -416,7 +416,7 @@ export default function BrandMarketingSimulation() {
               </Button>
               <div className="h-6 w-px bg-gray-300"></div>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-green-600 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2d407e] to-[#765889] flex items-center justify-center">
                   <Megaphone className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -431,13 +431,13 @@ export default function BrandMarketingSimulation() {
                 <Clock className="w-4 h-4" />
                 4-6 hours
               </div>
-              <Badge className="bg-gradient-to-r from-blue-500 to-green-600 text-white">Branding & Marketing</Badge>
+              <Badge className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">Branding & Marketing</Badge>
 
               {/* Save Status */}
               <div className="flex items-center gap-2">
                 {isSaving ? (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                  <div className="flex items-center gap-2 text-[#2d407e]">
+                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#2d407e]"></div>
                     <span className="text-xs">Saving...</span>
                   </div>
                 ) : saveError ? (
@@ -486,7 +486,7 @@ export default function BrandMarketingSimulation() {
           {currentPhase === "intro" && (
             <Card className="border-2 border-blue-200 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-[#2d407e] to-[#765889] rounded-full flex items-center justify-center shadow-lg">
                   <Megaphone className="w-12 h-12 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome to "Make Your Star Shine"</h2>
@@ -536,7 +536,7 @@ export default function BrandMarketingSimulation() {
                 <Button
                   onClick={() => handlePhaseComplete({}, "pre-reflection")}
                   size="lg"
-                  className="bg-gradient-to-r from-blue-500 to-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-green-700 transition-all shadow-lg"
+                  className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#0e3968] hover:to-[#231349] transition-all shadow-lg"
                 >
                   🚀 Start Your Journey
                 </Button>

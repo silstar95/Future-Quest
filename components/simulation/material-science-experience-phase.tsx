@@ -395,7 +395,7 @@ export function MaterialScienceExperiencePhase({ onComplete, initialData }: Mate
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative bg-slate-50">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative">
       {/* Header */}
       <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 max-w-6xl mx-auto mb-6">
         <CardHeader>

@@ -63,16 +63,32 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-pink-500 to-red-500 text-white">
-        <CardTitle className="flex items-center text-2xl">
-          <Target className="mr-3 h-6 w-6" />
-          Task 3: #GoingViral
-        </CardTitle>
-        <p className="text-pink-100">Role: Social Media Strategist | Location: Creative Studio</p>
-      </CardHeader>
+    <div className="relative min-h-screen">
+      {/* Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/task3.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      </div>
 
-      <CardContent className="p-8">
+      {/* Content Container */}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-pink-500 to-red-500 text-white">
+            <CardTitle className="flex items-center text-2xl">
+              <Target className="mr-3 h-6 w-6" />
+              Task 3: #GoingViral
+            </CardTitle>
+            <p className="text-pink-100">Role: Social Media Strategist | Location: Creative Studio</p>
+          </CardHeader>
+
+          <CardContent className="p-8">
         <div className="bg-pink-50 border border-pink-200 p-6 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
             <Instagram className="mr-2 h-5 w-5" />
@@ -249,6 +265,8 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
           </Button>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </div>
+    </div>
   )
 }

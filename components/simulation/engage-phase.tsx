@@ -86,7 +86,7 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-2xl flex items-center">
-              <Users className="mr-3 h-6 w-6 text-blue-500" />
+              <Users className="mr-3 h-6 w-6 text-[#2d407e]" />
               Engage
             </CardTitle>
             <span className="text-sm text-gray-500">
@@ -98,20 +98,20 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
 
         <CardContent className="p-8">
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-lg mb-6">
-              <h3 className="text-lg font-semibold mb-2">🎉 Congratulations!</h3>
-              <p className="text-gray-700">
+            <div className="bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 p-6 rounded-lg mb-6 border border-[#db9b6c]/30">
+              <h3 className="text-lg font-semibold mb-2 text-[#2d407e]">🎉 Congratulations!</h3>
+              <p className="text-[#4e3113]">
                 You've finished experiencing a range of projects encountered by branding and marketing roles. Now, it's
                 time to learn more through engaging with real people who are in these roles.
               </p>
             </div>
 
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2d407e] to-[#765889] flex items-center justify-center mr-4">
                 <IconComponent className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-blue-600 mb-1">{currentQ.title}</h3>
+                <h3 className="text-lg font-semibold text-[#2d407e] mb-1">{currentQ.title}</h3>
                 <p className="text-xl text-gray-800 leading-relaxed">{currentQ.question}</p>
               </div>
             </div>
@@ -127,9 +127,9 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
             </div>
 
             {currentQuestion === 0 && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">💡 Tips for Finding LinkedIn Profiles:</h4>
-                <ul className="text-blue-700 text-sm space-y-1">
+              <div className="mt-4 p-4 bg-[#f0ad70]/20 border border-[#db9b6c]/30 rounded-lg">
+                <h4 className="font-semibold text-[#2d407e] mb-2">💡 Tips for Finding LinkedIn Profiles:</h4>
+                <ul className="text-[#4e3113] text-sm space-y-1">
                   <li>• Search for job titles like "Brand Manager," "Marketing Director," "Social Media Strategist"</li>
                   <li>• Look at companies you admire and browse their employee profiles</li>
                   <li>• Check if your school has alumni working in these roles</li>
@@ -139,9 +139,9 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
             )}
 
             {currentQuestion === 1 && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2">💡 Tips for Great Questions:</h4>
-                <ul className="text-green-700 text-sm space-y-1">
+              <div className="mt-4 p-4 bg-[#f0ad70]/20 border border-[#db9b6c]/30 rounded-lg">
+                <h4 className="font-semibold text-[#2d407e] mb-2">💡 Tips for Great Questions:</h4>
+                <ul className="text-[#4e3113] text-sm space-y-1">
                   <li>• Focus on day-to-day responsibilities and tasks</li>
                   <li>• Ask about both challenges and rewards of the role</li>
                   <li>• Inquire about required skills and qualifications</li>
@@ -166,7 +166,7 @@ export function EngagePhase({ onComplete, initialData }: EngagePhaseProps) {
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex items-center bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              className="flex items-center bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
             >
               {currentQuestion === questions.length - 1 ? "Continue to Evaluation" : "Next"}
               <ChevronRight className="ml-2 h-4 w-4" />

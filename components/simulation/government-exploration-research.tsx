@@ -19,18 +19,18 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
-interface ExplorationPhaseProps {
+interface GovernmentExplorationResearchProps {
   onComplete: (data: any) => void
   initialData?: any
 }
 
-export function ExplorationPhase({ onComplete, initialData }: ExplorationPhaseProps) {
+export default function GovernmentExplorationResearch({ onComplete, initialData }: GovernmentExplorationResearchProps) {
   const [timeSpent, setTimeSpent] = useState(initialData?.timeSpent || 0)
   const [isResearching, setIsResearching] = useState(initialData?.isResearching || false)
   const [answers, setAnswers] = useState({
     summary: initialData?.summary || "",
     roles: initialData?.roles || "",
-    companies: initialData?.companies || "",
+    organizations: initialData?.organizations || "",
   })
   const [showWarning, setShowWarning] = useState(false)
 
@@ -82,20 +82,21 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
     }
   }
 
-  const canComplete = answers.summary.trim() !== "" && answers.roles.trim() !== "" && answers.companies.trim() !== ""
+  const canComplete =
+    answers.summary.trim() !== "" && answers.roles.trim() !== "" && answers.organizations.trim() !== ""
 
   const researchProgress = Math.min((timeSpent / recommendedTime) * 100, 100)
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Phase Header */}
-      <Card className="bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 border-2 border-[#db9b6c]/30">
-        <CardHeader>
+      <Card className="border-2 border-gray-200 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
           <CardTitle className="flex items-center text-2xl">
-            <Search className="mr-3 h-6 w-6 text-[#2d407e]" />
-            Explore: Research Branding & Marketing Careers
+            <Search className="mr-3 h-6 w-6" />
+            Explore: Research Government & Politics Careers
           </CardTitle>
-          <p className="text-[#4e3113] leading-relaxed">
+          <p className="text-[#f0ad70] leading-relaxed">
             To begin, we'll start with the first E of Career Exploration - <strong>Explore</strong>. Exploring means
             researching to learn more about a specific industry.
           </p>
@@ -103,7 +104,7 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
       </Card>
 
       {/* Research Timer */}
-      <Card className="border-2 border-[#db9b6c]/30">
+      <Card className="border-2 border-gray-200 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
@@ -126,7 +127,7 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
           {!isResearching ? (
             <div className="text-center space-y-4">
               <p className="text-gray-600">
-                Begin by doing an internet search of Branding and Marketing careers. See what you can find about the
+                Begin by doing an internet search of Government and Politics careers. See what you can find about the
                 industry and individual roles.
               </p>
               <Button onClick={handleStartResearch} className="bg-[#2d407e] hover:bg-[#0e3968]">
@@ -136,14 +137,14 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="bg-[#f0ad70]/20 p-4 rounded-lg border border-[#db9b6c]/30">
+              <div className="bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 p-4 rounded-lg border border-[#db9b6c]/30">
                 <h4 className="font-semibold text-[#2d407e] mb-2 flex items-center">
                   <Lightbulb className="mr-2 h-4 w-4" />
                   Research Tip
                 </h4>
                 <p className="text-[#4e3113] text-sm">
-                  Try searching for job boards, company career pages, and industry websites to find current openings and
-                  detailed role descriptions.
+                  Try searching for government job boards, political organizations, and public administration programs
+                  to find current openings and detailed role descriptions.
                 </p>
               </div>
 
@@ -154,11 +155,11 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                   </CardHeader>
                   <CardContent>
                     <ul className="text-sm space-y-1 text-gray-600">
-                      <li>• "Brand manager jobs"</li>
-                      <li>• "Marketing coordinator roles"</li>
-                      <li>• "Digital marketing careers"</li>
-                      <li>• "Creative director positions"</li>
-                      <li>• "Social media manager"</li>
+                      <li>• "Government jobs"</li>
+                      <li>• "Political careers"</li>
+                      <li>• "Public administration roles"</li>
+                      <li>• "Congressional staff positions"</li>
+                      <li>• "Policy analyst jobs"</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -169,11 +170,11 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                   </CardHeader>
                   <CardContent>
                     <ul className="text-sm space-y-1 text-gray-600">
-                      <li>• LinkedIn Jobs</li>
-                      <li>• Indeed.com</li>
-                      <li>• Company career pages</li>
+                      <li>• USAJobs.gov</li>
+                      <li>• Congress.gov</li>
+                      <li>• Government career pages</li>
                       <li>• Bureau of Labor Statistics</li>
-                      <li>• Marketing industry blogs</li>
+                      <li>• Political organization websites</li>
                     </ul>
                   </CardContent>
                 </Card>
@@ -186,7 +187,7 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
       {/* Research Questions */}
       {isResearching && (
         <div className="space-y-6">
-          <Card className="border-2 border-gray-200">
+          <Card className="border-2 border-gray-200 shadow-lg">
             <CardHeader>
               <CardTitle>Research Questions</CardTitle>
               <p className="text-gray-600">
@@ -197,12 +198,12 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
             <CardContent className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  1. Give a 1-2 sentence summary of what Branding & Marketing is.
+                  1. Give a 1-2 sentence summary of what Government & Politics careers involve.
                 </label>
                 <Textarea
                   value={answers.summary}
                   onChange={(e) => handleAnswerChange("summary", e.target.value)}
-                  placeholder="Describe what branding and marketing involves..."
+                  placeholder="Describe what government and politics careers involve..."
                   className="min-h-20"
                   rows={3}
                 />
@@ -210,7 +211,7 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  2. List 3-4 roles that exist within this industry.
+                  2. List 3-4 roles that exist within the government and politics industry.
                 </label>
                 <Textarea
                   value={answers.roles}
@@ -223,12 +224,12 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  3. Name a few companies that are actively hiring for Branding & Marketing roles.
+                  3. Name a few organizations or agencies that actively hire for Government & Politics roles.
                 </label>
                 <Textarea
-                  value={answers.companies}
-                  onChange={(e) => handleAnswerChange("companies", e.target.value)}
-                  placeholder="List companies and what types of marketing roles they're hiring for..."
+                  value={answers.organizations}
+                  onChange={(e) => handleAnswerChange("organizations", e.target.value)}
+                  placeholder="List government agencies, political organizations, or related employers..."
                   className="min-h-20"
                   rows={3}
                 />
@@ -237,7 +238,7 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
           </Card>
 
           {/* Complete Button */}
-          <Card className="border-2 border-[#713c09]/30 bg-[#f0ad70]/10">
+          <Card className="border-2 border-[#f0ad70]/30 bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -252,7 +253,7 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                   <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
                     <AlertDialogTrigger asChild>
                       <Button
-                        className="bg-[#713c09] hover:bg-[#4e3113] text-white"
+                        className="bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349] text-white"
                         disabled={!canComplete}
                         onClick={handleContinueWithWarning}
                       >

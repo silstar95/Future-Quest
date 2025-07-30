@@ -20,13 +20,11 @@ import {
   XCircle,
   AlertTriangle,
   Trophy,
-  Home,
   RotateCcw,
   Send,
   Eye,
   ExternalLink,
   ArrowRight,
-  BookOpen,
 } from "lucide-react"
 
 interface GovernmentExperiencePhaseProps {
@@ -101,7 +99,7 @@ export default function GovernmentExperiencePhase({ onComplete }: GovernmentExpe
         role: "Gatekeeper of Congressional Priorities",
         task: "Internal Memo",
         icon: UserTie,
-        color: "text-blue-600",
+        color: "text-[#2d407e]",
         description:
           "The Chief of Staff manages the Congressmember's schedule and priorities. They're strategic and practical, focused on what will advance the office's agenda.",
         assignment:
@@ -187,7 +185,7 @@ NEXT STEPS:
         role: "Bipartisan Bridge Builder",
         task: "Email Pitch",
         icon: Scale,
-        color: "text-purple-600",
+        color: "text-[#765889]",
         description:
           "A practical member of the opposition party who knows that the $625 billion needed for water pipes requires federal help, but wants responsible spending and state involvement.",
         assignment:
@@ -236,7 +234,7 @@ Respectfully,
         role: "Legislative Process Guardian",
         task: "Verbal Pitch",
         icon: Gavel,
-        color: "text-orange-600",
+        color: "text-[#f0ad70]",
         description:
           "An experienced member of Congress who leads the Energy and Commerce Committee that handles water laws. They know the EPA's new rule makes this urgent, but they need to be sure they have enough support.",
         assignment:
@@ -283,7 +281,7 @@ REQUEST: [Specific action with realistic timeline]`,
         role: "Final Decision Maker",
         task: "Final Persuasion Letter",
         icon: Crown,
-        color: "text-red-600",
+        color: "text-[#db9b6c]",
         description:
           "The most powerful person who decides what bills get voted on in the House. They know that 9.2 million lead pipes are a national emergency, but there's limited time and many bills competing for attention.",
         assignment:
@@ -344,7 +342,7 @@ Legislative Assistant`,
     return stakeholderData[stakeholderName] || {}
   }
 
-  // Analysis Logic
+  // Analysis Logic (keeping the same logic but updating colors)
   const analyzeWritingResponse = (stakeholderName: string, writingResponse: string, attemptNumber: number) => {
     const stakeholderData = getStakeholderData(stakeholderName)
     const difficulty = stakeholderData.difficulty
@@ -441,7 +439,7 @@ If you can address these points, I'll give this bill serious consideration."
           return {
             success: false,
             feedback:
-              "**No response received.**\n\nYour email was still incomplete or unprofessional. Opposition members won't engage with correspondence that doesn't meet basic standards. This stakeholder attempt has failed.",
+              "**No response received.**\n\nYour email was still incomplete or unprofessional. Opposition members won't engage with correspondence that doesn't meet basic standards. This Opposition members won't engage with correspondence that doesn't meet basic standards. This stakeholder attempt has failed.",
           }
         } else {
           const hasSpecificPolicy = ["state revolving fund", "matching funds", "state control", "federalism"].some(
@@ -700,10 +698,10 @@ If you can address these points, I'll give this bill serious consideration."
   // Welcome Phase
   if (gamePhase === "welcome") {
     return (
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Building2 className="h-12 w-12 text-blue-600" />
+            <Building2 className="h-12 w-12 text-[#2d407e]" />
             <div>
               <h1 className="text-4xl font-bold text-gray-900">Inside the Hill</h1>
               <p className="text-xl text-gray-600">A Congressional Simulation Game</p>
@@ -712,21 +710,21 @@ If you can address these points, I'll give this bill serious consideration."
         </div>
 
         {/* Mission Brief */}
-        <Card className="mb-6">
-          <CardHeader>
+        <Card className="border-2 border-gray-200 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <AlertTriangle className="h-6 w-6" />
               Your Mission
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <p className="text-lg mb-4">
               You are a <strong>Legislative Assistant</strong> in a U.S. congressional office. Your goal is to build
               support and successfully move a clean water bill through Congress.
             </p>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
+                <h4 className="font-semibold text-[#2d407e] mb-2 flex items-center gap-2">
                   <Users className="h-5 w-5" />
                   The Challenge
                 </h4>
@@ -750,14 +748,14 @@ If you can address these points, I'll give this bill serious consideration."
         </Card>
 
         {/* Water Crisis Stats */}
-        <Card className="mb-6 border-red-200 bg-red-50">
+        <Card className="border-2 border-red-200 bg-red-50 shadow-lg">
           <CardHeader>
             <CardTitle className="text-red-800 flex items-center gap-2">
               <AlertTriangle className="h-6 w-6" />
               The Clean Water Crisis
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
               <div>
                 <div className="text-3xl font-bold text-red-600">9.2M</div>
@@ -768,11 +766,11 @@ If you can address these points, I'll give this bill serious consideration."
                 <p className="text-sm text-gray-600">Needed for drinking water infrastructure over 20 years</p>
               </div>
               <div>
-                <div className="text-3xl font-bold text-blue-600">49%</div>
+                <div className="text-3xl font-bold text-[#2d407e]">49%</div>
                 <p className="text-sm text-gray-600">Of tribal homes lack reliable water access</p>
               </div>
               <div>
-                <div className="text-3xl font-bold text-purple-600">70%</div>
+                <div className="text-3xl font-bold text-[#765889]">70%</div>
                 <p className="text-sm text-gray-600">Of Chicago children under 6 exposed to lead in tap water</p>
               </div>
             </div>
@@ -784,14 +782,14 @@ If you can address these points, I'll give this bill serious consideration."
         </Card>
 
         {/* Stakeholders Preview */}
-        <Card className="mb-8">
+        <Card className="border-2 border-gray-200 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-6 w-6 text-green-600" />
               Key Stakeholders You'll Meet
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {STAKEHOLDERS.map((stakeholder, index) => {
                 const data = getStakeholderData(stakeholder)
@@ -813,7 +811,11 @@ If you can address these points, I'll give this bill serious consideration."
         </Card>
 
         <div className="text-center">
-          <Button onClick={() => setGamePhase("stakeholder")} size="lg" className="px-8">
+          <Button
+            onClick={() => setGamePhase("stakeholder")}
+            size="lg"
+            className="px-8 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+          >
             <Send className="mr-2 h-5 w-5" />
             Start Your Mission
           </Button>
@@ -830,7 +832,7 @@ If you can address these points, I'll give this bill serious consideration."
     const success = yesVotes >= 3
 
     return (
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Results Header */}
         <div className="text-center mb-8">
           {success ? (
@@ -849,7 +851,7 @@ If you can address these points, I'll give this bill serious consideration."
         </div>
 
         {/* Score Card */}
-        <Card className={`mb-8 ${success ? "border-green-500" : "border-red-500"}`}>
+        <Card className={`border-2 shadow-lg ${success ? "border-green-500" : "border-red-500"}`}>
           <CardHeader className={`${success ? "bg-green-500" : "bg-red-500"} text-white text-center`}>
             <CardTitle>Final Score</CardTitle>
           </CardHeader>
@@ -876,14 +878,14 @@ If you can address these points, I'll give this bill serious consideration."
         </Card>
 
         {/* Detailed Results */}
-        <Card className="mb-8">
+        <Card className="border-2 border-gray-200 shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-6 w-6" />
               Stakeholder Results
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {STAKEHOLDERS.map((stakeholder, index) => {
                 const data = getStakeholderData(stakeholder)
@@ -940,140 +942,19 @@ If you can address these points, I'll give this bill serious consideration."
           </CardContent>
         </Card>
 
-        {/* What Happens Next */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ArrowRight className="h-6 w-6" />
-              What Happens Next?
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {success ? (
-              <Alert className="border-green-500 bg-green-50">
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <h4 className="font-semibold text-green-800 mb-2">Legislative Success Path</h4>
-                  <ul className="space-y-1 text-green-700">
-                    <li>
-                      <strong>Committee Markup:</strong> The Committee Chair schedules hearings and markup sessions
-                    </li>
-                    <li>
-                      <strong>Floor Consideration:</strong> The Majority Leader schedules floor time for debate and
-                      voting
-                    </li>
-                    <li>
-                      <strong>House Passage:</strong> If passed, the bill moves to the Senate
-                    </li>
-                    <li>
-                      <strong>Senate Process:</strong> Similar stakeholder engagement needed in the Senate
-                    </li>
-                    <li>
-                      <strong>Presidential Signature:</strong> Final step to become law
-                    </li>
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <Alert className="border-yellow-500 bg-yellow-50">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <h4 className="font-semibold text-yellow-800 mb-2">Back to the Drawing Board</h4>
-                  <ul className="space-y-1 text-yellow-700">
-                    <li>
-                      <strong>Reassess Strategy:</strong> Figure out what went wrong with convincing people
-                    </li>
-                    <li>
-                      <strong>Build Coalition:</strong> Get more community groups and organizations to support you
-                    </li>
-                    <li>
-                      <strong>Compromise:</strong> Change parts of the bill to address concerns
-                    </li>
-                    <li>
-                      <strong>Timing:</strong> Wait for a better time politically
-                    </li>
-                    <li>
-                      <strong>Try Again:</strong> Introduce the bill again next year
-                    </li>
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Educational Summary */}
-        <Card className="mb-8 border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="text-blue-800 flex items-center gap-2">
-              <BookOpen className="h-6 w-6" />
-              Key Lessons Learned
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Stakeholder Management
-                </h4>
-                <ul className="text-sm text-blue-600 space-y-1">
-                  <li>• Different people care about different things</li>
-                  <li>• Understanding what motivates people helps you convince them</li>
-                  <li>• Building support groups requires smart planning</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
-                  <Scale className="h-5 w-5" />
-                  Political Strategy
-                </h4>
-                <ul className="text-sm text-blue-600 space-y-1">
-                  <li>• Timing and sequencing matter in politics</li>
-                  <li>• Bipartisan support strengthens legislation</li>
-                  <li>• Leadership buy-in is often crucial</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
-                  <Gavel className="h-5 w-5" />
-                  Legislative Process
-                </h4>
-                <ul className="text-sm text-blue-600 space-y-1">
-                  <li>• Bills must pass through many checkpoints</li>
-                  <li>• Committee chairs control when bills get hearings</li>
-                  <li>• Voting time is limited and hard to get</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
-                  Water Crisis Reality
-                </h4>
-                <ul className="text-sm text-blue-600 space-y-1">
-                  <li>• 9.2 million lead service lines need replacement</li>
-                  <li>• $625 billion needed for infrastructure over 20 years</li>
-                  <li>• 49% of tribal homes lack reliable water access</li>
-                  <li>• 70% of Chicago children exposed to lead in tap water</li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Action Buttons */}
         <div className="flex justify-center gap-4">
-          <Button onClick={resetGame} size="lg">
+          <Button onClick={resetGame} size="lg" variant="outline">
             <RotateCcw className="mr-2 h-5 w-5" />
             Play Again
           </Button>
           <Button
-            variant="outline"
             onClick={() => onComplete({ success, yesVotes, totalStakeholders, gameState })}
             size="lg"
+            className="bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
           >
-            <Home className="mr-2 h-5 w-5" />
-            Continue to Reflection
+            <ArrowRight className="mr-2 h-5 w-5" />
+            Continue to Next Phase
           </Button>
         </div>
       </div>
@@ -1090,9 +971,9 @@ If you can address these points, I'll give this bill serious consideration."
     gameState.stakeholderFeedback[stakeholderName][gameState.stakeholderFeedback[stakeholderName].length - 1]
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Progress Bar */}
-      <Card className="mb-6">
+      <Card className="border-2 border-gray-200 shadow-lg">
         <CardContent className="p-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-medium">Progress: Stakeholder {currentStakeholder + 1} of 5</h3>
@@ -1106,27 +987,27 @@ If you can address these points, I'll give this bill serious consideration."
       </Card>
 
       {/* Stakeholder Card */}
-      <Card>
-        <CardHeader>
+      <Card className="border-2 border-gray-200 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="flex items-center gap-2 mb-2">
-                <Icon className={`h-6 w-6 ${stakeholderData.color}`} />
+                <Icon className="h-6 w-6" />
                 {stakeholderData.name}
               </CardTitle>
-              <p className="text-gray-600 mb-1">{stakeholderData.role}</p>
-              <Badge variant="secondary">
+              <p className="text-[#f0ad70] mb-1">{stakeholderData.role}</p>
+              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
                 <FileText className="h-4 w-4 mr-1" />
                 Task: {stakeholderData.task}
               </Badge>
             </div>
             <div className="text-right">
               {maxAttempts > 1 ? (
-                <Badge variant="outline">
+                <Badge variant="outline" className="bg-white/20 text-white border-white/30">
                   Attempt {currentAttempts + 1} / {maxAttempts}
                 </Badge>
               ) : (
-                <Badge variant="destructive">
+                <Badge variant="destructive" className="bg-red-500/80 text-white border-white/30">
                   <AlertTriangle className="h-4 w-4 mr-1" />
                   One Chance Only
                 </Badge>
@@ -1134,7 +1015,7 @@ If you can address these points, I'll give this bill serious consideration."
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-6">
           {/* Description */}
           <Alert>
             <AlertDescription>{stakeholderData.description}</AlertDescription>
@@ -1156,9 +1037,9 @@ If you can address these points, I'll give this bill serious consideration."
           )}
 
           {/* Assignment */}
-          <Card className="border-blue-200">
+          <Card className="border-[#f0ad70]/30 bg-gradient-to-r from-[#f0ad70]/10 to-[#db9b6c]/10">
             <CardHeader>
-              <CardTitle className="text-blue-800 flex items-center gap-2">
+              <CardTitle className="text-[#2d407e] flex items-center gap-2">
                 <FileText className="h-5 w-5" />
                 Your Assignment
               </CardTitle>
@@ -1181,13 +1062,13 @@ If you can address these points, I'll give this bill serious consideration."
                 </ul>
               </div>
 
-              <Alert className="border-blue-200 bg-blue-50">
+              <Alert className="border-[#2d407e]/30 bg-[#2d407e]/10">
                 <AlertDescription>
                   <h4 className="font-semibold mb-1 flex items-center gap-2">
                     <Eye className="h-4 w-4" />
                     Example Opening:
                   </h4>
-                  <em className="text-blue-700">{stakeholderData.exampleOpening}</em>
+                  <em className="text-[#2d407e]">{stakeholderData.exampleOpening}</em>
                 </AlertDescription>
               </Alert>
 
@@ -1245,7 +1126,12 @@ If you can address these points, I'll give this bill serious consideration."
               )}
 
               <div className="text-center">
-                <Button onClick={handleSubmitWriting} disabled={!currentResponse.trim()} size="lg">
+                <Button
+                  onClick={handleSubmitWriting}
+                  disabled={!currentResponse.trim()}
+                  size="lg"
+                  className="bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+                >
                   <Send className="mr-2 h-5 w-5" />
                   Submit {stakeholderData.task}
                 </Button>

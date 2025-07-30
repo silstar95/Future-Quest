@@ -110,7 +110,7 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Progress Header */}
-      <Card className="bg-gradient-to-r from-blue-500 to-green-600 text-white border-0 shadow-2xl">
+      <Card className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white border-0 shadow-2xl">
         <CardHeader>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -118,7 +118,7 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
             </div>
             <div>
               <CardTitle className="text-2xl">Pre-Reflection: Understanding Your Starting Point</CardTitle>
-              <p className="text-blue-100 mt-1">
+              <p className="text-[#f0ad70] mt-1">
                 Let's understand your current knowledge about branding and marketing careers
               </p>
             </div>
@@ -185,7 +185,7 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
               <Button
                 onClick={handleNext}
                 disabled={!isAnswered}
-                className="px-6 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+                className="px-6 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
               >
                 {currentQuestion === questions.length - 1 ? "Complete Pre-Reflection" : "Next Question"}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -196,9 +196,9 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
       </Card>
 
       {/* Help Text */}
-      <Card className="bg-gradient-to-br from-blue-50 to-green-50 border-2 border-blue-200">
+      <Card className="bg-gradient-to-br from-[#f0ad70]/20 to-[#db9b6c]/20 border-2 border-[#db9b6c]/30">
         <CardContent className="p-4">
-          <p className="text-sm text-blue-800">
+          <p className="text-sm text-[#4e3113]">
             <strong>💡 Tip:</strong> Be honest in your responses! This helps us understand your starting point and
             personalize your learning experience. There are no right or wrong answers.
           </p>

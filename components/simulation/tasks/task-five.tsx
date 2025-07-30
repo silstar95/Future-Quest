@@ -47,16 +47,32 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white">
-        <CardTitle className="flex items-center text-2xl">
-          <Shield className="mr-3 h-6 w-6" />
-          Task #5: Damage Control
-        </CardTitle>
-        <p className="text-red-100">Role: PR Manager | Location: Media Studio</p>
-      </CardHeader>
+    <div className="relative min-h-screen">
+      {/* Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/task5.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      </div>
 
-      <CardContent className="p-8">
+      {/* Content Container */}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white">
+            <CardTitle className="flex items-center text-2xl">
+              <Shield className="mr-3 h-6 w-6" />
+              Task #5: Damage Control
+            </CardTitle>
+            <p className="text-red-100">Role: PR Manager | Location: Media Studio</p>
+          </CardHeader>
+
+          <CardContent className="p-8">
         <div className="bg-red-50 border border-red-200 p-6 rounded-lg mb-8">
           <div className="flex items-center mb-3">
             <AlertTriangle className="h-6 w-6 text-red-600 mr-2" />
@@ -98,7 +114,7 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
               value={formData.responseStrategy}
               onChange={(e) => setFormData((prev) => ({ ...prev, responseStrategy: e.target.value }))}
               placeholder="Outline different approaches and decide on the best strategy for addressing the situation..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -119,7 +135,7 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
               value={formData.impactAssessment}
               onChange={(e) => setFormData((prev) => ({ ...prev, impactAssessment: e.target.value }))}
               placeholder="Analyze who was affected and how to address the broader impact..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -139,7 +155,7 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
               value={formData.futureCommitment}
               onChange={(e) => setFormData((prev) => ({ ...prev, futureCommitment: e.target.value }))}
               placeholder="Describe specific steps and commitments for future behavior change..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -162,7 +178,7 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
               value={formData.voiceKeywords}
               onChange={(e) => setFormData((prev) => ({ ...prev, voiceKeywords: e.target.value }))}
               placeholder="List key words and phrases that match your celebrity's authentic speaking style..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
 
@@ -186,7 +202,7 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
               value={formData.pressRelease}
               onChange={(e) => setFormData((prev) => ({ ...prev, pressRelease: e.target.value }))}
               placeholder="Write a heartfelt 2-paragraph press release incorporating all the elements above..."
-              className="ml-11 min-h-[150px]"
+              className="ml-4 min-h-[150px]"
             />
           </div>
         </div>
@@ -213,6 +229,8 @@ export function TaskFive({ onComplete, initialData, celebrityData }: TaskFivePro
           </Button>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </div>
+    </div>
   )
 }

@@ -9,36 +9,36 @@ import {
   Building2,
   CheckCircle,
   ArrowRight,
-  BookOpen,
   Users,
-  Lightbulb,
   FileText,
   Home,
   ArrowLeft,
   Clock,
   Save,
+  Search,
+  Target,
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/providers/auth-provider"
 import { saveSimulationProgress, getSimulationProgress, completeSimulation } from "@/lib/firebase-service"
 import { useToast } from "@/hooks/use-toast"
 
-// Import all phase components
-import GovernmentPreReflectionForm from "@/components/simulation/government-pre-reflection-form"
-import GovernmentExplorationPhase from "@/components/simulation/government-exploration-phase"
+// Import phase components
+import { PreReflectionForm } from "@/components/simulation/pre-reflection-form"
 import GovernmentExperiencePhase from "@/components/simulation/government-experience-phase"
-import GovernmentEnvisionPhase from "@/components/simulation/government-envision-phase"
+import { EngagePhase } from "@/components/simulation/engage-phase"
 import GovernmentPostReflectionForm from "@/components/simulation/government-post-reflection-form"
-import { FrameworkExplanation } from "@/components/simulation/framework-explanation"
+import { EnvisionPhase } from "@/components/simulation/envision-phase"
+import GovernmentExplorationResearch from "@/components/simulation/government-exploration-research"
 
 type SimulationPhase =
   | "intro"
-  | "framework"
   | "pre-reflection"
   | "exploration"
   | "experience"
+  | "engage"
+  | "evaluate"
   | "envision"
-  | "post-reflection"
   | "complete"
 
 interface SimulationData {
@@ -47,7 +47,7 @@ interface SimulationData {
   explorationAnswers?: any
   experienceAnswers?: any
   engageAnswers?: any
-  postReflectionAnswers?: any
+  evaluateAnswers?: any
   envisionAnswers?: any
   startedAt?: string
   completedAt?: string
@@ -69,13 +69,13 @@ export default function GovernmentSimulationPage() {
   })
 
   const phases = [
-    { id: "intro", name: "Introduction", icon: Building2, color: "text-blue-600" },
-    { id: "framework", name: "5Es Framework", icon: BookOpen, color: "text-purple-600" },
-    { id: "pre-reflection", name: "Engage", icon: Users, color: "text-green-600" },
-    { id: "exploration", name: "Explore", icon: BookOpen, color: "text-blue-600" },
-    { id: "experience", name: "Experience", icon: Building2, color: "text-red-600" },
-    { id: "envision", name: "Envision", icon: Lightbulb, color: "text-yellow-600" },
-    { id: "post-reflection", name: "Evaluate", icon: FileText, color: "text-purple-600" },
+    { id: "intro", name: "Introduction", icon: Building2, color: "text-[#2d407e]" },
+    { id: "pre-reflection", name: "Pre-reflection", icon: Users, color: "text-[#765889]" },
+    { id: "exploration", name: "Explore", icon: Search, color: "text-[#f0ad70]" },
+    { id: "experience", name: "Experience", icon: Building2, color: "text-[#2d407e]" },
+    { id: "engage", name: "Engage", icon: Users, color: "text-[#765889]" },
+    { id: "evaluate", name: "Evaluate", icon: FileText, color: "text-[#f0ad70]" },
+    { id: "envision", name: "Envision", icon: Target, color: "text-[#db9b6c]" },
     { id: "complete", name: "Complete", icon: CheckCircle, color: "text-green-600" },
   ]
 
@@ -86,12 +86,12 @@ export default function GovernmentSimulationPage() {
   const getPhaseStep = (phase: SimulationPhase): number => {
     const phaseSteps = {
       intro: 1,
-      framework: 2,
-      "pre-reflection": 3,
-      exploration: 4,
-      experience: 5,
-      envision: 6,
-      "post-reflection": 7,
+      "pre-reflection": 2,
+      exploration: 3,
+      experience: 4,
+      engage: 5,
+      evaluate: 6,
+      envision: 7,
       complete: 8,
     }
     return phaseSteps[phase] || 1
@@ -100,12 +100,12 @@ export default function GovernmentSimulationPage() {
   const getPhaseProgress = () => {
     const phaseProgress = {
       intro: 5,
-      framework: 15,
-      "pre-reflection": 25,
-      exploration: 35,
-      experience: 55,
-      envision: 70,
-      "post-reflection": 85,
+      "pre-reflection": 15,
+      exploration: 25,
+      experience: 45,
+      engage: 60,
+      evaluate: 75,
+      envision: 85,
       complete: 100,
     }
     return phaseProgress[currentPhase] || 0
@@ -116,17 +116,16 @@ export default function GovernmentSimulationPage() {
     if (data === null || data === undefined) {
       return data
     }
-    
-    if (typeof data === 'object') {
-      // Check if it's a DOM event or React synthetic event
+
+    if (typeof data === "object") {
       if (data.nativeEvent || data.target || data.currentTarget || data.type) {
-        return null // Remove event objects
+        return null
       }
-      
+
       if (Array.isArray(data)) {
-        return data.map(item => cleanDataForFirebase(item))
+        return data.map((item) => cleanDataForFirebase(item))
       }
-      
+
       const cleaned: any = {}
       for (const [key, value] of Object.entries(data)) {
         const cleanedValue = cleanDataForFirebase(value)
@@ -136,7 +135,7 @@ export default function GovernmentSimulationPage() {
       }
       return cleaned
     }
-    
+
     return data
   }
 
@@ -151,12 +150,11 @@ export default function GovernmentSimulationPage() {
     }
   }, [user, router])
 
-  // Auto-save progress every 30 seconds
   useEffect(() => {
     if (user && currentPhase !== "intro" && currentPhase !== "complete") {
       const interval = setInterval(() => {
-        saveCurrentProgress(true) // true for auto-save
-      }, 30000) // Auto-save every 30 seconds
+        saveCurrentProgress(true)
+      }, 30000)
 
       return () => clearInterval(interval)
     }
@@ -165,18 +163,14 @@ export default function GovernmentSimulationPage() {
   const loadSimulationProgress = async () => {
     try {
       if (user?.uid) {
-        console.log("🔄 Loading simulation progress for user:", user.uid)
         setIsLoading(true)
 
         const result = await getSimulationProgress(user.uid, "government-simulation")
 
         if (result.success && result.data) {
-          console.log("✅ Loaded existing progress:", result.data)
-
-          // Convert SimulationProgress to SimulationData format
           const loadedData: SimulationData = {
             phase: result.data.currentPhase as SimulationPhase,
-            ...result.data.phaseProgress, // Include any additional phase-specific data
+            ...result.data.phaseProgress,
             startedAt: result.data.startedAt,
             lastUpdated: result.data.lastUpdated,
           }
@@ -189,16 +183,12 @@ export default function GovernmentSimulationPage() {
             description: `Continuing from ${loadedData.phase} phase`,
           })
         } else {
-          console.log("ℹ️ No existing progress found, starting fresh")
-          // Initialize with intro phase
           setSimulationData({
             phase: "intro",
             startTime: Date.now(),
           })
 
-          // If there was an error (not just no data), show it
           if (result.error && result.error !== "No progress found") {
-            console.error("Database error:", result.error)
             toast({
               title: "Database Connection Issue",
               description: result.error,
@@ -230,9 +220,7 @@ export default function GovernmentSimulationPage() {
         lastUpdated: new Date().toISOString(),
       }
 
-      // Clean the data before saving to Firebase
       const cleanedData = cleanDataForFirebase(progressData)
-      console.log("💾 Saving progress:", cleanedData)
 
       const simulationProgressData = {
         userId: user.uid,
@@ -243,7 +231,7 @@ export default function GovernmentSimulationPage() {
         phaseProgress: cleanedData,
         startedAt: progressData.startedAt || new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
-        completed: false,
+        completed: progressData.phase === "complete",
       }
 
       const result = await saveSimulationProgress(simulationProgressData)
@@ -252,27 +240,20 @@ export default function GovernmentSimulationPage() {
         setLastSaved(new Date())
 
         if (!isAutoSave) {
-          // Calculate progress percentage based on current phase
           const progressPercentage = getPhaseProgress()
-
           toast({
             title: "Progress Saved",
             description: `${progressPercentage}% complete`,
           })
         }
-
-        console.log("✅ Progress saved successfully:", result)
       } else {
         throw new Error(result.error || "Failed to save progress")
       }
     } catch (error: any) {
-      console.error("❌ Error saving simulation progress:", error)
-      const errorMessage = error?.message || "Failed to save progress"
-
       if (!isAutoSave) {
         toast({
           title: "Save Error",
-          description: errorMessage,
+          description: error?.message || "Failed to save progress",
           variant: "destructive",
         })
       }
@@ -294,9 +275,7 @@ export default function GovernmentSimulationPage() {
 
         setSimulationData(updatedData)
 
-        // Clean the data before saving to Firebase
         const cleanedData = cleanDataForFirebase(updatedData)
-        console.log("💾 Saving progress with cleaned data:", cleanedData)
 
         const simulationProgressData = {
           userId: user.uid,
@@ -307,21 +286,18 @@ export default function GovernmentSimulationPage() {
           phaseProgress: cleanedData,
           startedAt: updatedData.startedAt || new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
-          completed: false,
+          completed: updatedData.phase === "complete",
         }
 
         const result = await saveSimulationProgress(simulationProgressData)
 
         if (result.success) {
           setLastSaved(new Date())
-          console.log("✅ Progress saved successfully:", result)
         } else {
           throw new Error("Failed to save progress")
         }
       }
     } catch (error) {
-      console.error("❌ Error saving simulation progress:", error)
-
       toast({
         title: "Save Error",
         description: "Failed to save progress. Please try again.",
@@ -333,8 +309,6 @@ export default function GovernmentSimulationPage() {
   }
 
   const handlePhaseComplete = async (phaseData: any, nextPhase: SimulationPhase) => {
-    console.log(`🎯 Completing phase: ${currentPhase} → ${nextPhase}`)
-
     const updateData: Partial<SimulationData> = {
       phase: nextPhase,
       [`${currentPhase}Answers`]: phaseData,
@@ -349,15 +323,12 @@ export default function GovernmentSimulationPage() {
     if (nextPhase === "complete") {
       updateData.completedAt = new Date().toISOString()
 
-      // Complete the simulation and unlock next content
       try {
-        console.log("🏆 Completing simulation...")
-
-        const completionResult = await completeSimulation(user!.uid, "government-simulation", 150, ["government-expert"])
+        const completionResult = await completeSimulation(user!.uid, "government-simulation", 150, [
+          "government-expert",
+        ])
 
         if (completionResult.success) {
-          console.log("✅ Simulation completed:", completionResult)
-
           toast({
             title: "🎉 Simulation Complete!",
             description: "Your progress has been saved and new buildings unlocked!",
@@ -366,39 +337,32 @@ export default function GovernmentSimulationPage() {
           throw new Error(completionResult.error || "Failed to complete simulation")
         }
       } catch (error) {
-        console.error("❌ Error completing simulation:", error)
         toast({
           title: "Completion Error",
           description: "Failed to complete simulation. Please try again.",
           variant: "destructive",
         })
-        return // Don't proceed if completion failed
+        return
       }
     }
 
-    // Update simulation data first
-    setSimulationData(prev => ({
+    setSimulationData((prev) => ({
       ...prev,
-      ...updateData
+      ...updateData,
     }))
 
-    // Save progress
     await saveProgress(updateData)
-    
-    // Update current phase last
-    console.log(`🔄 Setting current phase to: ${nextPhase}`)
     setCurrentPhase(nextPhase)
 
-    // Show toast for phase completion (only for phase transitions, not auto-saves)
     if (nextPhase !== "complete") {
       const phaseProgress = {
         intro: 5,
-        framework: 15,
-        "pre-reflection": 25,
-        exploration: 35,
-        experience: 55,
-        envision: 70,
-        "post-reflection": 85,
+        "pre-reflection": 15,
+        exploration: 25,
+        experience: 45,
+        engage: 60,
+        evaluate: 75,
+        envision: 85,
         complete: 100,
       }
       const progressPercentage = phaseProgress[nextPhase] || 0
@@ -412,19 +376,18 @@ export default function GovernmentSimulationPage() {
   const handleBackStep = async () => {
     const phaseOrder: SimulationPhase[] = [
       "intro",
-      "framework",
       "pre-reflection",
       "exploration",
       "experience",
+      "engage",
+      "evaluate",
       "envision",
-      "post-reflection",
       "complete",
     ]
 
     const currentIndex = phaseOrder.indexOf(currentPhase)
     if (currentIndex > 0) {
       const previousPhase = phaseOrder[currentIndex - 1]
-      console.log("⬅️ Moving back from", currentPhase, "to", previousPhase)
       setCurrentPhase(previousPhase)
       await saveProgress({ phase: previousPhase })
     }
@@ -434,10 +397,8 @@ export default function GovernmentSimulationPage() {
     await saveProgress({ phase: currentPhase })
   }
 
-  // Auto-save when currentPhase changes
   useEffect(() => {
     if (user?.uid && currentPhase && !isLoading && currentPhase !== "intro") {
-      console.log("🔄 Phase changed to:", currentPhase, "- Auto-saving...")
       saveProgress({ phase: currentPhase })
     }
   }, [currentPhase, user?.uid, isLoading])
@@ -446,7 +407,7 @@ export default function GovernmentSimulationPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Building2 className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-pulse" />
+          <Building2 className="h-12 w-12 text-[#2d407e] mx-auto mb-4 animate-pulse" />
           <p className="text-gray-600">Loading your simulation progress...</p>
         </div>
       </div>
@@ -457,22 +418,22 @@ export default function GovernmentSimulationPage() {
     switch (currentPhase) {
       case "intro":
         return (
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-3 mb-6">
-                <Building2 className="h-16 w-16 text-blue-600" />
+                <Building2 className="h-16 w-16 text-[#2d407e]" />
                 <div>
                   <h1 className="text-4xl font-bold text-gray-900">Inside the Hill</h1>
-                  <p className="text-xl text-gray-600">Congressional Simulation Experience</p>
+                  <p className="text-xl text-gray-600">Government & Politics Career Simulation</p>
                 </div>
               </div>
             </div>
 
-            <Card className="mb-8">
-              <CardHeader>
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
                 <CardTitle className="text-center">Welcome to Your Congressional Journey</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
                 <div className="text-center">
                   <p className="text-lg text-gray-700 mb-6">
                     Step into the role of a Legislative Assistant and experience the complex world of congressional
@@ -483,7 +444,7 @@ export default function GovernmentSimulationPage() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-blue-600">What You'll Experience:</h3>
+                    <h3 className="text-lg font-semibold text-[#2d407e]">What You'll Experience:</h3>
                     <ul className="space-y-2">
                       <li className="flex items-start gap-2">
                         <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -505,7 +466,7 @@ export default function GovernmentSimulationPage() {
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-red-600">Skills You'll Develop:</h3>
+                    <h3 className="text-lg font-semibold text-[#765889]">Skills You'll Develop:</h3>
                     <ul className="space-y-2">
                       <li className="flex items-start gap-2">
                         <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -527,9 +488,9 @@ export default function GovernmentSimulationPage() {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-                  <h4 className="font-semibold text-blue-800 mb-2">The Challenge</h4>
-                  <p className="text-blue-700">
+                <div className="bg-gradient-to-r from-[#f0ad70]/10 to-[#db9b6c]/10 p-6 rounded-lg border-l-4 border-[#f0ad70]">
+                  <h4 className="font-semibold text-[#2d407e] mb-2">The Challenge</h4>
+                  <p className="text-[#4e3113]">
                     America faces a water crisis: 9.2 million lead service lines, $625 billion in infrastructure needs,
                     and vulnerable communities without clean water access. The WATER Act could provide solutions, but
                     only if you can convince enough stakeholders to support it.
@@ -537,7 +498,11 @@ export default function GovernmentSimulationPage() {
                 </div>
 
                 <div className="text-center">
-                  <Button onClick={() => handlePhaseComplete({}, "framework")} size="lg" className="px-8">
+                  <Button
+                    onClick={() => handlePhaseComplete({}, "pre-reflection")}
+                    size="lg"
+                    className="px-8 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+                  >
                     Begin Your Congressional Experience
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -547,37 +512,53 @@ export default function GovernmentSimulationPage() {
           </div>
         )
 
-      case "framework":
-        return <FrameworkExplanation simulationType="government" onComplete={() => handlePhaseComplete({}, "pre-reflection")} />
-
       case "pre-reflection":
-        return <GovernmentPreReflectionForm onComplete={(data) => handlePhaseComplete(data, "exploration")} />
-
-      case "exploration":
-        return <GovernmentExplorationPhase onComplete={(data) => handlePhaseComplete(data, "experience")} />
-
-      case "experience":
-        return <GovernmentExperiencePhase onComplete={(data) => handlePhaseComplete(data, "envision")} />
-
-      case "envision":
         return (
-          <GovernmentEnvisionPhase
-            simulationResults={simulationData.experienceAnswers}
-            onComplete={(data) => handlePhaseComplete(data, "post-reflection")}
+          <PreReflectionForm
+            onComplete={(data) => handlePhaseComplete(data, "exploration")}
+            initialData={simulationData.preReflectionAnswers}
           />
         )
 
-      case "post-reflection":
+      case "exploration":
+        return (
+          <GovernmentExplorationResearch
+            onComplete={(data) => handlePhaseComplete(data, "experience")}
+            initialData={simulationData.explorationAnswers}
+          />
+        )
+
+      case "experience":
+        return <GovernmentExperiencePhase onComplete={(data) => handlePhaseComplete(data, "engage")} />
+
+      case "engage":
+        return (
+          <EngagePhase
+            onComplete={(data) => handlePhaseComplete(data, "evaluate")}
+            initialData={simulationData.engageAnswers}
+          />
+        )
+
+      case "evaluate":
         return (
           <GovernmentPostReflectionForm
             simulationResults={simulationData.experienceAnswers}
+            onComplete={(data) => handlePhaseComplete(data, "envision")}
+          />
+        )
+
+      case "envision":
+        return (
+          <EnvisionPhase
             onComplete={(data) => handlePhaseComplete(data, "complete")}
+            initialData={simulationData.envisionAnswers}
+            simulationType="government"
           />
         )
 
       case "complete":
         return (
-          <div className="max-w-4xl mx-auto p-6">
+          <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center mb-8">
               <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
               <h1 className="text-4xl font-bold text-gray-900 mb-4">Simulation Complete!</h1>
@@ -586,27 +567,27 @@ export default function GovernmentSimulationPage() {
               </p>
             </div>
 
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle className="text-center text-green-800">Your Congressional Journey Summary</CardTitle>
+            <Card className="border-2 border-gray-200 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
+                <CardTitle className="text-center">Your Congressional Journey Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="font-semibold text-blue-600 mb-3">Experience Highlights:</h3>
+                    <h3 className="font-semibold text-[#2d407e] mb-3">Experience Highlights:</h3>
                     <ul className="space-y-2 text-sm">
                       <li>✓ Completed pre-simulation reflection</li>
-                      <li>✓ Explored congressional dynamics and stakeholders</li>
-                      <li>✓ Engaged with 5 key congressional stakeholders</li>
+                      <li>✓ Explored government and politics careers</li>
+                      <li>✓ Learned congressional dynamics and processes</li>
+                      <li>✓ Engaged with key congressional stakeholders</li>
                       <li>✓ Practiced professional political writing</li>
-                      <li>✓ Developed strategic thinking skills</li>
+                      <li>✓ Evaluated your learning experience</li>
                       <li>✓ Envisioned future applications</li>
-                      <li>✓ Completed comprehensive reflection</li>
                     </ul>
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-red-600 mb-3">Skills Developed:</h3>
+                    <h3 className="font-semibold text-[#765889] mb-3">Skills Developed:</h3>
                     <ul className="space-y-2 text-sm">
                       <li>• Stakeholder management and persuasion</li>
                       <li>• Professional writing and communication</li>
@@ -618,45 +599,14 @@ export default function GovernmentSimulationPage() {
                   </div>
                 </div>
 
-                {simulationData.experienceResults && (
-                  <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500">
-                    <h4 className="font-semibold text-blue-800 mb-2">Your Final Results:</h4>
-                    <div className="grid grid-cols-3 gap-4 text-center">
-                      <div>
-                        <div
-                          className={`text-2xl font-bold ${simulationData.experienceResults.success ? "text-green-600" : "text-red-600"}`}
-                        >
-                          {simulationData.experienceResults.success ? "SUCCESS" : "INCOMPLETE"}
-                        </div>
-                        <p className="text-sm text-gray-600">Mission Status</p>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold text-blue-600">
-                          {simulationData.experienceResults.yesVotes || 0} / 5
-                        </div>
-                        <p className="text-sm text-gray-600">Stakeholders Won</p>
-                      </div>
-                      <div>
-                        <div className="text-2xl font-bold text-purple-600">
-                          {Object.values(simulationData.experienceResults.gameState?.attempts || {}).reduce(
-                            (a: number, b: number) => a + b,
-                            0,
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600">Total Attempts</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
-                  <h4 className="font-semibold text-green-800 mb-2">What's Next?</h4>
-                  <p className="text-green-700 mb-3">
+                <div className="bg-gradient-to-r from-[#f0ad70]/10 to-[#db9b6c]/10 p-6 rounded-lg border-l-4 border-[#f0ad70]">
+                  <h4 className="font-semibold text-[#2d407e] mb-2">What's Next?</h4>
+                  <p className="text-[#4e3113] mb-3">
                     You've gained valuable insights into the congressional process and developed important civic
                     engagement skills. Consider how you can apply these skills in your future career and civic
                     participation.
                   </p>
-                  <ul className="text-sm text-green-600 space-y-1">
+                  <ul className="text-sm text-[#4e3113] space-y-1">
                     <li>• Stay informed about policy issues that matter to you</li>
                     <li>• Practice professional communication in your studies and work</li>
                     <li>• Consider internships or volunteer opportunities in government</li>
@@ -665,7 +615,11 @@ export default function GovernmentSimulationPage() {
                 </div>
 
                 <div className="text-center space-y-4">
-                  <Button onClick={() => router.push("/dashboard")} size="lg" className="px-8">
+                  <Button
+                    onClick={() => router.push("/dashboard")}
+                    size="lg"
+                    className="px-8 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+                  >
                     <Home className="mr-2 h-5 w-5" />
                     Return to Dashboard
                   </Button>
@@ -685,7 +639,7 @@ export default function GovernmentSimulationPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with Navigation and Progress - Matching Marketing Simulation Style */}
+      {/* Header with Navigation and Progress - Matching Finance Simulation Style */}
       <div className="bg-white border-b shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
@@ -697,7 +651,7 @@ export default function GovernmentSimulationPage() {
               </Button>
 
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md">
+                <div className="p-2 bg-gradient-to-br from-[#2d407e] to-[#765889] rounded-lg shadow-md">
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -714,7 +668,7 @@ export default function GovernmentSimulationPage() {
                 <span>2-3 hours</span>
               </div>
 
-              <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">Government</Badge>
+              <Badge className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">Government</Badge>
 
               <div className="flex items-center gap-2">
                 {lastSaved && (
@@ -755,36 +709,38 @@ export default function GovernmentSimulationPage() {
         </div>
       </div>
 
-      {/* Phase Navigation */}
+      {/* Phase Navigation - Centered */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center gap-2 overflow-x-auto">
-            {phases.map((phase, index) => {
-              const Icon = phase.icon
-              const isCompleted = getCurrentPhaseIndex() > index
-              const isCurrent = currentPhase === phase.id
+          <div className="flex justify-center">
+            <div className="flex items-center gap-2 overflow-x-auto max-w-6xl">
+              {phases.map((phase, index) => {
+                const Icon = phase.icon
+                const isCompleted = getCurrentPhaseIndex() > index
+                const isCurrent = currentPhase === phase.id
 
-              return (
-                <div
-                  key={phase.id}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap ${
-                    isCurrent
-                      ? "bg-blue-100 text-blue-800"
-                      : isCompleted
-                        ? "bg-green-100 text-green-800"
-                        : "text-gray-500"
-                  }`}
-                >
-                  <Icon
-                    className={`h-4 w-4 ${
-                      isCurrent ? "text-blue-600" : isCompleted ? "text-green-600" : "text-gray-400"
+                return (
+                  <div
+                    key={phase.id}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm whitespace-nowrap ${
+                      isCurrent
+                        ? "bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 text-[#2d407e]"
+                        : isCompleted
+                          ? "bg-green-100 text-green-800"
+                          : "text-gray-500"
                     }`}
-                  />
-                  <span>{phase.name}</span>
-                  {isCompleted && <CheckCircle className="h-4 w-4 text-green-600" />}
-                </div>
-              )
-            })}
+                  >
+                    <Icon
+                      className={`h-4 w-4 ${
+                        isCurrent ? "text-[#2d407e]" : isCompleted ? "text-green-600" : "text-gray-400"
+                      }`}
+                    />
+                    <span>{phase.name}</span>
+                    {isCompleted && <CheckCircle className="h-4 w-4 text-green-600" />}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>

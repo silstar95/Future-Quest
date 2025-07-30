@@ -203,7 +203,7 @@ export default function GovernmentPostReflectionForm({
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-4">
           <CheckCircle className="h-8 w-8 text-green-600" />
@@ -223,9 +223,9 @@ export default function GovernmentPostReflectionForm({
 
       {/* Results Summary */}
       {currentStep === 0 && simulationResults && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="border-2 border-[#f0ad70]/30 bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 shadow-lg mb-6">
           <CardHeader>
-            <CardTitle className="text-blue-800 flex items-center gap-2">
+            <CardTitle className="text-[#2d407e] flex items-center gap-2">
               <Star className="h-6 w-6" />
               Your Performance Summary
             </CardTitle>
@@ -239,11 +239,11 @@ export default function GovernmentPostReflectionForm({
                 <p className="text-sm text-gray-600">Final Result</p>
               </div>
               <div>
-                <div className="text-2xl font-bold text-blue-600">{simulationResults.yesVotes || 0} / 5</div>
+                <div className="text-2xl font-bold text-[#2d407e]">{simulationResults.yesVotes || 0} / 5</div>
                 <p className="text-sm text-gray-600">Stakeholders Won</p>
               </div>
               <div>
-                <div className="text-2xl font-bold text-purple-600">
+                <div className="text-2xl font-bold text-[#765889]">
                   {Object.values(simulationResults.gameState?.attempts || {}).reduce(
                     (a: number, b: number) => a + b,
                     0,
@@ -252,7 +252,7 @@ export default function GovernmentPostReflectionForm({
                 <p className="text-sm text-gray-600">Total Attempts</p>
               </div>
               <div>
-                <div className="text-2xl font-bold text-orange-600">{simulationResults.success ? "A" : "B"}</div>
+                <div className="text-2xl font-bold text-[#f0ad70]">{simulationResults.success ? "A" : "B"}</div>
                 <p className="text-sm text-gray-600">Grade Estimate</p>
               </div>
             </div>
@@ -260,18 +260,18 @@ export default function GovernmentPostReflectionForm({
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
+      <Card className="border-2 border-gray-200 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
           <CardTitle className="flex items-center gap-2">
-            {currentStep === 0 && <Star className="h-5 w-5 text-yellow-600" />}
-            {currentStep === 1 && <Target className="h-5 w-5 text-red-600" />}
-            {currentStep === 2 && <TrendingUp className="h-5 w-5 text-green-600" />}
-            {currentStep === 3 && <Lightbulb className="h-5 w-5 text-blue-600" />}
-            {currentStep >= 4 && <CheckCircle className="h-5 w-5 text-purple-600" />}
+            {currentStep === 0 && <Star className="h-5 w-5" />}
+            {currentStep === 1 && <Target className="h-5 w-5" />}
+            {currentStep === 2 && <TrendingUp className="h-5 w-5" />}
+            {currentStep === 3 && <Lightbulb className="h-5 w-5" />}
+            {currentStep >= 4 && <CheckCircle className="h-5 w-5" />}
             {currentQuestion.title}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 p-6">
           <div>
             <h3 className="text-lg font-medium mb-4">{currentQuestion.question}</h3>
 
@@ -307,7 +307,7 @@ export default function GovernmentPostReflectionForm({
                   return (
                     <div key={skill.key} className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Icon className="h-5 w-5 text-blue-600" />
+                        <Icon className="h-5 w-5 text-[#2d407e]" />
                         <Label className="font-medium">{skill.label}</Label>
                         <Badge variant="outline">
                           {responses.skillDevelopment[skill.key as keyof typeof responses.skillDevelopment][0]}
@@ -363,10 +363,10 @@ export default function GovernmentPostReflectionForm({
 
           {/* Contextual Tips */}
           {currentStep === 2 && (
-            <Card className="border-green-200 bg-green-50">
+            <Card className="border-[#f0ad70]/30 bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20">
               <CardContent className="p-4">
-                <h4 className="font-semibold text-green-800 mb-2">Skill Development Reflection</h4>
-                <p className="text-sm text-green-700">
+                <h4 className="font-semibold text-[#2d407e] mb-2">Skill Development Reflection</h4>
+                <p className="text-sm text-[#4e3113]">
                   Consider not just what you learned, but how much you improved from where you started. Even small
                   improvements in complex skills like stakeholder management are significant achievements.
                 </p>
@@ -375,10 +375,10 @@ export default function GovernmentPostReflectionForm({
           )}
 
           {currentStep === 5 && (
-            <Card className="border-blue-200 bg-blue-50">
+            <Card className="border-[#f0ad70]/30 bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20">
               <CardContent className="p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">Improvement Suggestions</h4>
-                <p className="text-sm text-blue-700">
+                <h4 className="font-semibold text-[#2d407e] mb-2">Improvement Suggestions</h4>
+                <p className="text-sm text-[#4e3113]">
                   Your feedback helps improve this simulation for future students. Consider aspects like: difficulty
                   level, clarity of instructions, realism, engagement, and learning effectiveness.
                 </p>
@@ -391,7 +391,11 @@ export default function GovernmentPostReflectionForm({
               Previous
             </Button>
 
-            <Button onClick={handleNext} disabled={!isAnswered()}>
+            <Button
+              onClick={handleNext}
+              disabled={!isAnswered()}
+              className="bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+            >
               {currentStep === questions.length - 1 ? (
                 <>
                   Complete Reflection

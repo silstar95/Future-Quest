@@ -114,13 +114,13 @@ export function PostReflectionForm({
   const growthMessage = detectGrowth()
 
   return (
-    <Card className="border-2 border-green-200 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-green-600 text-white">
+    <Card className="border-2 border-[#713c09]/30 shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
         <div className="flex items-center gap-3">
           <CheckCircle className="w-8 h-8" />
           <div>
             <CardTitle className="text-xl">Post-Simulation Reflection</CardTitle>
-            <CardDescription className="text-blue-100">
+            <CardDescription className="text-[#f0ad70]">
               {content.icon} Reflect on your {content.field} journey and growth
             </CardDescription>
           </div>
@@ -129,12 +129,12 @@ export function PostReflectionForm({
 
       <CardContent className="p-8 space-y-8">
         {growthMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="bg-[#f0ad70]/20 border border-[#db9b6c]/30 rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-              <span className="font-medium text-green-800">Growth Detected!</span>
+              <TrendingUp className="w-5 h-5 text-[#2d407e]" />
+              <span className="font-medium text-[#2d407e]">Growth Detected!</span>
             </div>
-            <p className="text-green-700 mt-1">{growthMessage}</p>
+            <p className="text-[#4e3113] mt-1">{growthMessage}</p>
           </div>
         )}
 
@@ -155,7 +155,7 @@ export function PostReflectionForm({
               />
               <div className="flex justify-between text-sm text-gray-500 mt-2">
                 <span>1 - Not enjoyable</span>
-                <span className="font-medium text-lg text-blue-600">{answers.enjoymentRating[0]}</span>
+                <span className="font-medium text-lg text-[#2d407e]">{answers.enjoymentRating[0]}</span>
                 <span>10 - Very enjoyable</span>
               </div>
             </div>
@@ -200,7 +200,7 @@ export function PostReflectionForm({
               />
               <div className="flex justify-between text-sm text-gray-500 mt-2">
                 <span>1 - Not at all confident</span>
-                <span className="font-medium text-lg text-blue-600">{answers.confidenceRating[0]}</span>
+                <span className="font-medium text-lg text-[#2d407e]">{answers.confidenceRating[0]}</span>
                 <span>5 - Very confident</span>
               </div>
             </div>
@@ -224,7 +224,7 @@ export function PostReflectionForm({
               />
               <div className="flex justify-between text-sm text-gray-500 mt-2">
                 <span>1 - Not at all</span>
-                <span className="font-medium text-lg text-blue-600">{answers.interestLevel[0]}</span>
+                <span className="font-medium text-lg text-[#2d407e]">{answers.interestLevel[0]}</span>
                 <span>5 - Most definitely</span>
               </div>
             </div>
@@ -308,24 +308,24 @@ export function PostReflectionForm({
         </div>
 
         {/* Summary Card */}
-        <Card className="bg-gradient-to-br from-blue-50 to-green-50 border-blue-200">
+        <Card className="bg-gradient-to-br from-[#f0ad70]/20 to-[#db9b6c]/20 border-[#db9b6c]/30">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Star className="w-6 h-6 text-blue-600" />
-              <h4 className="text-lg font-semibold text-blue-800">Your {content.fieldCapitalized} Journey Summary</h4>
+              <Star className="w-6 h-6 text-[#2d407e]" />
+              <h4 className="text-lg font-semibold text-[#2d407e]">Your {content.fieldCapitalized} Journey Summary</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{answers.enjoymentRating[0]}/10</div>
-                <div className="text-blue-700">Enjoyment Rating</div>
+                <div className="text-2xl font-bold text-[#2d407e]">{answers.enjoymentRating[0]}/10</div>
+                <div className="text-[#4e3113]">Enjoyment Rating</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{answers.confidenceRating[0]}/5</div>
-                <div className="text-green-700">Confidence Level</div>
+                <div className="text-2xl font-bold text-[#765889]">{answers.confidenceRating[0]}/5</div>
+                <div className="text-[#4e3113]">Confidence Level</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{answers.interestLevel[0]}/5</div>
-                <div className="text-purple-700">Future Interest</div>
+                <div className="text-2xl font-bold text-[#713c09]">{answers.interestLevel[0]}/5</div>
+                <div className="text-[#4e3113]">Future Interest</div>
               </div>
             </div>
           </CardContent>
@@ -336,7 +336,7 @@ export function PostReflectionForm({
             onClick={handleSubmit}
             disabled={!isComplete()}
             size="lg"
-            className="px-8 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+            className="px-8 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
           >
             Complete Reflection
             <CheckCircle className="ml-2 h-5 w-5" />

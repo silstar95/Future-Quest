@@ -43,7 +43,7 @@ const UNREACHABLE_AREAS = [
   { x: 467, y: 937, width: 109, height: 39 },
   { x: 533, y: 787, width: 43, height: 189 },
   { x: 801, y: 887, width: 105, height: 35 },
-  { x: 801, y: 887, width: 37, height: 169 }
+  { x: 801, y: 887, width: 37, height: 169 },
 ]
 
 // Debug mode to show collision boundaries (set to true to visualize)
@@ -81,6 +81,7 @@ class OfficeScene extends Phaser.Scene {
   public onLocationChange?: (location: string) => void
   public onTaskSelect?: (taskId: string) => void
   public onTaskReview?: (taskId: string) => void
+  public onShowTaskSelection?: (roomId: string, tasks: TaskData[]) => void
 
   constructor() {
     super({ key: "OfficeScene" })
@@ -186,7 +187,7 @@ class OfficeScene extends Phaser.Scene {
 
     // Add room interaction zones
     this.createInteractionZones()
-    
+
     // Add debug info display
     if (DEBUG_COLLISION_AREAS) {
       this.createDebugDisplay()
@@ -204,16 +205,16 @@ class OfficeScene extends Phaser.Scene {
       const scaledY = area.y * SCALE_Y
       const scaledWidth = area.width * SCALE_X
       const scaledHeight = area.height * SCALE_Y
-      
+
       const collisionBody = this.add.rectangle(
         scaledX + scaledWidth / 2,
         scaledY + scaledHeight / 2,
         scaledWidth,
         scaledHeight,
         DEBUG_COLLISION_AREAS ? 0xff0000 : 0x000000, // Red if debug mode, invisible otherwise
-        DEBUG_COLLISION_AREAS ? 0.3 : 0 // Semi-transparent red if debug mode
+        DEBUG_COLLISION_AREAS ? 0.3 : 0, // Semi-transparent red if debug mode
       )
-      
+
       // Add position and size text on each area in debug mode
       if (DEBUG_COLLISION_AREAS) {
         const infoText = this.add.text(
@@ -221,16 +222,16 @@ class OfficeScene extends Phaser.Scene {
           scaledY + scaledHeight / 2,
           `Area ${index + 1}\n(${Math.round(scaledX)}, ${Math.round(scaledY)})\n${Math.round(scaledWidth)}x${Math.round(scaledHeight)}`,
           {
-            fontSize: '8px',
-            color: '#ffffff',
-            fontStyle: 'bold',
-            backgroundColor: '#000000',
-            padding: { x: 2, y: 2 }
-          }
+            fontSize: "8px",
+            color: "#ffffff",
+            fontStyle: "bold",
+            backgroundColor: "#000000",
+            padding: { x: 2, y: 2 },
+          },
         )
         infoText.setOrigin(0.5)
       }
-      
+
       // Enable physics for collision detection
       this.physics.add.existing(collisionBody, true)
       this.collisionBodies.add(collisionBody)
@@ -239,15 +240,14 @@ class OfficeScene extends Phaser.Scene {
 
   // Helper function to check if a position is in an unreachable area
   isPositionUnreachable(x: number, y: number): boolean {
-    return UNREACHABLE_AREAS.some(area => {
+    return UNREACHABLE_AREAS.some((area) => {
       // Scale the area coordinates to match the canvas size
       const scaledX = area.x * SCALE_X
       const scaledY = area.y * SCALE_Y
       const scaledWidth = area.width * SCALE_X
       const scaledHeight = area.height * SCALE_Y
-      
-      return x >= scaledX && x <= scaledX + scaledWidth &&
-             y >= scaledY && y <= scaledY + scaledHeight
+
+      return x >= scaledX && x <= scaledX + scaledWidth && y >= scaledY && y <= scaledY + scaledHeight
     })
   }
 
@@ -259,20 +259,19 @@ class OfficeScene extends Phaser.Scene {
     const catRight = catX + catWidth / 2
     const catTop = catY - catHeight / 2
     const catBottom = catY + catHeight / 2
-    
-    return UNREACHABLE_AREAS.some(area => {
+
+    return UNREACHABLE_AREAS.some((area) => {
       // Scale the area coordinates to match the canvas size
       const scaledX = area.x * SCALE_X
       const scaledY = area.y * SCALE_Y
       const scaledWidth = area.width * SCALE_X
       const scaledHeight = area.height * SCALE_Y
-      
+
       const areaRight = scaledX + scaledWidth
       const areaBottom = scaledY + scaledHeight
-      
+
       // Check for overlap between cat bounds and area bounds
-      return !(catLeft >= areaRight || catRight <= scaledX || 
-               catTop >= areaBottom || catBottom <= scaledY)
+      return !(catLeft >= areaRight || catRight <= scaledX || catTop >= areaBottom || catBottom <= scaledY)
     })
   }
 
@@ -330,7 +329,6 @@ class OfficeScene extends Phaser.Scene {
     cat.lineBetween(12, -24, 18, -25)
     cat.lineBetween(12, -22, 18, -22)
 
-
     // Paws
     cat.fillStyle(0xff8c42)
     cat.fillCircle(-8, 18, 4) // Left front paw
@@ -346,10 +344,10 @@ class OfficeScene extends Phaser.Scene {
     const catBody = (cat as any).body as Phaser.Physics.Arcade.Body
     catBody.setCollideWorldBounds(true)
     catBody.setSize(30, 40)
-    
+
     // Add collision with unreachable areas
     this.physics.add.collider(cat, this.collisionBodies)
-    
+
     // Visualize cat collision bounds in debug mode
     if (DEBUG_COLLISION_AREAS) {
       const bounds = this.add.rectangle(
@@ -358,10 +356,10 @@ class OfficeScene extends Phaser.Scene {
         30, // cat collision width
         40, // cat collision height
         0x00ff00, // Green color
-        0.3 // Semi-transparent
+        0.3, // Semi-transparent
       )
       bounds.setStrokeStyle(2, 0x00ff00)
-      
+
       // Make bounds follow the cat
       this.tweens.add({
         targets: bounds,
@@ -371,7 +369,7 @@ class OfficeScene extends Phaser.Scene {
         repeat: -1,
         onUpdate: () => {
           bounds.setPosition(cat.x, cat.y)
-        }
+        },
       })
     }
   }
@@ -384,12 +382,12 @@ class OfficeScene extends Phaser.Scene {
       if (DEBUG_COLLISION_AREAS) {
         // Room background (green in debug mode)
         const roomBg = this.add.rectangle(
-          0, 
-          0, 
-          room.width, 
-          room.height, 
+          0,
+          0,
+          room.width,
+          room.height,
           0x00ff00, // Green
-          0.3 // More visible in debug mode
+          0.3, // More visible in debug mode
         )
         roomBg.setStrokeStyle(1, 0x00ff00, 1)
         container.add(roomBg)
@@ -436,9 +434,14 @@ class OfficeScene extends Phaser.Scene {
           creative: "🎨",
           media: "📺",
         }
-        const roomIcon = this.add.text(-room.width / 2 + 20, room.height / 2 - 20, icons[room.id as keyof typeof icons], {
-          fontSize: "20px",
-        })
+        const roomIcon = this.add.text(
+          -room.width / 2 + 20,
+          room.height / 2 - 20,
+          icons[room.id as keyof typeof icons],
+          {
+            fontSize: "20px",
+          },
+        )
         container.add(roomIcon)
       }
 
@@ -486,15 +489,15 @@ class OfficeScene extends Phaser.Scene {
   }
 
   createDebugDisplay() {
-    const debugText = this.add.text(10, 10, '', {
-      fontSize: '10px',
-      color: '#ffffff',
-      backgroundColor: '#000000',
-      padding: { x: 5, y: 5 }
+    const debugText = this.add.text(10, 10, "", {
+      fontSize: "10px",
+      color: "#ffffff",
+      backgroundColor: "#000000",
+      padding: { x: 5, y: 5 },
     })
     debugText.setScrollFactor(0) // Keep it fixed on screen
-    debugText.name = 'debug-text'
-    
+    debugText.name = "debug-text"
+
     // Update debug info every frame
     this.time.addEvent({
       delay: 100,
@@ -503,7 +506,7 @@ class OfficeScene extends Phaser.Scene {
           const catX = Math.round(this.cat.x)
           const catY = Math.round(this.cat.y)
           const inUnreachable = this.isCatInUnreachableArea(catX, catY)
-          
+
           // Create detailed unreachable areas info
           const areasInfo = UNREACHABLE_AREAS.map((area, index) => {
             const scaledX = Math.round(area.x * SCALE_X)
@@ -511,20 +514,20 @@ class OfficeScene extends Phaser.Scene {
             const scaledWidth = Math.round(area.width * SCALE_X)
             const scaledHeight = Math.round(area.height * SCALE_Y)
             return `Area ${index + 1}: (${scaledX}, ${scaledY}) ${scaledWidth}x${scaledHeight}`
-          }).join('\n')
-          
+          }).join("\n")
+
           debugText.setText([
             `Cat Position: (${catX}, ${catY})`,
-            `In Unreachable Area: ${inUnreachable ? 'YES' : 'NO'}`,
+            `In Unreachable Area: ${inUnreachable ? "YES" : "NO"}`,
             `Canvas Size: ${CANVAS_WIDTH}x${CANVAS_HEIGHT}`,
             `Scale Factors: X=${SCALE_X.toFixed(3)}, Y=${SCALE_Y.toFixed(3)}`,
-            '',
-            'Unreachable Areas (Scaled):',
-            areasInfo
+            "",
+            "Unreachable Areas (Scaled):",
+            areasInfo,
           ])
         }
       },
-      loop: true
+      loop: true,
     })
   }
 
@@ -559,18 +562,18 @@ class OfficeScene extends Phaser.Scene {
     if (DEBUG_COLLISION_AREAS && this.cat) {
       const nextX = this.cat.x + catBody.velocity.x * 0.016 // 16ms frame time
       const nextY = this.cat.y + catBody.velocity.y * 0.016
-      
+
       if (this.isCatInUnreachableArea(nextX, nextY)) {
         // Add a warning indicator when trying to enter unreachable area
-        if (!this.children.list.some(child => child.name === 'collision-warning')) {
-          const warning = this.add.text(this.cat.x, this.cat.y - 50, '⚠️ COLLISION', {
-            fontSize: '12px',
-            color: '#ff0000',
-            fontStyle: 'bold'
+        if (!this.children.list.some((child) => child.name === "collision-warning")) {
+          const warning = this.add.text(this.cat.x, this.cat.y - 50, "⚠️ COLLISION", {
+            fontSize: "12px",
+            color: "#ff0000",
+            fontStyle: "bold",
           })
           warning.setOrigin(0.5)
-          warning.name = 'collision-warning'
-          
+          warning.name = "collision-warning"
+
           // Remove warning after 1 second
           this.time.delayedCall(1000, () => {
             warning.destroy()
@@ -581,11 +584,26 @@ class OfficeScene extends Phaser.Scene {
 
     // Check room proximity for manual entry
     this.checkRoomProximity()
-    
+
     // Handle space key for room entry
     if (this.spaceKey?.isDown && !this.spaceKeyPressed && this.nearRoomId) {
       this.spaceKeyPressed = true
-      this.enterRoom(this.nearRoomId)
+
+      // Get available tasks for current room
+      const availableTasks = this.tasks.filter((t) => t.location === this.nearRoomId && !t.isCompleted)
+
+      if (availableTasks.length === 1) {
+        // Single task - start directly
+        if (this.onTaskSelect) {
+          this.onTaskSelect(availableTasks[0].id)
+        }
+      } else if (availableTasks.length > 1) {
+        // Multiple tasks - show selection
+        if (this.onShowTaskSelection) {
+          this.onShowTaskSelection(this.nearRoomId, availableTasks)
+        }
+      }
+
       this.hideRoomEntryMessage()
     } else if (!this.spaceKey?.isDown) {
       this.spaceKeyPressed = false
@@ -609,7 +627,7 @@ class OfficeScene extends Phaser.Scene {
       if (catX >= roomLeft && catX <= roomRight && catY >= roomTop && catY <= roomBottom) {
         if (this.nearRoomId !== room.id) {
           this.nearRoomId = room.id
-          this.showRoomEntryMessage(room.name)
+          this.showRoomEntryMessage(`You've reached ${room.name} - Press SPACE to enter`)
         }
         foundNearRoom = true
       }
@@ -629,14 +647,14 @@ class OfficeScene extends Phaser.Scene {
     this.roomEntryMessage = this.add.text(
       this.cameras.main.width / 2,
       100,
-      `You've reached ${roomName}! Press SPACE to enter.`,
+      roomName,
       {
-        fontSize: '18px',
-        color: '#ffffff',
-        backgroundColor: '#000000',
+        fontSize: "18px",
+        color: "#ffffff",
+        backgroundColor: "#000000",
         padding: { x: 10, y: 5 },
-        fontStyle: 'bold'
-      }
+        fontStyle: "bold",
+      },
     )
     this.roomEntryMessage.setOrigin(0.5)
     this.roomEntryMessage.setScrollFactor(0) // Keep it on screen
@@ -666,18 +684,7 @@ class OfficeScene extends Phaser.Scene {
 
     this.currentRoom = roomId
 
-    // Check if room has a task
-    const task = this.tasks.find((t) => t.location === roomId)
-    if (task) {
-      if (task.isCompleted && this.onTaskReview) {
-        // Allow reviewing completed tasks
-        this.onTaskReview(task.id)
-      } else if (this.onTaskSelect) {
-        // Start new task
-        this.onTaskSelect(task.id)
-      }
-    }
-
+    // Only notify location change, don't auto-start tasks
     if (this.onLocationChange) {
       this.onLocationChange(roomId)
     }
@@ -699,6 +706,21 @@ class OfficeScene extends Phaser.Scene {
       } else {
         console.warn(`Room ${roomId} is positioned in an unreachable area`)
       }
+    }
+  }
+
+  public getCatPosition(): { x: number; y: number; room: string } {
+    return {
+      x: this.cat?.x || 433,
+      y: this.cat?.y || 328,
+      room: this.currentRoom,
+    }
+  }
+
+  public setCatPosition(x: number, y: number, room: string) {
+    if (this.cat && !this.isPositionUnreachable(x, y)) {
+      this.cat.setPosition(x, y)
+      this.currentRoom = room
     }
   }
 }
