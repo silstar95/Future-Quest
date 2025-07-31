@@ -105,7 +105,7 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-2xl flex items-center">
-              <Users className="mr-3 h-6 w-6 text-blue-500" />
+              <Users className="mr-3 h-6 w-6 text-brand-primary" />
               Engage
             </CardTitle>
             <span className="text-sm text-gray-500">
@@ -117,7 +117,7 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
 
         <CardContent className="p-8">
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-lg mb-6">
+            <div className="bg-gradient-to-r from-brand-accent/10 to-brand-highlight/10 p-6 rounded-lg mb-6">
               <h3 className="text-lg font-semibold mb-2">🎉 Congratulations!</h3>
               <p className="text-gray-700">
                 You've finished experiencing a range of projects encountered by materials science roles. Now, it's time
@@ -126,11 +126,11 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
             </div>
 
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary flex items-center justify-center mr-4">
                 <IconComponent className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-blue-600 mb-1">{currentQ.title}</h3>
+                <h3 className="text-lg font-semibold text-brand-primary mb-1">{currentQ.title}</h3>
                 <p className="text-xl text-gray-800 leading-relaxed">{currentQ.question}</p>
               </div>
             </div>
@@ -138,9 +138,9 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
             <div className="mt-6">
               {currentQ.type === "video" && (
                 <div className="space-y-4">
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-800 mb-2">📹 Video: What is a Materials Scientist?</h4>
-                    <p className="text-blue-700 text-sm mb-3">
+                  <div className="bg-brand-accent/10 p-4 rounded-lg border border-brand-accent/30">
+                    <h4 className="font-semibold text-brand-primary mb-2">📹 Video: What is a Materials Scientist?</h4>
+                    <p className="text-brand-secondary text-sm mb-3">
                       Watch this video to learn directly from materials science professionals about their work and
                       career paths.
                     </p>
@@ -157,7 +157,7 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
                       <Button
                         onClick={() => handleInputChange("watched")}
                         variant="outline"
-                        className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                        className="border-brand-accent text-brand-primary hover:bg-brand-accent/10"
                       >
                         Mark as Watched
                       </Button>
@@ -165,10 +165,12 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
                   </div>
 
                   {formData.videoWatched && (
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <div className="bg-brand-highlight/10 p-4 rounded-lg border border-brand-highlight/30">
                       <div className="flex items-center">
-                        <ChevronRight className="w-5 h-5 text-green-600 mr-2" />
-                        <span className="text-green-800 font-medium">Great! You can now proceed to the next step.</span>
+                        <ChevronRight className="w-5 h-5 text-brand-highlight mr-2" />
+                        <span className="text-brand-primary font-medium">
+                          Great! You can now proceed to the next step.
+                        </span>
                       </div>
                     </div>
                   )}
@@ -187,9 +189,9 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
             </div>
 
             {currentQuestion === 1 && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2">💡 Tips for Finding LinkedIn Profiles:</h4>
-                <ul className="text-blue-700 text-sm space-y-1">
+              <div className="mt-4 p-4 bg-brand-accent/10 border border-brand-accent/30 rounded-lg">
+                <h4 className="font-semibold text-brand-primary mb-2">💡 Tips for Finding LinkedIn Profiles:</h4>
+                <ul className="text-brand-secondary text-sm space-y-1">
                   <li>
                     • Search for job titles like "Materials Scientist," "Materials Engineer," "Research Scientist"
                   </li>
@@ -201,9 +203,9 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
             )}
 
             {currentQuestion === 2 && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2">💡 Tips for Great Questions:</h4>
-                <ul className="text-green-700 text-sm space-y-1">
+              <div className="mt-4 p-4 bg-brand-highlight/10 border border-brand-highlight/30 rounded-lg">
+                <h4 className="font-semibold text-brand-primary mb-2">💡 Tips for Great Questions:</h4>
+                <ul className="text-brand-secondary text-sm space-y-1">
                   <li>• Focus on day-to-day responsibilities and research projects</li>
                   <li>• Ask about both challenges and rewards of materials science work</li>
                   <li>• Inquire about required skills and educational background</li>
@@ -228,7 +230,7 @@ export function MaterialScienceEngagePhase({ onComplete, initialData }: Material
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex items-center bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              className="flex items-center bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary/90 hover:to-brand-secondary/90"
             >
               {currentQuestion === questions.length - 1 ? "Continue to Evaluation" : "Next"}
               <ChevronRight className="ml-2 h-4 w-4" />

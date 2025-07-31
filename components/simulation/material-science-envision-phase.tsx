@@ -98,7 +98,7 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <CardTitle className="text-2xl flex items-center">
-              <Rocket className="mr-3 h-6 w-6 text-green-500" />
+              <Rocket className="mr-3 h-6 w-6 text-brand-highlight" />
               Envision Your Future
             </CardTitle>
             <span className="text-sm text-gray-500">
@@ -110,7 +110,7 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
 
         <CardContent className="p-8">
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-green-100 to-blue-100 p-6 rounded-lg mb-6">
+            <div className="bg-gradient-to-r from-brand-highlight/10 to-brand-accent/10 p-6 rounded-lg mb-6">
               <h3 className="text-lg font-semibold mb-2">🚀 Plan Your Materials Science Journey</h3>
               <p className="text-gray-700">
                 You've explored materials science careers, experienced hands-on research, and connected with
@@ -120,11 +120,11 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
             </div>
 
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center mr-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-highlight to-brand-accent flex items-center justify-center mr-4">
                 <IconComponent className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-green-600 mb-1">{currentQ.title}</h3>
+                <h3 className="text-lg font-semibold text-brand-highlight mb-1">{currentQ.title}</h3>
                 <p className="text-xl text-gray-800 leading-relaxed">{currentQ.question}</p>
               </div>
             </div>
@@ -141,12 +141,12 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
 
             {/* Contextual tips for each question */}
             {currentQuestion === 0 && (
-              <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+              <div className="mt-4 p-4 bg-brand-accent/10 border border-brand-accent/30 rounded-lg">
+                <h4 className="font-semibold text-brand-primary mb-2 flex items-center">
                   <Lightbulb className="mr-2 h-4 w-4" />
                   Materials Science Career Areas
                 </h4>
-                <div className="grid md:grid-cols-2 gap-3 text-sm text-blue-700">
+                <div className="grid md:grid-cols-2 gap-3 text-sm text-brand-secondary">
                   <div>
                     <strong>Research & Development:</strong>
                     <ul className="ml-4 mt-1 space-y-1">
@@ -168,12 +168,12 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
             )}
 
             {currentQuestion === 1 && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <h4 className="font-semibold text-green-800 mb-2 flex items-center">
+              <div className="mt-4 p-4 bg-brand-highlight/10 border border-brand-highlight/30 rounded-lg">
+                <h4 className="font-semibold text-brand-primary mb-2 flex items-center">
                   <BookOpen className="mr-2 h-4 w-4" />
                   Action Plan Framework
                 </h4>
-                <div className="text-sm text-green-700 space-y-2">
+                <div className="text-sm text-brand-secondary space-y-2">
                   <div>
                     <strong>Education:</strong> What courses, degrees, or certifications do you need?
                   </div>
@@ -194,12 +194,12 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
             )}
 
             {currentQuestion === 2 && (
-              <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                <h4 className="font-semibold text-purple-800 mb-2 flex items-center">
+              <div className="mt-4 p-4 bg-brand-accent/10 border border-brand-accent/30 rounded-lg">
+                <h4 className="font-semibold text-brand-primary mb-2 flex items-center">
                   <Rocket className="mr-2 h-4 w-4" />
                   Making It Actionable
                 </h4>
-                <div className="text-sm text-purple-700 space-y-1">
+                <div className="text-sm text-brand-secondary space-y-1">
                   <div>• Be specific: "Research 5 materials science programs" vs "Look into colleges"</div>
                   <div>• Set deadlines: "By next Friday" vs "Soon"</div>
                   <div>• Make it measurable: "Contact 3 professionals" vs "Network more"</div>
@@ -223,7 +223,7 @@ export function MaterialScienceEnvisionPhase({ onComplete, initialData }: Materi
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="flex items-center bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+              className="flex items-center bg-gradient-to-r from-brand-highlight to-brand-accent hover:from-brand-highlight/90 hover:to-brand-accent/90"
             >
               {currentQuestion === questions.length - 1 ? "Complete Envision Phase" : "Next"}
               <ChevronRight className="ml-2 h-4 w-4" />

@@ -11,13 +11,12 @@ import { EngagePhase } from "@/components/simulation/engage-phase"
 import { PostReflectionForm } from "@/components/simulation/post-reflection-form"
 import { EnvisionPhase } from "@/components/simulation/envision-phase"
 import { SimulationComplete } from "@/components/simulation/simulation-complete"
+import { SimulationNavigation } from "@/components/simulation/simulation-navigation"
 import { saveSimulationProgress, getSimulationProgress, completeSimulation } from "@/lib/firebase-service"
 import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { Megaphone, Clock, Users, Star, ArrowLeft, Save, CheckCircle, AlertCircle } from "lucide-react"
+import { Megaphone, Users, Star } from "lucide-react"
 
 type SimulationPhase =
   | "intro"
@@ -157,7 +156,7 @@ export default function BrandMarketingSimulation() {
         simulationId: "brand-marketing",
         currentPhase: progressData.phase,
         currentStep: getPhaseStep(progressData.phase),
-        totalSteps: 8, // Updated to include framework phase
+        totalSteps: 9, // Updated to include framework phase
         phaseProgress: progressData,
         startedAt: progressData.startedAt || new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
@@ -221,7 +220,7 @@ export default function BrandMarketingSimulation() {
           simulationId: "brand-marketing",
           currentPhase: updatedData.phase,
           currentStep: getPhaseStep(updatedData.phase),
-          totalSteps: 8, // Updated to include framework phase
+          totalSteps: 9, // Updated to include framework phase
           phaseProgress: updatedData,
           startedAt: updatedData.startedAt || new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
@@ -327,6 +326,50 @@ export default function BrandMarketingSimulation() {
     router.push("/dashboard/student")
   }
 
+  const handlePreviousStep = () => {
+    const phases: SimulationPhase[] = [
+      "intro",
+      "pre-reflection",
+      "framework",
+      "exploration",
+      "experience",
+      "engage",
+      "post-reflection",
+      "envision",
+      "complete",
+    ]
+    const currentIndex = phases.indexOf(currentPhase)
+
+    if (currentIndex > 0) {
+      const previousPhase = phases[currentIndex - 1]
+      setCurrentPhase(previousPhase)
+
+      // Update simulation data
+      const updateData: Partial<SimulationData> = {
+        phase: previousPhase,
+        lastUpdated: new Date().toISOString(),
+      }
+
+      saveProgress(updateData)
+    }
+  }
+
+  const canGoBack = () => {
+    const phases: SimulationPhase[] = [
+      "intro",
+      "pre-reflection",
+      "framework",
+      "exploration",
+      "experience",
+      "engage",
+      "post-reflection",
+      "envision",
+      "complete",
+    ]
+    const currentIndex = phases.indexOf(currentPhase)
+    return currentIndex > 0 && currentPhase !== "complete"
+  }
+
   const getPhaseStep = (phase: SimulationPhase): number => {
     const phaseSteps = {
       intro: 1,
@@ -337,7 +380,7 @@ export default function BrandMarketingSimulation() {
       engage: 6,
       "post-reflection": 7,
       envision: 8,
-      complete: 8,
+      complete: 9,
     }
     return phaseSteps[phase] || 1
   }
@@ -382,15 +425,6 @@ export default function BrandMarketingSimulation() {
     }
   }
 
-  const formatLastSaved = () => {
-    if (!lastSaved) return ""
-    const now = new Date()
-    const diff = Math.floor((now.getTime() - lastSaved.getTime()) / 1000)
-    if (diff < 60) return "Saved just now"
-    if (diff < 3600) return `Saved ${Math.floor(diff / 60)}m ago`
-    return `Saved ${Math.floor(diff / 3600)}h ago`
-  }
-
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -405,80 +439,25 @@ export default function BrandMarketingSimulation() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={handleBackToDashboard} className="flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2d407e] to-[#765889] flex items-center justify-center">
-                  <Megaphone className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-800">Make Your Star Shine</h1>
-                  <p className="text-sm text-gray-600">Branding & Marketing Career Simulation</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6 text-sm text-gray-500">
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                4-6 hours
-              </div>
-              <Badge className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">Branding & Marketing</Badge>
-
-              {/* Save Status */}
-              <div className="flex items-center gap-2">
-                {isSaving ? (
-                  <div className="flex items-center gap-2 text-[#2d407e]">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#2d407e]"></div>
-                    <span className="text-xs">Saving...</span>
-                  </div>
-                ) : saveError ? (
-                  <div className="flex items-center gap-2 text-red-600">
-                    <AlertCircle className="w-3 h-3" />
-                    <span className="text-xs">Save Error</span>
-                  </div>
-                ) : lastSaved ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle className="w-3 h-3" />
-                    <span className="text-xs">{formatLastSaved()}</span>
-                  </div>
-                ) : null}
-
-                {/* Manual Save Button */}
-                {currentPhase !== "intro" && currentPhase !== "complete" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => saveCurrentProgress()}
-                    disabled={isSaving}
-                    className="h-7 px-2"
-                  >
-                    <Save className="w-3 h-3 mr-1" />
-                    Save
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">{getPhaseTitle()}</span>
-              <span className="text-sm text-gray-500">{Math.round(getPhaseProgress())}% Complete</span>
-            </div>
-            <Progress value={getPhaseProgress()} className="h-2" />
-          </div>
-        </div>
-      </div>
+      {/* Navigation Header */}
+      <SimulationNavigation
+        title="Make Your Star Shine"
+        subtitle="Branding & Marketing Career Simulation"
+        icon={<Megaphone className="w-6 h-6 text-white" />}
+        duration="4-6 hours"
+        category="Branding & Marketing"
+        categoryColor="bg-gradient-to-r from-[#2d407e] to-[#765889]"
+        currentPhase={currentPhase} // Pass the actual phase ID, not the title
+        progress={getPhaseProgress()}
+        onBackToDashboard={handleBackToDashboard}
+        onPreviousStep={handlePreviousStep}
+        canGoBack={canGoBack()}
+        isSaving={isSaving}
+        saveError={saveError}
+        lastSaved={lastSaved}
+        onManualSave={() => saveCurrentProgress()}
+        showSaveButton={currentPhase !== "intro" && currentPhase !== "complete"}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Simulation Content */}

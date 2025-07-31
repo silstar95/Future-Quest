@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Building, CheckCircle, Calculator, AlertTriangle, Info } from 'lucide-react'
+import { ArrowLeft, Building, CheckCircle, Calculator, AlertTriangle, Info } from "lucide-react"
 
 interface FinanceTaskThreeProps {
   onComplete: (answers: any) => void
@@ -130,19 +130,21 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
     <div className="max-w-4xl mx-auto">
       {/* Task Description */}
       {showDescription && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="mb-6 border-brand-primary/20 bg-brand-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Info className="w-6 h-6 text-blue-600" />
                 <div>
-                  <CardTitle className="text-lg text-blue-800">Task 3: Corporate Treasurer</CardTitle>
-                  <CardDescription className="text-blue-600">Budget Boss: Crafting the Financial Future</CardDescription>
+                  <CardTitle className="text-lg text-brand-primary">Task 3: Corporate Treasurer</CardTitle>
+                  <CardDescription className="text-brand-secondary">
+                    Budget Boss: Crafting the Financial Future
+                  </CardDescription>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowDescription(false)}
                 className="text-blue-600 hover:text-blue-800"
               >
@@ -153,13 +155,13 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
           <CardContent className="text-blue-800">
             <div className="space-y-4">
               <p className="leading-relaxed">
-                <strong>Description:</strong> As the financial advisor for your company, you are tasked with preparing 
-                the budget for the upcoming year. The leadership team is counting on you to allocate funds wisely, 
+                <strong>Description:</strong> As the financial advisor for your company, you are tasked with preparing
+                the budget for the upcoming year. The leadership team is counting on you to allocate funds wisely,
                 balancing necessary expenses with growth opportunities.
               </p>
               <p className="leading-relaxed">
-                However, like any business, you will face constraints—you must work within a limited budget while 
-                making strategic financial decisions.
+                However, like any business, you will face constraints—you must work within a limited budget while making
+                strategic financial decisions.
               </p>
               <div className="bg-white p-4 rounded-lg border border-blue-200">
                 <h4 className="font-semibold mb-2">What You'll Learn:</h4>
@@ -181,7 +183,7 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
       )}
 
       <Card className="border-2 border-blue-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-green-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack} className="text-white hover:bg-white/20">
@@ -204,9 +206,9 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                 Step {currentStep + 1} of {steps.length}
               </Badge>
               {!showDescription && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowDescription(true)}
                   className="text-white hover:bg-white/20"
                 >
@@ -224,7 +226,8 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                 <Calculator className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 1: Understand Last Year's Budget</h3>
                 <p className="text-gray-600 mb-6">
-                  Your company's previous year's budget is as follows. You have $225 million total—an increase of $10M from last year.
+                  Your company's previous year's budget is as follows. You have $225 million total—an increase of $10M
+                  from last year.
                 </p>
               </div>
 
@@ -293,9 +296,11 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
             <div className="space-y-6">
               <div className="text-center">
                 <Calculator className="w-16 h-16 mx-auto text-blue-600 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 2: Identify Budget Constraints & Priorities</h3>
+                <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                  Step 2: Identify Budget Constraints & Priorities
+                </h3>
                 <p className="text-gray-600 mb-6">
-                  Consider these factors as you adjust the budget. As you read each of them, calculate the amount that 
+                  Consider these factors as you adjust the budget. As you read each of them, calculate the amount that
                   would ideally be needed in each category if you did not have the limit of $225M:
                 </p>
               </div>
@@ -326,7 +331,9 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <h4 className="font-medium">R&D Demand: The company wants to increase innovation and invest 10% more in AI development</h4>
+                        <h4 className="font-medium">
+                          R&D Demand: The company wants to increase innovation and invest 10% more in AI development
+                        </h4>
                         <p className="text-sm text-gray-600">Current: $40M</p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -371,7 +378,8 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                     <div className="flex justify-between items-center">
                       <div>
                         <h4 className="font-medium">
-                          Tech Upgrades: The IT team has identified cybersecurity risks and needs an additional $10M for infrastructure improvements
+                          Tech Upgrades: The IT team has identified cybersecurity risks and needs an additional $10M for
+                          infrastructure improvements
                         </h4>
                         <p className="text-sm text-gray-600">Current: $25M</p>
                       </div>
@@ -394,7 +402,8 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                     <div className="flex justify-between items-center">
                       <div>
                         <h4 className="font-medium">
-                          Cost-Saving Initiative: The company's leadership wants to cut 5% from logistics costs to improve efficiency
+                          Cost-Saving Initiative: The company's leadership wants to cut 5% from logistics costs to
+                          improve efficiency
                         </h4>
                         <p className="text-sm text-gray-600">Current: $60M</p>
                       </div>
@@ -421,7 +430,7 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                 <Building className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 3: Disappoint some, Please some</h3>
                 <p className="text-gray-600 mb-6">
-                  Now adjust the budget without exceeding $225M while meeting the company's strategic goals. You will 
+                  Now adjust the budget without exceeding $225M while meeting the company's strategic goals. You will
                   please some departments and you will disappoint some. This is just part of the role.
                 </p>
               </div>
@@ -503,7 +512,7 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                 <CheckCircle className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 4: Justify Your Budget Decisions</h3>
                 <p className="text-gray-600 mb-6">
-                  For each category, justify your change. For the justification, get creative e.g something can get 
+                  For each category, justify your change. For the justification, get creative e.g something can get
                   automated to save costs, using AI to save costs etc.
                 </p>
               </div>
@@ -519,7 +528,8 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
                 ].map((item) => (
                   <div key={item.key}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      {item.label} (${answers.newBudget[item.key as keyof typeof answers.newBudget]}M) - Justification for Change:
+                      {item.label} (${answers.newBudget[item.key as keyof typeof answers.newBudget]}M) - Justification
+                      for Change:
                     </label>
                     <Textarea
                       value={answers.justifications[item.key as keyof typeof answers.justifications]}
@@ -571,7 +581,7 @@ export default function FinanceTaskThree({ onComplete, onBack, initialData }: Fi
             <Button
               onClick={handleNext}
               disabled={!isStepComplete()}
-              className="px-6 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+              className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent"
             >
               {currentStep === steps.length - 1 ? (
                 <>

@@ -73,13 +73,13 @@ export function MaterialSciencePostReflectionForm({
   const growthMessage = detectGrowth()
 
   return (
-    <Card className="border-2 border-green-200 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-green-600 text-white">
+    <Card className="border-2 border-brand-highlight/30 shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
         <div className="flex items-center gap-3">
           <CheckCircle className="w-8 h-8" />
           <div>
             <CardTitle className="text-xl">Post Reflection</CardTitle>
-            <CardDescription className="text-blue-100">
+            <CardDescription className="text-brand-primary/20">
               🔬 Congratulations! You've completed your simulation. Take a moment to reflect on how you felt working on
               this task and the wider project.
             </CardDescription>
@@ -89,12 +89,12 @@ export function MaterialSciencePostReflectionForm({
 
       <CardContent className="p-8 space-y-8">
         {growthMessage && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="bg-brand-highlight/10 border border-brand-highlight/30 rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-              <span className="font-medium text-green-800">Growth Detected!</span>
+              <TrendingUp className="w-5 h-5 text-brand-highlight" />
+              <span className="font-medium text-brand-primary">Growth Detected!</span>
             </div>
-            <p className="text-green-700 mt-1">{growthMessage}</p>
+            <p className="text-brand-secondary mt-1">{growthMessage}</p>
           </div>
         )}
 
@@ -126,7 +126,7 @@ export function MaterialSciencePostReflectionForm({
                 <span>10</span>
               </div>
               <div className="text-center mt-2">
-                <span className="font-medium text-lg text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                <span className="font-medium text-lg text-brand-primary bg-brand-accent/10 px-3 py-1 rounded-full">
                   {answers.enjoymentRating[0]}
                 </span>
               </div>
@@ -212,7 +212,7 @@ export function MaterialSciencePostReflectionForm({
                 <span>5 = Very confident</span>
               </div>
               <div className="text-center mt-2">
-                <span className="font-medium text-lg text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                <span className="font-medium text-lg text-brand-primary bg-brand-accent/10 px-3 py-1 rounded-full">
                   {answers.confidenceRating[0]}
                 </span>
               </div>
@@ -243,7 +243,7 @@ export function MaterialSciencePostReflectionForm({
                 <span>5 = Most Definitely</span>
               </div>
               <div className="text-center mt-2">
-                <span className="font-medium text-lg text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                <span className="font-medium text-lg text-brand-primary bg-brand-accent/10 px-3 py-1 rounded-full">
                   {answers.interestLevel[0]}
                 </span>
               </div>
@@ -265,30 +265,30 @@ export function MaterialSciencePostReflectionForm({
         </div>
 
         {/* Summary Card */}
-        <Card className="bg-gradient-to-br from-blue-50 to-green-50 border-blue-200">
+        <Card className="bg-gradient-to-br from-brand-accent/10 to-brand-highlight/10 border-brand-accent/30">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Star className="w-6 h-6 text-blue-600" />
-              <h4 className="text-lg font-semibold text-blue-800">Your Materials Science Journey Summary</h4>
+              <Star className="w-6 h-6 text-brand-primary" />
+              <h4 className="text-lg font-semibold text-brand-primary">Your Materials Science Journey Summary</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{answers.enjoymentRating[0]}/10</div>
-                <div className="text-blue-700">Enjoyment Rating</div>
+                <div className="text-2xl font-bold text-brand-primary">{answers.enjoymentRating[0]}/10</div>
+                <div className="text-brand-secondary">Enjoyment Rating</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{answers.confidenceRating[0]}/5</div>
-                <div className="text-green-700">Confidence Level</div>
+                <div className="text-2xl font-bold text-brand-highlight">{answers.confidenceRating[0]}/5</div>
+                <div className="text-brand-secondary">Confidence Level</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{answers.interestLevel[0]}/5</div>
-                <div className="text-purple-700">Future Interest</div>
+                <div className="text-2xl font-bold text-brand-accent">{answers.interestLevel[0]}/5</div>
+                <div className="text-brand-secondary">Future Interest</div>
               </div>
             </div>
             <div className="mt-4 text-center">
               <div className="flex items-center justify-center gap-2">
-                <Microscope className="w-5 h-5 text-blue-600" />
-                <span className="font-medium text-blue-800">
+                <Microscope className="w-5 h-5 text-brand-primary" />
+                <span className="font-medium text-brand-primary">
                   Career Interest:{" "}
                   {answers.careerPursuit === "yes"
                     ? "✅ Yes"
@@ -306,7 +306,7 @@ export function MaterialSciencePostReflectionForm({
             onClick={handleSubmit}
             disabled={!isComplete()}
             size="lg"
-            className="px-8 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+            className="px-8 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary/90 hover:to-brand-secondary/90"
           >
             Complete Reflection
             <CheckCircle className="ml-2 h-5 w-5" />

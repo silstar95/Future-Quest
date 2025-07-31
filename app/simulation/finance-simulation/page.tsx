@@ -6,13 +6,12 @@ import { useRouter } from "next/navigation"
 import { PostReflectionForm } from "@/components/simulation/post-reflection-form"
 import { EnvisionPhase } from "@/components/simulation/envision-phase"
 import { SimulationComplete } from "@/components/simulation/simulation-complete"
+import { SimulationNavigation } from "@/components/simulation/simulation-navigation"
 import { saveSimulationProgress, getSimulationProgress, completeSimulation } from "@/lib/firebase-service"
 import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { DollarSign, Clock, Users, Star, ArrowLeft, Save, CheckCircle, AlertCircle } from "lucide-react"
+import { DollarSign, Users, Star } from "lucide-react"
 import FinancePreReflectionForm from "@/components/simulation/finance-pre-reflection-form"
 import FinanceExplorationPhase from "@/components/simulation/finance-exploration-phase"
 import FinanceExperiencePhase from "@/components/simulation/finance-experience-phase"
@@ -324,6 +323,48 @@ export default function FinanceSimulation() {
     router.push("/dashboard/student")
   }
 
+  const handlePreviousStep = () => {
+    const phases: SimulationPhase[] = [
+      "intro",
+      "pre-reflection",
+      "framework",
+      "exploration",
+      "experience",
+      "post-reflection",
+      "envision",
+      "complete",
+    ]
+    const currentIndex = phases.indexOf(currentPhase)
+
+    if (currentIndex > 0) {
+      const previousPhase = phases[currentIndex - 1]
+      setCurrentPhase(previousPhase)
+
+      // Update simulation data
+      const updateData: Partial<SimulationData> = {
+        phase: previousPhase,
+        lastUpdated: new Date().toISOString(),
+      }
+
+      saveProgress(updateData)
+    }
+  }
+
+  const canGoBack = () => {
+    const phases: SimulationPhase[] = [
+      "intro",
+      "pre-reflection",
+      "framework",
+      "exploration",
+      "experience",
+      "post-reflection",
+      "envision",
+      "complete",
+    ]
+    const currentIndex = phases.indexOf(currentPhase)
+    return currentIndex > 0 && currentPhase !== "complete"
+  }
+
   const getPhaseStep = (phase: SimulationPhase): number => {
     const phaseSteps = {
       intro: 1,
@@ -333,7 +374,7 @@ export default function FinanceSimulation() {
       experience: 5,
       "post-reflection": 6,
       envision: 7,
-      complete: 7,
+      complete: 8,
     }
     return phaseSteps[phase] || 1
   }
@@ -375,15 +416,6 @@ export default function FinanceSimulation() {
     }
   }
 
-  const formatLastSaved = () => {
-    if (!lastSaved) return ""
-    const now = new Date()
-    const diff = Math.floor((now.getTime() - lastSaved.getTime()) / 1000)
-    if (diff < 60) return "Saved just now"
-    if (diff < 3600) return `Saved ${Math.floor(diff / 60)}m ago`
-    return `Saved ${Math.floor(diff / 3600)}h ago`
-  }
-
   if (loading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -398,80 +430,25 @@ export default function FinanceSimulation() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={handleBackToDashboard} className="flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2d407e] to-[#765889] flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-800">Risk, Reward, and Real World Finance</h1>
-                  <p className="text-sm text-gray-600">Finance Career Simulation</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6 text-sm text-gray-500">
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                3-4 hours
-              </div>
-              <Badge className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">Finance</Badge>
-
-              {/* Save Status */}
-              <div className="flex items-center gap-2">
-                {isSaving ? (
-                  <div className="flex items-center gap-2 text-[#2d407e]">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#2d407e]"></div>
-                    <span className="text-xs">Saving...</span>
-                  </div>
-                ) : saveError ? (
-                  <div className="flex items-center gap-2 text-red-600">
-                    <AlertCircle className="w-3 h-3" />
-                    <span className="text-xs">Save Error</span>
-                  </div>
-                ) : lastSaved ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle className="w-3 h-3" />
-                    <span className="text-xs">{formatLastSaved()}</span>
-                  </div>
-                ) : null}
-
-                {/* Manual Save Button */}
-                {currentPhase !== "intro" && currentPhase !== "complete" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => saveCurrentProgress()}
-                    disabled={isSaving}
-                    className="h-7 px-2"
-                  >
-                    <Save className="w-3 h-3 mr-1" />
-                    Save
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">{getPhaseTitle()}</span>
-              <span className="text-sm text-gray-500">{Math.round(getPhaseProgress())}% Complete</span>
-            </div>
-            <Progress value={getPhaseProgress()} className="h-2" />
-          </div>
-        </div>
-      </div>
+      {/* Navigation Header */}
+      <SimulationNavigation
+        title="Risk, Reward, and Real World Finance"
+        subtitle="Finance Career Simulation"
+        icon={<DollarSign className="w-6 h-6 text-white" />}
+        duration="3-4 hours"
+        category="Finance"
+        categoryColor="bg-gradient-to-r from-[#2d407e] to-[#765889]"
+        currentPhase={currentPhase} // Pass the actual phase ID, not the title
+        progress={getPhaseProgress()}
+        onBackToDashboard={handleBackToDashboard}
+        onPreviousStep={handlePreviousStep}
+        canGoBack={canGoBack()}
+        isSaving={isSaving}
+        saveError={saveError}
+        lastSaved={lastSaved}
+        onManualSave={() => saveCurrentProgress()}
+        showSaveButton={currentPhase !== "intro" && currentPhase !== "complete"}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Simulation Content */}
@@ -479,7 +456,7 @@ export default function FinanceSimulation() {
           {currentPhase === "intro" && (
             <Card className="border-2 border-blue-200 shadow-lg">
               <CardContent className="p-8 text-center">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-[#2d407e] to-[#765889] rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-full flex items-center justify-center shadow-lg">
                   <DollarSign className="w-12 h-12 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-800 mb-4">
@@ -491,12 +468,12 @@ export default function FinanceSimulation() {
                   finance careers.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 text-left">
-                  <div className="bg-gradient-to-br from-blue-50 to-green-50 p-6 rounded-xl border border-blue-200">
-                    <h3 className="font-bold text-blue-800 mb-3 flex items-center">
+                  <div className="bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 p-6 rounded-xl border border-brand-primary/20">
+                    <h3 className="font-bold text-brand-primary mb-3 flex items-center">
                       <Star className="w-5 h-5 mr-2" />
                       The 5 E's You'll Experience:
                     </h3>
-                    <ul className="text-sm text-blue-700 space-y-2">
+                    <ul className="text-sm text-brand-secondary space-y-2">
                       <li>
                         • 🔍 <strong>Explore</strong> - Discover finance career roles
                       </li>
@@ -514,12 +491,12 @@ export default function FinanceSimulation() {
                       </li>
                     </ul>
                   </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-green-50 p-6 rounded-xl border border-blue-200">
-                    <h3 className="font-bold text-blue-800 mb-3 flex items-center">
+                  <div className="bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10 p-6 rounded-xl border border-brand-primary/20">
+                    <h3 className="font-bold text-brand-primary mb-3 flex items-center">
                       <Users className="w-5 h-5 mr-2" />
                       Finance Roles You'll Master:
                     </h3>
-                    <ul className="text-sm text-blue-700 space-y-2">
+                    <ul className="text-sm text-brand-secondary space-y-2">
                       <li>• 📊 Financial Analyst</li>
                       <li>• 💼 Investment Advisor</li>
                       <li>• 💰 Corporate Treasurer</li>
@@ -531,7 +508,7 @@ export default function FinanceSimulation() {
                 <Button
                   onClick={() => handlePhaseComplete({}, "pre-reflection")}
                   size="lg"
-                  className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#0e3968] hover:to-[#231349] transition-all shadow-lg"
+                  className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-8 py-3 rounded-lg font-semibold hover:from-brand-secondary hover:to-brand-accent transition-all shadow-lg"
                 >
                   🚀 Start Your Journey
                 </Button>

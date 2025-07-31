@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, DollarSign, CheckCircle, TrendingUp, Info } from 'lucide-react'
+import { ArrowLeft, DollarSign, CheckCircle, TrendingUp, Info } from "lucide-react"
 
 interface FinanceTaskTwoProps {
   onComplete: (answers: any) => void
@@ -42,17 +42,20 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
     {
       id: "africa",
       title: "Expanding into the African continent",
-      description: "This would increase your user base by 500 million and would cost you close to $1 billion dollars to do so.",
+      description:
+        "This would increase your user base by 500 million and would cost you close to $1 billion dollars to do so.",
     },
     {
       id: "ai",
       title: "Launch a new AI product",
-      description: "With every company investing in AI, you have a chance to launch your own AI product that is related to your selected company.",
+      description:
+        "With every company investing in AI, you have a chance to launch your own AI product that is related to your selected company.",
     },
     {
       id: "acquisition",
       title: "Acquire a competitor",
-      description: "Acquire a competitor who is a third of the size of your company. This acquisition would increase your market share by 3%.",
+      description:
+        "Acquire a competitor who is a third of the size of your company. This acquisition would increase your market share by 3%.",
     },
   ]
 
@@ -115,19 +118,21 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
     <div className="max-w-4xl mx-auto">
       {/* Task Description */}
       {showDescription && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="mb-6 border-brand-primary/20 bg-brand-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Info className="w-6 h-6 text-blue-600" />
                 <div>
-                  <CardTitle className="text-lg text-blue-800">Task 2: Investment Advisor</CardTitle>
-                  <CardDescription className="text-blue-600">Fuel the Future: Strategic Investments</CardDescription>
+                  <CardTitle className="text-lg text-brand-primary">Task 2: Investment Advisor</CardTitle>
+                  <CardDescription className="text-brand-secondary">
+                    Fuel the Future: Strategic Investments
+                  </CardDescription>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowDescription(false)}
                 className="text-blue-600 hover:text-blue-800"
               >
@@ -138,11 +143,12 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
           <CardContent className="text-blue-800">
             <div className="space-y-4">
               <p className="leading-relaxed">
-                <strong>Scenario:</strong> Now that you have selected the company that you are the financial advisor for, 
-                you are tasked with a major investment decision to make. You have a chance to invest in one of three options.
+                <strong>Scenario:</strong> Now that you have selected the company that you are the financial advisor
+                for, you are tasked with a major investment decision to make. You have a chance to invest in one of
+                three options.
               </p>
               <p className="leading-relaxed">
-                Select one investment option (there is no right or wrong answer) and follow the steps below to justify 
+                Select one investment option (there is no right or wrong answer) and follow the steps below to justify
                 your investment decision.
               </p>
               <div className="bg-white p-4 rounded-lg border border-blue-200">
@@ -160,7 +166,7 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
       )}
 
       <Card className="border-2 border-blue-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-green-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack} className="text-white hover:bg-white/20">
@@ -181,9 +187,9 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
                 Step {currentStep + 1} of {steps.length}
               </Badge>
               {!showDescription && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowDescription(true)}
                   className="text-white hover:bg-white/20"
                 >
@@ -245,7 +251,7 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
                 <DollarSign className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 2: Funding the Investment</h3>
                 <p className="text-gray-600 mb-6">
-                  Like in any organization, you do not have unlimited funds to make this investment. Your company has 
+                  Like in any organization, you do not have unlimited funds to make this investment. Your company has
                   three options to choose from to fund this investment:
                 </p>
               </div>
@@ -293,8 +299,9 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
                 <TrendingUp className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 3: Analyze the Risk</h3>
                 <p className="text-gray-600 mb-6">
-                  Every investment has a risk associated with it. Fill out the following table with 3 risks that you 
-                  anticipate with this investment. Some things you can think about include market competition, global trends, inflation etc.
+                  Every investment has a risk associated with it. Fill out the following table with 3 risks that you
+                  anticipate with this investment. Some things you can think about include market competition, global
+                  trends, inflation etc.
                 </p>
               </div>
 
@@ -352,8 +359,8 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
                 <DollarSign className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 4: Pitch Your Investment</h3>
                 <p className="text-gray-600 mb-6">
-                  You are presenting this investment decision to the company's Board of Directors. Write a 1-minute pitch 
-                  convincing them that your choice is the right one.
+                  You are presenting this investment decision to the company's Board of Directors. Write a 1-minute
+                  pitch convincing them that your choice is the right one.
                 </p>
               </div>
 
@@ -380,7 +387,8 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
 
               <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                 <p className="text-green-800 text-sm font-medium">
-                  🎉 Well done! You have learnt how to strategically think through an investment decision and pitch it to stakeholders.
+                  🎉 Well done! You have learnt how to strategically think through an investment decision and pitch it
+                  to stakeholders.
                 </p>
               </div>
             </div>
@@ -399,7 +407,7 @@ export default function FinanceTaskTwo({ onComplete, onBack, initialData }: Fina
             <Button
               onClick={handleNext}
               disabled={!isStepComplete()}
-              className="px-6 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+              className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent"
             >
               {currentStep === steps.length - 1 ? (
                 <>

@@ -26,6 +26,7 @@ import {
   ExternalLink,
   ArrowRight,
 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 interface GovernmentExperiencePhaseProps {
   onComplete: (results: any) => void
@@ -49,6 +50,7 @@ const STAKEHOLDERS = [
 ]
 
 export default function GovernmentExperiencePhase({ onComplete }: GovernmentExperiencePhaseProps) {
+  const { toast } = useToast()
   const [gamePhase, setGamePhase] = useState<"welcome" | "stakeholder" | "results">("welcome")
   const [currentStakeholder, setCurrentStakeholder] = useState(0)
   const [gameState, setGameState] = useState<GameState>({
@@ -621,13 +623,22 @@ If you can address these points, I'll give this bill serious consideration."
       newGameState.stakeholderResults[stakeholderName] = true
       setGameState(newGameState)
 
-      // Move to next stakeholder or results
-      if (currentStakeholder < STAKEHOLDERS.length - 1) {
-        setCurrentStakeholder(currentStakeholder + 1)
-        setCurrentResponse("")
-      } else {
-        setGamePhase("results")
-      }
+      // Show success message immediately
+      toast({
+        title: "🎉 Stakeholder Convinced!",
+        description: `${stakeholderName} supports the WATER Act!`,
+        duration: 3000,
+      })
+
+      // Wait a moment to show the success, then move to next stakeholder or results
+      setTimeout(() => {
+        if (currentStakeholder < STAKEHOLDERS.length - 1) {
+          setCurrentStakeholder(currentStakeholder + 1)
+          setCurrentResponse("")
+        } else {
+          setGamePhase("results")
+        }
+      }, 2000)
     } else {
       // Failed attempt
       newGameState.stakeholderResults[stakeholderName] = false
@@ -636,18 +647,36 @@ If you can address these points, I'll give this bill serious consideration."
       const canRetry = currentAttempt < gameState.maxAttempts[stakeholderName]
 
       if (canRetry) {
+        // Show retry message
+        toast({
+          title: "❌ Not Convinced Yet",
+          description: `${stakeholderName} needs more convincing. Try again!`,
+          variant: "destructive",
+          duration: 3000,
+        })
         // Stay on same stakeholder for retry
         setGameState(newGameState)
         setCurrentResponse("")
       } else {
-        // No more attempts, move to next
+        // No more attempts, show final failure message
+        toast({
+          title: "❌ Stakeholder Not Convinced",
+          description: `${stakeholderName} will not support the WATER Act.`,
+          variant: "destructive",
+          duration: 3000,
+        })
+
         setGameState(newGameState)
-        if (currentStakeholder < STAKEHOLDERS.length - 1) {
-          setCurrentStakeholder(currentStakeholder + 1)
-          setCurrentResponse("")
-        } else {
-          setGamePhase("results")
-        }
+
+        // Wait a moment then move to next stakeholder or results
+        setTimeout(() => {
+          if (currentStakeholder < STAKEHOLDERS.length - 1) {
+            setCurrentStakeholder(currentStakeholder + 1)
+            setCurrentResponse("")
+          } else {
+            setGamePhase("results")
+          }
+        }, 2000)
       }
     }
   }
@@ -1032,6 +1061,33 @@ If you can address these points, I'll give this bill serious consideration."
             >
               <AlertDescription>
                 <div className="whitespace-pre-line">{latestFeedback}</div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Current Status Indicator */}
+          {gameState.stakeholderResults[stakeholderName] !== null && (
+            <Alert
+              className={
+                gameState.stakeholderResults[stakeholderName] === true
+                  ? "border-green-500 bg-green-50"
+                  : "border-red-500 bg-red-50"
+              }
+            >
+              <AlertDescription>
+                <div className="flex items-center gap-2">
+                  {gameState.stakeholderResults[stakeholderName] === true ? (
+                    <>
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <span className="font-semibold text-green-800">✅ {stakeholderName} supports the WATER Act!</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-5 w-5 text-red-600" />
+                      <span className="font-semibold text-red-800">❌ {stakeholderName} is not convinced yet.</span>
+                    </>
+                  )}
+                </div>
               </AlertDescription>
             </Alert>
           )}

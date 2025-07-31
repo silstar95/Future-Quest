@@ -89,10 +89,10 @@ export function MaterialScienceExplorationPhase({ onComplete, initialData }: Mat
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Phase Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200">
+      <Card className="bg-gradient-to-r from-brand-accent/10 to-brand-highlight/10 border-2 border-brand-accent/30">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl">
-            <Search className="mr-3 h-6 w-6 text-blue-600" />
+            <Search className="mr-3 h-6 w-6 text-brand-primary" />
             Explore: Research Materials Science Careers
           </CardTitle>
           <p className="text-gray-600 leading-relaxed">
@@ -104,11 +104,11 @@ export function MaterialScienceExplorationPhase({ onComplete, initialData }: Mat
       </Card>
 
       {/* Research Timer */}
-      <Card className="border-2 border-blue-200">
+      <Card className="border-2 border-brand-accent/30">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
-              <Clock className="mr-2 h-5 w-5 text-blue-600" />
+              <Clock className="mr-2 h-5 w-5 text-brand-primary" />
               Research Timer
             </div>
             <Badge variant={timeSpent >= minResearchTime ? "default" : "secondary"}>{formatTime(timeSpent)}</Badge>
@@ -128,19 +128,19 @@ export function MaterialScienceExplorationPhase({ onComplete, initialData }: Mat
                 Begin by doing an internet search of Materials Science careers. See what you can find about the industry
                 and individual roles.
               </p>
-              <Button onClick={handleStartResearch} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={handleStartResearch} className="bg-brand-primary hover:bg-brand-primary/90">
                 <Search className="mr-2 h-4 w-4" />
                 Start Research Timer
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+              <div className="bg-brand-accent/10 p-4 rounded-lg border border-brand-accent/30">
+                <h4 className="font-semibold text-brand-primary mb-2 flex items-center">
                   <Lightbulb className="mr-2 h-4 w-4" />
                   Research Tip
                 </h4>
-                <p className="text-blue-700 text-sm">
+                <p className="text-brand-secondary text-sm">
                   Try searching for materials engineering jobs, research positions, and industry websites to find
                   current openings and detailed role descriptions in materials science.
                 </p>
@@ -236,12 +236,12 @@ export function MaterialScienceExplorationPhase({ onComplete, initialData }: Mat
           </Card>
 
           {/* Complete Button */}
-          <Card className="border-2 border-green-200 bg-green-50">
+          <Card className="border-2 border-brand-highlight/30 bg-brand-highlight/10">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-green-800">Ready to Continue?</h4>
-                  <p className="text-sm text-green-700">
+                  <h4 className="font-semibold text-brand-primary">Ready to Continue?</h4>
+                  <p className="text-sm text-brand-secondary">
                     {timeSpent >= recommendedTime
                       ? "Great job! You've completed the recommended research time."
                       : `Continue researching for ${Math.ceil((recommendedTime - timeSpent) / 60)} more minutes for best results.`}
@@ -251,7 +251,7 @@ export function MaterialScienceExplorationPhase({ onComplete, initialData }: Mat
                   <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
                     <AlertDialogTrigger asChild>
                       <Button
-                        className="bg-green-600 hover:bg-green-700"
+                        className="bg-brand-highlight hover:bg-brand-highlight/90"
                         disabled={!canComplete}
                         onClick={handleContinueWithWarning}
                       >

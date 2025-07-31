@@ -205,7 +205,7 @@ export function SimulationComplete({
             </div>
           </div>
           <CardTitle className="text-4xl mb-2 font-bold">Mission Accomplished!</CardTitle>
-          <p className="text-[#f0ad70] text-xl">
+          <p className="text-white text-xl">
             {content.icon} You've successfully completed "{content.title}" - {content.field} Simulation
           </p>
         </CardHeader>

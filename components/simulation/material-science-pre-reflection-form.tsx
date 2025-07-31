@@ -118,7 +118,7 @@ export function MaterialSciencePreReflectionForm({ onComplete, initialData }: Ma
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Progress Header */}
-      <Card className="bg-gradient-to-r from-blue-500 to-green-600 text-white border-0 shadow-2xl">
+      <Card className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white border-0 shadow-2xl">
         <CardHeader>
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -126,7 +126,7 @@ export function MaterialSciencePreReflectionForm({ onComplete, initialData }: Ma
             </div>
             <div>
               <CardTitle className="text-2xl">Pre-Reflection: Understanding Your Starting Point</CardTitle>
-              <p className="text-blue-100 mt-1">
+              <p className="text-brand-primary/20 mt-1">
                 Let's understand your current knowledge about materials science careers
               </p>
             </div>
@@ -193,7 +193,7 @@ export function MaterialSciencePreReflectionForm({ onComplete, initialData }: Ma
               <Button
                 onClick={handleNext}
                 disabled={!isAnswered}
-                className="px-6 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+                className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-primary/90 hover:to-brand-secondary/90"
               >
                 {currentQuestion === questions.length - 1 ? "Complete Pre-Reflection" : "Next Question"}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -204,9 +204,9 @@ export function MaterialSciencePreReflectionForm({ onComplete, initialData }: Ma
       </Card>
 
       {/* Help Text */}
-      <Card className="bg-gradient-to-br from-blue-50 to-green-50 border-2 border-blue-200">
+      <Card className="bg-gradient-to-br from-brand-accent/10 to-brand-highlight/10 border-2 border-brand-accent/30">
         <CardContent className="p-4">
-          <p className="text-sm text-blue-800">
+          <p className="text-sm text-brand-primary">
             <strong>💡 Tip:</strong> Be honest in your responses! This helps us understand your starting point and
             personalize your learning experience. There are no right or wrong answers.
           </p>

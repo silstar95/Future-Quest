@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Shield, CheckCircle, AlertTriangle, Scale, Info } from 'lucide-react'
+import { ArrowLeft, Shield, CheckCircle, Scale, Info } from "lucide-react"
 
 interface FinanceTaskFiveProps {
   onComplete: (answers: any) => void
@@ -70,19 +70,21 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
     <div className="max-w-4xl mx-auto">
       {/* Task Description */}
       {showDescription && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="mb-6 border-brand-primary/20 bg-brand-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Info className="w-6 h-6 text-blue-600" />
                 <div>
-                  <CardTitle className="text-lg text-blue-800">Task 5: Risk Manager</CardTitle>
-                  <CardDescription className="text-blue-600">Ethics in Finance: Navigating Moral Dilemmas</CardDescription>
+                  <CardTitle className="text-lg text-brand-primary">Task 5: Risk Manager</CardTitle>
+                  <CardDescription className="text-brand-secondary">
+                    Ethics in Finance: Navigating Moral Dilemmas
+                  </CardDescription>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowDescription(false)}
                 className="text-blue-600 hover:text-blue-800"
               >
@@ -93,15 +95,20 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
           <CardContent className="text-blue-800">
             <div className="space-y-4">
               <p className="leading-relaxed">
-                <strong>Description:</strong> Your company is facing financial struggles due to an economic recession. 
-                Consumer spending has dropped by 10%, and profits have fallen by 33%. To stay profitable for the next year, 
-                the company must make a difficult choice.
+                <strong>Description:</strong> Your company is facing financial struggles due to an economic recession.
+                Consumer spending has dropped by 10%, and profits have fallen by 33%. To stay profitable for the next
+                year, the company must make a difficult choice.
               </p>
               <div className="bg-white p-4 rounded-lg border border-blue-200">
                 <h4 className="font-semibold mb-2">The Dilemma:</h4>
                 <ul className="space-y-1 text-sm">
-                  <li>• <strong>Option 1:</strong> Lay off workers to reduce labor cost, which would negatively impact employees</li>
-                  <li>• <strong>Option 2:</strong> Raise prices during a shortage, which would negatively impact consumers</li>
+                  <li>
+                    • <strong>Option 1:</strong> Lay off workers to reduce labor cost, which would negatively impact
+                    employees
+                  </li>
+                  <li>
+                    • <strong>Option 2:</strong> Raise prices during a shortage, which would negatively impact consumers
+                  </li>
                 </ul>
               </div>
             </div>
@@ -110,7 +117,7 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
       )}
 
       <Card className="border-2 border-purple-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack} className="text-white hover:bg-white/20">
@@ -133,9 +140,9 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
                 Step {currentStep + 1} of {steps.length}
               </Badge>
               {!showDescription && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowDescription(true)}
                   className="text-white hover:bg-white/20"
                 >
@@ -153,8 +160,8 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
                 <Scale className="w-16 h-16 mx-auto text-purple-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 1: Analyze Options</h3>
                 <p className="text-gray-600 mb-6">
-                  List the pros and cons for each choice. Consider not just the individual impact on those affected, 
-                  but also how the choice could influence company reputation and sales.
+                  List the pros and cons for each choice. Consider not just the individual impact on those affected, but
+                  also how the choice could influence company reputation and sales.
                 </p>
               </div>
 
@@ -273,7 +280,7 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
                 <Scale className="w-16 h-16 mx-auto text-purple-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 2: Make Your Recommendation</h3>
                 <p className="text-gray-600 mb-6">
-                  Using the list above, make your recommendation—it can be one choice or a combination of the two. 
+                  Using the list above, make your recommendation—it can be one choice or a combination of the two.
                   Justify why it's the most financially sound option.
                 </p>
               </div>
@@ -338,16 +345,32 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
                 <h4 className="font-semibold text-purple-800 mb-3">Consider these ethical principles:</h4>
                 <div className="grid md:grid-cols-2 gap-4 text-purple-700 text-sm">
                   <ul className="space-y-1">
-                    <li>• <strong>Stakeholder Impact:</strong> Who is most affected?</li>
-                    <li>• <strong>Fairness:</strong> Is the burden shared equitably?</li>
-                    <li>• <strong>Long-term Consequences:</strong> What are the lasting effects?</li>
-                    <li>• <strong>Social Responsibility:</strong> Company's duty to society</li>
+                    <li>
+                      • <strong>Stakeholder Impact:</strong> Who is most affected?
+                    </li>
+                    <li>
+                      • <strong>Fairness:</strong> Is the burden shared equitably?
+                    </li>
+                    <li>
+                      • <strong>Long-term Consequences:</strong> What are the lasting effects?
+                    </li>
+                    <li>
+                      • <strong>Social Responsibility:</strong> Company's duty to society
+                    </li>
                   </ul>
                   <ul className="space-y-1">
-                    <li>• <strong>Employee Welfare:</strong> Impact on livelihoods</li>
-                    <li>• <strong>Consumer Protection:</strong> Access to essential goods</li>
-                    <li>• <strong>Transparency:</strong> Honest communication</li>
-                    <li>• <strong>Sustainability:</strong> Long-term viability</li>
+                    <li>
+                      • <strong>Employee Welfare:</strong> Impact on livelihoods
+                    </li>
+                    <li>
+                      • <strong>Consumer Protection:</strong> Access to essential goods
+                    </li>
+                    <li>
+                      • <strong>Transparency:</strong> Honest communication
+                    </li>
+                    <li>
+                      • <strong>Sustainability:</strong> Long-term viability
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -370,8 +393,8 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
                   <span className="font-medium text-green-800">Reflection Complete</span>
                 </div>
                 <p className="text-green-700 text-sm">
-                  You've successfully navigated a complex ethical dilemma in finance, balancing financial necessity 
-                  with moral responsibility.
+                  You've successfully navigated a complex ethical dilemma in finance, balancing financial necessity with
+                  moral responsibility.
                 </p>
               </div>
             </div>
@@ -390,7 +413,7 @@ export default function FinanceTaskFive({ onComplete, onBack, initialData }: Fin
             <Button
               onClick={handleNext}
               disabled={!isStepComplete()}
-              className="px-6 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700"
+              className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent"
             >
               {currentStep === steps.length - 1 ? (
                 <>

@@ -107,7 +107,7 @@ export default function FinancePreReflectionForm({ onComplete, initialData }: Fi
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="border-2 border-blue-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-green-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
               <DollarSign className="w-6 h-6" />
@@ -178,7 +178,7 @@ export default function FinancePreReflectionForm({ onComplete, initialData }: Fi
               <Button
                 onClick={handleNext}
                 disabled={!isCurrentAnswerValid()}
-                className="px-6 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+                className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent"
               >
                 {currentQuestion === questions.length - 1 ? (
                   <>

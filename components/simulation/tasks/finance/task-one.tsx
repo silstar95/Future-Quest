@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Calculator, TrendingUp, CheckCircle, ExternalLink, Info } from 'lucide-react'
+import { ArrowLeft, Calculator, TrendingUp, CheckCircle, ExternalLink, Info } from "lucide-react"
 
 interface FinanceTaskOneProps {
   onComplete: (answers: any) => void
@@ -119,19 +119,21 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
     <div className="max-w-4xl mx-auto">
       {/* Task Description */}
       {showDescription && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="mb-6 border-brand-primary/20 bg-brand-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Info className="w-6 h-6 text-blue-600" />
                 <div>
-                  <CardTitle className="text-lg text-blue-800">Task 1: Financial Health Check-Up</CardTitle>
-                  <CardDescription className="text-blue-600">Understanding Financial Health Analysis</CardDescription>
+                  <CardTitle className="text-lg text-brand-primary">Task 1: Financial Health Check-Up</CardTitle>
+                  <CardDescription className="text-brand-secondary">
+                    Understanding Financial Health Analysis
+                  </CardDescription>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowDescription(false)}
                 className="text-blue-600 hover:text-blue-800"
               >
@@ -142,14 +144,14 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
           <CardContent className="text-blue-800">
             <div className="space-y-4">
               <p className="leading-relaxed">
-                <strong>Description:</strong> In this task, you will analyze a company's financial health using key financial statements. 
-                You will get a chance to select a company of your choice. Financial health is how well a company is doing with its money — 
-                like how strong and stable it is financially.
+                <strong>Description:</strong> In this task, you will analyze a company's financial health using key
+                financial statements. You will get a chance to select a company of your choice. Financial health is how
+                well a company is doing with its money — like how strong and stable it is financially.
               </p>
               <p className="leading-relaxed">
-                If a company has enough money to pay its bills, doesn't owe too much, and is making more money than it's spending, 
-                it has good financial health. It's kind of like when a person saves money, doesn't borrow too much, and still has 
-                enough to buy what they need.
+                If a company has enough money to pay its bills, doesn't owe too much, and is making more money than it's
+                spending, it has good financial health. It's kind of like when a person saves money, doesn't borrow too
+                much, and still has enough to buy what they need.
               </p>
               <div className="bg-white p-4 rounded-lg border border-blue-200">
                 <h4 className="font-semibold mb-2">What You'll Learn:</h4>
@@ -166,7 +168,7 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
       )}
 
       <Card className="border-2 border-blue-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-green-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack} className="text-white hover:bg-white/20">
@@ -189,9 +191,9 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
                 Step {currentStep + 1} of {steps.length}
               </Badge>
               {!showDescription && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowDescription(true)}
                   className="text-white hover:bg-white/20"
                 >
@@ -209,7 +211,7 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
                 <Calculator className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 1: Choose Your Company</h3>
                 <p className="text-gray-600 mb-6">
-                  Choose your company from the three options below. Select whichever company you are excited to see the 
+                  Choose your company from the three options below. Select whichever company you are excited to see the
                   financials of or any company that you just like.
                 </p>
               </div>
@@ -245,8 +247,8 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
                 <Calculator className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 2: Calculate Financial Ratios</h3>
                 <p className="text-gray-600 mb-6">
-                  Calculate their key financial ratios using the "Company Information" reference sheet below. 
-                  You can find each ratio and a definition below:
+                  Calculate their key financial ratios using the "Company Information" reference sheet below. You can
+                  find each ratio and a definition below:
                 </p>
               </div>
 
@@ -446,9 +448,17 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
                   <span className="font-medium text-blue-800">Need Help?</span>
                 </div>
                 <p className="text-blue-700 text-sm">
-                  If you need help with these calculations, you can use our <a href="https://chatgpt.com/g/g-6802da6857108191842e556e7d619bb3-risk-reward-and-real-world-finance" target="_blank" rel="noopener noreferrer" className="text-blue-700 underline hover:text-blue-900">AI tool</a> that will guide you through the
-                  process of finding the ratios. Just select the ratio you require help with and the company you have
-                  chosen.
+                  If you need help with these calculations, you can use our{" "}
+                  <a
+                    href="https://chatgpt.com/g/g-6802da6857108191842e556e7d619bb3-risk-reward-and-real-world-finance"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 underline hover:text-blue-900"
+                  >
+                    AI tool
+                  </a>{" "}
+                  that will guide you through the process of finding the ratios. Just select the ratio you require help
+                  with and the company you have chosen.
                 </p>
               </div>
             </div>
@@ -518,7 +528,7 @@ export default function FinanceTaskOne({ onComplete, onBack, initialData }: Fina
             <Button
               onClick={handleNext}
               disabled={!isStepComplete()}
-              className="px-6 bg-gradient-to-r from-blue-500 to-green-600 hover:from-blue-600 hover:to-green-700"
+              className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent"
             >
               {currentStep === steps.length - 1 ? (
                 <>

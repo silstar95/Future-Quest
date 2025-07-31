@@ -138,7 +138,7 @@ export default function FinanceExperiencePhase({ onComplete, initialData }: Fina
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold text-blue-800">🏢 Experience Finance Roles</CardTitle>
+              <CardTitle className="text-2xl font-bold text-brand-primary">🏢 Experience Finance Roles</CardTitle>
               <p className="text-gray-600 mt-2">
                 Navigate the finance office and complete real-world tasks in different finance roles
               </p>
@@ -188,7 +188,7 @@ export default function FinanceExperiencePhase({ onComplete, initialData }: Fina
                     {task.isCompleted ? (
                       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
                     ) : (
-                      <Play className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <Play className="w-5 h-5 text-brand-primary flex-shrink-0" />
                     )}
                   </div>
                   <p className="text-xs text-gray-600 mb-2">{task.role}</p>

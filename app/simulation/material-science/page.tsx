@@ -5,11 +5,10 @@ import { useAuth } from "@/components/providers/auth-provider"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { saveSimulationProgress, getSimulationProgress } from "@/lib/firebase-service"
-import { Microscope, Clock, ArrowLeft, CheckCircle, Save } from "lucide-react"
+import { SimulationNavigation } from "@/components/simulation/simulation-navigation"
+import { Microscope } from "lucide-react"
 
 // Import simulation components
 import { MaterialSciencePreReflectionForm } from "@/components/simulation/material-science-pre-reflection-form"
@@ -56,6 +55,7 @@ export default function MaterialScienceSimulation() {
   })
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -68,6 +68,17 @@ export default function MaterialScienceSimulation() {
     }
   }, [user, loading, router])
 
+  // Auto-save progress every 30 seconds
+  useEffect(() => {
+    if (user && currentPhase !== "intro" && currentPhase !== "complete") {
+      const interval = setInterval(() => {
+        saveCurrentProgress(true) // true for auto-save
+      }, 30000) // Auto-save every 30 seconds
+
+      return () => clearInterval(interval)
+    }
+  }, [user, currentPhase, simulationData])
+
   const loadUserProgress = async () => {
     if (!user) return
 
@@ -79,6 +90,61 @@ export default function MaterialScienceSimulation() {
       }
     } catch (error) {
       console.error("Error loading progress:", error)
+    }
+  }
+
+  const saveCurrentProgress = async (isAutoSave = false) => {
+    if (!user?.uid || isSaving) return
+
+    try {
+      setIsSaving(true)
+      setSaveError(null)
+
+      const progressData = {
+        ...simulationData,
+        lastUpdated: new Date().toISOString(),
+      }
+
+      const simulationProgressData = {
+        userId: user.uid,
+        simulationId: "material-science",
+        currentPhase: progressData.currentPhase,
+        currentStep: getPhaseStep(progressData.currentPhase),
+        totalSteps: 9,
+        phaseProgress: progressData,
+        startedAt: progressData.startTime ? new Date(progressData.startTime).toISOString() : new Date().toISOString(),
+        lastUpdated: new Date().toISOString(),
+        completed: progressData.currentPhase === "complete",
+      }
+
+      const result = await saveSimulationProgress(simulationProgressData)
+
+      if (result.success) {
+        setLastSaved(new Date())
+
+        if (!isAutoSave) {
+          toast({
+            title: "Progress Saved",
+            description: "Your simulation progress has been saved.",
+          })
+        }
+      } else {
+        throw new Error(result.error || "Failed to save progress")
+      }
+    } catch (error: any) {
+      console.error("Error saving progress:", error)
+      const errorMessage = error?.message || "Failed to save progress"
+      setSaveError(errorMessage)
+
+      if (!isAutoSave) {
+        toast({
+          title: "Save Error",
+          description: errorMessage,
+          variant: "destructive",
+        })
+      }
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -146,11 +212,59 @@ export default function MaterialScienceSimulation() {
   }
 
   const handleBackToDashboard = () => {
+    // Save progress before leaving
+    if (currentPhase !== "intro" && currentPhase !== "complete") {
+      saveCurrentProgress()
+    }
     router.push("/dashboard/student")
   }
 
   const handleViewCity = () => {
     router.push("/simulations?tab=city")
+  }
+
+  const handlePreviousStep = () => {
+    const phases: SimulationPhase[] = [
+      "intro",
+      "pre-reflection",
+      "framework",
+      "exploration",
+      "experience",
+      "engage",
+      "envision",
+      "post-reflection",
+      "complete",
+    ]
+    const currentIndex = phases.indexOf(currentPhase)
+
+    if (currentIndex > 0) {
+      const previousPhase = phases[currentIndex - 1]
+      setCurrentPhase(previousPhase)
+
+      // Update simulation data
+      const updatedData = {
+        ...simulationData,
+        currentPhase: previousPhase,
+      }
+
+      saveProgress(previousPhase, updatedData)
+    }
+  }
+
+  const canGoBack = () => {
+    const phases: SimulationPhase[] = [
+      "intro",
+      "pre-reflection",
+      "framework",
+      "exploration",
+      "experience",
+      "engage",
+      "envision",
+      "post-reflection",
+      "complete",
+    ]
+    const currentIndex = phases.indexOf(currentPhase)
+    return currentIndex > 0 && currentPhase !== "complete"
   }
 
   const getPhaseStep = (phase: SimulationPhase): number => {
@@ -203,7 +317,7 @@ export default function MaterialScienceSimulation() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[#2d407e] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-brand-primary mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Loading your simulation...</p>
           <p className="text-gray-500 text-sm mt-2">Retrieving your progress from database...</p>
         </div>
@@ -212,79 +326,39 @@ export default function MaterialScienceSimulation() {
   }
 
   return (
-    <div className={`min-h-screen ${currentPhase === "experience" ? "bg-cover bg-center bg-no-repeat relative" : "bg-gray-50"}`} 
-         style={currentPhase === "experience" ? { backgroundImage: "url('/images/matlab.jpg')" } : {}}>
+    <div
+      className={`min-h-screen ${currentPhase === "experience" ? "bg-cover bg-center bg-no-repeat relative" : "bg-gray-50"}`}
+      style={currentPhase === "experience" ? { backgroundImage: "url('/images/matlab.jpg')" } : {}}
+    >
       {/* Dark overlay for experience phase */}
-      {currentPhase === "experience" && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-      )}
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm" onClick={handleBackToDashboard} className="flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2d407e] to-[#765889] flex items-center justify-center">
-                  <Microscope className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-800">MagLev Makers: Engineering a Superconductor</h1>
-                  <p className="text-sm text-gray-600">Material Science Career Simulation</p>
-                </div>
-              </div>
-            </div>
+      {currentPhase === "experience" && <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>}
 
-            <div className="flex items-center gap-6 text-sm text-gray-500">
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                1-2 hours
-              </div>
-              <Badge className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">Science</Badge>
-
-              {/* Save Status */}
-              <div className="flex items-center gap-2">
-                {isSaving ? (
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#2d407e]"></div>
-                    <span className="text-xs">Saving...</span>
-                  </div>
-                ) : lastSaved ? (
-                  <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle className="w-3 h-3" />
-                    <span className="text-xs">Saved {lastSaved.toLocaleTimeString()}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-gray-400">
-                    <Save className="w-3 h-3" />
-                    <span className="text-xs">Not saved</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="mt-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-700">{getPhaseTitle()}</span>
-              <span className="text-sm text-gray-500">{getPhaseProgress()}% Complete</span>
-            </div>
-            <Progress value={getPhaseProgress()} className="h-2" />
-          </div>
-        </div>
-      </div>
+      {/* Navigation Header */}
+      <SimulationNavigation
+        title="MagLev Makers: Engineering a Superconductor"
+        subtitle="Material Science Career Simulation"
+        icon={<Microscope className="w-6 h-6 text-white" />}
+        duration="1-2 hours"
+        category="Science"
+        categoryColor="bg-gradient-to-r from-brand-primary to-brand-secondary"
+        currentPhase={currentPhase} // Pass the actual phase ID, not the title
+        progress={getPhaseProgress()}
+        onBackToDashboard={handleBackToDashboard}
+        onPreviousStep={handlePreviousStep}
+        canGoBack={canGoBack()}
+        isSaving={isSaving}
+        saveError={saveError}
+        lastSaved={lastSaved}
+        onManualSave={() => saveCurrentProgress()}
+        showSaveButton={currentPhase !== "intro" && currentPhase !== "complete"}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Intro Phase */}
         {currentPhase === "intro" && (
-          <Card className="max-w-4xl mx-auto border-2 border-blue-200 shadow-lg">
+          <Card className="max-w-4xl mx-auto border-2 border-brand-accent/30 shadow-lg">
             <CardContent className="p-8 text-center">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-[#2d407e] to-[#765889] rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-full flex items-center justify-center shadow-lg">
                 <Microscope className="w-12 h-12 text-white" />
               </div>
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Welcome to MagLev Makers!</h2>
@@ -294,9 +368,9 @@ export default function MaterialScienceSimulation() {
                 working with YBCO (Yttrium Barium Copper Oxide) superconductors.
               </p>
 
-              <div className="bg-gradient-to-br from-blue-50 to-green-50 p-6 rounded-xl border border-blue-200 mb-8">
-                <h3 className="font-bold text-blue-800 mb-3">Your Mission:</h3>
-                <ul className="text-sm text-blue-700 space-y-2 text-left max-w-md mx-auto">
+              <div className="bg-gradient-to-br from-brand-accent/10 to-brand-highlight/10 p-6 rounded-xl border border-brand-accent/30 mb-8">
+                <h3 className="font-bold text-brand-primary mb-3">Your Mission:</h3>
+                <ul className="text-sm text-brand-secondary space-y-2 text-left max-w-md mx-auto">
                   <li>• 🧪 Learn about material science careers</li>
                   <li>• ⚗️ Understand YBCO superconductor properties</li>
                   <li>• 🔬 Conduct virtual synthesis experiments</li>
@@ -308,7 +382,7 @@ export default function MaterialScienceSimulation() {
               <Button
                 onClick={() => handlePhaseComplete("intro", {})}
                 size="lg"
-                className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white px-8 py-3 rounded-lg font-semibold hover:from-[#0e3968] hover:to-[#231349] transition-all shadow-lg"
+                className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white px-8 py-3 rounded-lg font-semibold hover:from-brand-primary/90 hover:to-brand-secondary/90 transition-all shadow-lg"
               >
                 Begin Your Material Science Journey
               </Button>
@@ -379,6 +453,7 @@ export default function MaterialScienceSimulation() {
             simulationData={simulationData}
             onReturnToDashboard={handleBackToDashboard}
             onViewCity={handleViewCity}
+            simulationType="material-science"
           />
         )}
       </div>

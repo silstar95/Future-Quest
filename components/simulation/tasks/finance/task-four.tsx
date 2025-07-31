@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, TrendingDown, CheckCircle, AlertTriangle, Info } from 'lucide-react'
+import { ArrowLeft, TrendingDown, CheckCircle, AlertTriangle, Info } from "lucide-react"
 
 interface FinanceTaskFourProps {
   onComplete: (answers: any) => void
@@ -97,19 +97,21 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
     <div className="max-w-4xl mx-auto">
       {/* Task Description */}
       {showDescription && (
-        <Card className="mb-6 border-blue-200 bg-blue-50">
+        <Card className="mb-6 border-brand-primary/20 bg-brand-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Info className="w-6 h-6 text-blue-600" />
                 <div>
-                  <CardTitle className="text-lg text-blue-800">Task 4: Financial Analyst</CardTitle>
-                  <CardDescription className="text-blue-600">Economic Recession Crisis Management</CardDescription>
+                  <CardTitle className="text-lg text-brand-primary">Task 4: Financial Analyst</CardTitle>
+                  <CardDescription className="text-brand-secondary">
+                    Economic Recession Crisis Management
+                  </CardDescription>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowDescription(false)}
                 className="text-blue-600 hover:text-blue-800"
               >
@@ -120,16 +122,23 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
           <CardContent className="text-blue-800">
             <div className="space-y-4">
               <p className="leading-relaxed">
-                <strong>Description:</strong> The economy has entered a recession, leading to higher unemployment and 
-                lower consumer spending. Many households are cutting back on expenses. Make predictions and develop a 
+                <strong>Description:</strong> The economy has entered a recession, leading to higher unemployment and
+                lower consumer spending. Many households are cutting back on expenses. Make predictions and develop a
                 three-step crisis plan to keep your company safe during this time.
               </p>
               <div className="bg-white p-4 rounded-lg border border-blue-200">
                 <h4 className="font-semibold mb-2">Key Economic Changes:</h4>
                 <ul className="space-y-1 text-sm">
-                  <li>• <strong>Unemployment Rate:</strong> Increases from 4% to 8% → Fewer people have disposable income</li>
-                  <li>• <strong>Inflation:</strong> Remains High at 5% → The cost of goods rises, but wages stay the same</li>
-                  <li>• <strong>Consumer Spending:</strong> Drops by 10% → Families prioritize essentials and are buying less goods and services overall</li>
+                  <li>
+                    • <strong>Unemployment Rate:</strong> Increases from 4% to 8% → Fewer people have disposable income
+                  </li>
+                  <li>
+                    • <strong>Inflation:</strong> Remains High at 5% → The cost of goods rises, but wages stay the same
+                  </li>
+                  <li>
+                    • <strong>Consumer Spending:</strong> Drops by 10% → Families prioritize essentials and are buying
+                    less goods and services overall
+                  </li>
                 </ul>
               </div>
             </div>
@@ -138,7 +147,7 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
       )}
 
       <Card className="border-2 border-red-200 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-red-500 to-orange-600 text-white">
+        <CardHeader className="bg-gradient-to-r from-brand-primary to-brand-secondary text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={onBack} className="text-white hover:bg-white/20">
@@ -159,9 +168,9 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                 Step {currentStep + 1} of {steps.length}
               </Badge>
               {!showDescription && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowDescription(true)}
                   className="text-white hover:bg-white/20"
                 >
@@ -179,7 +188,7 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                 <AlertTriangle className="w-16 h-16 mx-auto text-red-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 1: Predict Impact</h3>
                 <p className="text-gray-600 mb-6">
-                  Predict where financial impact is happening in the company. Consider across areas operated by the 
+                  Predict where financial impact is happening in the company. Consider across areas operated by the
                   company such as merchandise, services, media, marketing, consumer goods, and more.
                 </p>
               </div>
@@ -187,7 +196,9 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className="border-red-200 bg-red-50">
                   <CardHeader>
-                    <CardTitle className="text-lg text-red-800">Financial Impact (Before vs. During Recession)</CardTitle>
+                    <CardTitle className="text-lg text-red-800">
+                      Financial Impact (Before vs. During Recession)
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 text-sm">
@@ -218,13 +229,15 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                       <div className="flex justify-between">
                         <span>Shareholders' Equity:</span>
                         <span>
-                          ${recessionData.before.shareholdersEquity}B → ${recessionData.during.shareholdersEquity}B (↓25%)
+                          ${recessionData.before.shareholdersEquity}B → ${recessionData.during.shareholdersEquity}B
+                          (↓25%)
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Debt-to-Equity:</span>
                         <span>
-                          {recessionData.before.debtToEquityRatio} → {recessionData.during.debtToEquityRatio} (↑Higher Risk)
+                          {recessionData.before.debtToEquityRatio} → {recessionData.during.debtToEquityRatio} (↑Higher
+                          Risk)
                         </span>
                       </div>
                     </div>
@@ -267,8 +280,9 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                 <AlertTriangle className="w-16 h-16 mx-auto text-red-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 2: Immediate Actions</h3>
                 <p className="text-gray-600 mb-6">
-                  Think about the immediate action you can take to keep your company financially strong, such as cutting 
-                  non-essential expenses or securing emergency funding. Write down 3 ideas here specific to your company.
+                  Think about the immediate action you can take to keep your company financially strong, such as cutting
+                  non-essential expenses or securing emergency funding. Write down 3 ideas here specific to your
+                  company.
                 </p>
               </div>
 
@@ -307,7 +321,7 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                 <TrendingDown className="w-16 h-16 mx-auto text-orange-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 3: Recovery Strategy</h3>
                 <p className="text-gray-600 mb-6">
-                  Consider short-term recovery strategies you can take, such as adjusting prices or renegotiating debts. 
+                  Consider short-term recovery strategies you can take, such as adjusting prices or renegotiating debts.
                   Write down 2 ideas specific to your company here.
                 </p>
               </div>
@@ -347,7 +361,7 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                 <CheckCircle className="w-16 h-16 mx-auto text-green-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Step 4: Prevention Measures</h3>
                 <p className="text-gray-600 mb-6">
-                  Now, take a look at the big picture and the long-term prevention measures you could consider to bring 
+                  Now, take a look at the big picture and the long-term prevention measures you could consider to bring
                   in more revenue for the company down the line. Write down 3 ideas specific to your company here.
                 </p>
               </div>
@@ -387,7 +401,7 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
                 <CheckCircle className="w-16 h-16 mx-auto text-blue-600 mb-4" />
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Bonus Step: Crisis Response Plan</h3>
                 <p className="text-gray-600 mb-6">
-                  Compare what you wrote in Step 1 to your ideas in Steps 2-4. Pick your top idea from each step to 
+                  Compare what you wrote in Step 1 to your ideas in Steps 2-4. Pick your top idea from each step to
                   create your three-step crisis response plan and write it below.
                 </p>
               </div>
@@ -466,7 +480,7 @@ export default function FinanceTaskFour({ onComplete, onBack, initialData }: Fin
             <Button
               onClick={handleNext}
               disabled={!isStepComplete()}
-              className="px-6 bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700"
+              className="px-6 bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-secondary hover:to-brand-accent"
             >
               {currentStep === steps.length - 1 ? (
                 <>
