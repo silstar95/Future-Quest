@@ -737,7 +737,7 @@ export default function FuturePathwaysPage() {
                 </ul>
               </div>
             </div>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <Button
                 size="lg"
                 onClick={() => router.push("/simulations")}
@@ -746,15 +746,7 @@ export default function FuturePathwaysPage() {
                 <Target className="mr-2 h-5 w-5" />
                 Take Another Simulation
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={handleDownloadReport}
-                className="border-green-400 text-green-700 hover:bg-green-50 bg-transparent"
-              >
-                <Download className="mr-2 h-5 w-5" />
-                Save My Report
-              </Button>
+        
               <Button
                 size="lg"
                 variant="outline"
