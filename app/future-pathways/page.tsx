@@ -120,6 +120,18 @@ export default function FuturePathwaysPage() {
       }
 
       console.log("📊 Student data loaded:", data)
+      console.log(
+        "📝 Reflection data details:",
+        data.reflectionData.map((r) => ({
+          simulation: r.simulationType,
+          completed: r.completedAt ? "Yes" : "No",
+          enjoyment: r.enjoymentRating,
+          favorite: r.favoriteTask,
+          skills: r.skillsLearned,
+          career: r.careerInterest,
+        })),
+      )
+
       setStudentData(data)
 
       // Check if student has completed any simulations
@@ -128,25 +140,25 @@ export default function FuturePathwaysPage() {
         return
       }
 
-      console.log("🤖 Starting AI analysis with reflection data:", data.reflectionData)
+      console.log("🤖 Starting AI analysis with reflection data:", data.reflectionData.length, "simulations")
 
-      // Analyze with AI
+      // Analyze with AI - pass more detailed context
       const insights = await aiCareerService.analyzeStudentReflections(data.reflectionData, data.onboardingData)
 
+      console.log("✅ AI analysis complete:", insights)
       setAiInsights(insights)
 
-      // Extract "Work You Loved" from simulation data with better filtering
+      // Extract "Work You Loved" with more specific criteria
       const lovedWork = data.reflectionData
         .filter((data) => {
           const enjoyment = data.enjoymentRating
           const interest = data.interestLevel
-          // More flexible filtering - include if either rating is good or if they have meaningful responses
-          return (
-            (enjoyment && enjoyment >= 6) ||
-            (interest && interest >= 3) ||
+          const hasMeaningfulResponses =
             (data.favoriteTask && data.favoriteTask.length > 10) ||
-            (data.careerInterest && data.careerInterest.length > 5)
-          )
+            (data.careerInterest && data.careerInterest.length > 5) ||
+            (data.skillsLearned && data.skillsLearned.length > 10)
+
+          return (enjoyment && enjoyment >= 6) || (interest && interest >= 3) || hasMeaningfulResponses
         })
         .map((data) => ({
           simulationType: formatSimulationType(data.simulationType),
@@ -156,12 +168,11 @@ export default function FuturePathwaysPage() {
           skillsLearned: data.skillsLearned,
           careerInterest: data.careerInterest,
           challengingTask: data.challengingTask,
+          completedAt: data.completedAt,
         }))
 
       console.log("💖 Work you loved data:", lovedWork)
       setWorkYouLoved(lovedWork)
-
-      console.log("✅ AI analysis complete:", insights)
     } catch (error) {
       console.error("❌ Error loading student data:", error)
       setError("An error occurred while analyzing your career data. Please try again.")

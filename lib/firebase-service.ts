@@ -1,15 +1,4 @@
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  writeBatch,
-  increment,
-} from "firebase/firestore"
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, writeBatch } from "firebase/firestore"
 import { db, auth } from "./firebase"
 
 // Types
@@ -205,7 +194,7 @@ export const saveSimulationProgress = async (progressData: SimulationProgress): 
     // Check if user document exists, create it if it doesn't
     const userDocRef = doc(db, "users", progressData.userId)
     const userSnap = await getDoc(userDocRef)
-    
+
     if (!userSnap.exists()) {
       console.log("⚠️ User document doesn't exist, creating basic user profile")
       await setDoc(userDocRef, {
@@ -337,9 +326,22 @@ export const completeSimulation = async (
 
     console.log("🔄 Completing simulation:", simulationId, "for user:", userId)
 
+    // First, get current user data to avoid overwriting
+    const userRef = doc(db, "users", userId)
+    const userSnap = await getDoc(userRef)
+
+    if (!userSnap.exists()) {
+      return { success: false, error: "User not found" }
+    }
+
+    const userData = userSnap.data()
+    const currentCompletedSimulations = userData.completedSimulations || []
+    const currentBadges = userData.badges || []
+    const currentTotalXP = userData.totalXP || 0
+
     const batch = writeBatch(db)
 
-    // Update simulation progress
+    // Update simulation progress with completed status
     const progressId = `${userId}_${simulationId}`
     const progressRef = doc(db, "simulationProgress", progressId)
     batch.update(progressRef, {
@@ -347,22 +349,29 @@ export const completeSimulation = async (
       completedAt: new Date().toISOString(),
       xpEarned: xpEarned,
       badgesEarned: badgesEarned,
+      lastUpdated: new Date().toISOString(),
     })
 
-    // Update user profile
-    const userRef = doc(db, "users", userId)
+    // Update user profile with completion data
+    const updatedCompletedSimulations = currentCompletedSimulations.includes(simulationId)
+      ? currentCompletedSimulations
+      : [...currentCompletedSimulations, simulationId]
+
+    const updatedBadges = Array.from(new Set([...currentBadges, ...badgesEarned]))
+
     batch.update(userRef, {
-      completedSimulations: [...((await getDoc(userRef)).data()?.completedSimulations || []), simulationId],
-      totalXP: increment(xpEarned),
-      badges: [...((await getDoc(userRef)).data()?.badges || []), ...badgesEarned],
+      completedSimulations: updatedCompletedSimulations,
+      totalXP: currentTotalXP + xpEarned,
+      badges: updatedBadges,
       [`simulationProgress.${simulationId}.completed`]: true,
       [`simulationProgress.${simulationId}.completedAt`]: new Date().toISOString(),
+      [`simulationProgress.${simulationId}.xpEarned`]: xpEarned,
       updatedAt: new Date().toISOString(),
     })
 
     await batch.commit()
 
-    console.log("✅ Simulation completed successfully")
+    console.log("✅ Simulation completed successfully with batch update")
     return { success: true }
   } catch (error: any) {
     console.error("❌ Error completing simulation:", error)
@@ -439,7 +448,7 @@ export const getCurrentSimulationProgress = async (userId: string): Promise<ApiR
     if (userSnap.exists()) {
       const userData = userSnap.data() as UserProfile
       const currentSimulation = userData.cityProgress?.lastActiveSimulation
-      
+
       if (currentSimulation) {
         const progressResult = await getSimulationProgress(userId, currentSimulation)
         return progressResult
@@ -500,7 +509,7 @@ export const getBuildingPositions = async (userId: string): Promise<ApiResponse<
     if (userSnap.exists()) {
       const userData = userSnap.data()
       const buildingPositions = userData.cityProgress?.buildingPositions || {}
-      
+
       console.log("✅ Building positions fetched successfully:", buildingPositions)
       return { success: true, data: buildingPositions }
     } else {
@@ -534,7 +543,12 @@ export const saveBuildingPositions = async (userId: string, positions: any): Pro
   }
 }
 
-export const saveBuildingPositionSmooth = async (userId: string, buildingId: string, x: number, y: number): Promise<ApiResponse> => {
+export const saveBuildingPositionSmooth = async (
+  userId: string,
+  buildingId: string,
+  x: number,
+  y: number,
+): Promise<ApiResponse> => {
   try {
     if (!checkDatabaseConnection()) {
       return { success: false, error: "Database connection not available" }
@@ -551,7 +565,7 @@ export const saveBuildingPositionSmooth = async (userId: string, buildingId: str
     const currentPositions = currentPositionsResult.data || {}
     const updatedPositions = {
       ...currentPositions,
-      [buildingId]: { x, y }
+      [buildingId]: { x, y },
     }
 
     const userRef = doc(db, "users", userId)

@@ -25,11 +25,6 @@ export default function FinanceExplorationPhase({ onComplete, initialData }: Fin
 
   const steps = [
     {
-      id: "framework",
-      title: "Exploration Framework",
-      description: "Learn about our systematic approach to career exploration",
-    },
-    {
       id: "video",
       title: "Watch Finance Overview",
       description: "Get introduced to various finance roles and careers",
@@ -87,13 +82,11 @@ export default function FinanceExplorationPhase({ onComplete, initialData }: Fin
 
   const isStepComplete = () => {
     switch (currentStep) {
-      case 0: // Framework
-        return true
-      case 1: // Video
+      case 0: // Video
         return answers.videoWatched
-      case 2: // Research
+      case 1: // Research
         return true // Allow progression after some time
-      case 3: // Reflection
+      case 2: // Reflection
         return answers.financeDefinition.trim().length > 0 && answers.financeRoles.trim().length > 0
       default:
         return false
@@ -136,38 +129,6 @@ export default function FinanceExplorationPhase({ onComplete, initialData }: Fin
 
         <CardContent className="p-8">
           {currentStep === 0 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <BookOpen className="w-16 h-16 mx-auto text-blue-600 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">Exploration Framework</h3>
-                <p className="text-gray-600 mb-6">
-                  Before we dive into exploring careers in Finance, here is an exploration framework we are using. This
-                  covers all aspects of learning about something new that can be applied in any situation.
-                </p>
-              </div>
-
-              <div className="bg-gradient-to-br from-blue-50 to-green-50 p-6 rounded-xl border border-blue-200">
-                <h4 className="font-bold text-blue-800 mb-4 text-center">The 5 E's Framework</h4>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  {["Explore", "Experience", "Engage", "Evaluate", "Envision"].map((step, index) => (
-                    <div key={step} className="text-center">
-                      <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-2 font-bold">
-                        {index + 1}
-                      </div>
-                      <div className="font-semibold text-blue-800">{step}</div>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-blue-700 text-sm mt-4 text-center">
-                  Review this framework as you can apply it in different situations. The entire module is designed
-                  following this framework and you will see that different parts of the module are labeled with parts of
-                  this framework.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center">
                 <Play className="w-16 h-16 mx-auto text-blue-600 mb-4" />
@@ -252,7 +213,7 @@ export default function FinanceExplorationPhase({ onComplete, initialData }: Fin
             </div>
           )}
 
-          {currentStep === 2 && (
+          {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center">
                 <DollarSign className="w-16 h-16 mx-auto text-blue-600 mb-4" />
@@ -312,7 +273,7 @@ export default function FinanceExplorationPhase({ onComplete, initialData }: Fin
             </div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center">
                 <CheckCircle className="w-16 h-16 mx-auto text-blue-600 mb-4" />

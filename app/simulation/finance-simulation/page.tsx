@@ -157,7 +157,7 @@ export default function FinanceSimulation() {
         phaseProgress: progressData,
         startedAt: progressData.startedAt || new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
-        completed: false,
+        completed: false, // This should remain false for in-progress saves
       }
 
       const result = await saveSimulationProgress(simulationProgressData)
@@ -196,7 +196,7 @@ export default function FinanceSimulation() {
     }
   }
 
-  const saveProgress = async (data: Partial<SimulationData>) => {
+  const saveProgress = async (data: Partial<SimulationData>, isCompleted = false) => {
     try {
       if (user?.uid && !isSaving) {
         setIsSaving(true)
@@ -210,7 +210,7 @@ export default function FinanceSimulation() {
 
         setSimulationData(updatedData)
 
-        console.log("💾 Saving progress with data:", updatedData)
+        console.log("💾 Saving progress with data:", updatedData, "Completed:", isCompleted)
 
         const simulationProgressData = {
           userId: user.uid,
@@ -221,7 +221,12 @@ export default function FinanceSimulation() {
           phaseProgress: updatedData,
           startedAt: updatedData.startedAt || new Date().toISOString(),
           lastUpdated: new Date().toISOString(),
-          completed: false,
+          completed: isCompleted, // Use the parameter to determine completion status
+          ...(isCompleted && {
+            completedAt: new Date().toISOString(),
+            xpEarned: 100,
+            badgesEarned: ["Finance Expert"],
+          }),
         }
 
         const result = await saveSimulationProgress(simulationProgressData)
@@ -230,13 +235,15 @@ export default function FinanceSimulation() {
           setLastSaved(new Date())
           console.log("✅ Progress saved successfully:", result)
 
-          // Calculate progress percentage based on current phase
-          const progressPercentage = getPhaseProgress()
+          if (!isCompleted) {
+            // Calculate progress percentage based on current phase
+            const progressPercentage = getPhaseProgress()
 
-          toast({
-            title: "Progress Saved",
-            description: `${progressPercentage}% complete`,
-          })
+            toast({
+              title: "Progress Saved",
+              description: `${progressPercentage}% complete`,
+            })
+          }
         } else {
           throw new Error("Failed to save progress")
         }
@@ -272,11 +279,14 @@ export default function FinanceSimulation() {
     if (nextPhase === "complete") {
       updateData.completedAt = new Date().toISOString()
 
-      // Complete the simulation and unlock next content
       try {
         console.log("🏆 Completing simulation...")
 
-        const completionResult = await completeSimulation(user!.uid, "finance-simulation", 100, [])
+        // Save the final progress with completed status = true
+        await saveProgress(updateData, true) // Pass true for completion
+
+        // Then complete the simulation for user profile updates
+        const completionResult = await completeSimulation(user!.uid, "finance-simulation", 100, ["Finance Expert"])
 
         if (completionResult.success) {
           console.log("✅ Simulation completed:", completionResult)
@@ -297,9 +307,11 @@ export default function FinanceSimulation() {
         })
         return // Don't proceed if completion failed
       }
+    } else {
+      // For non-completion phases, save with completed = false
+      await saveProgress(updateData, false)
     }
 
-    await saveProgress(updateData)
     setCurrentPhase(nextPhase)
   }
 
@@ -346,7 +358,7 @@ export default function FinanceSimulation() {
         lastUpdated: new Date().toISOString(),
       }
 
-      saveProgress(updateData)
+      saveProgress(updateData, false) // Not completed when going back
     }
   }
 

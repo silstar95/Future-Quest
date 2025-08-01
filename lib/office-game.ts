@@ -60,7 +60,7 @@ const SCALE_X = CANVAS_WIDTH / ORIGINAL_WIDTH
 const SCALE_Y = CANVAS_HEIGHT / ORIGINAL_HEIGHT
 
 class OfficeScene extends Phaser.Scene {
-  private cat?: Phaser.GameObjects.Graphics
+  private cat?: Phaser.GameObjects.Image
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
   private wasd?: {
     W: Phaser.Input.Keyboard.Key
@@ -149,6 +149,9 @@ class OfficeScene extends Phaser.Scene {
   preload() {
     // Load office background
     this.load.image("office-bg", "/images/office-background.png")
+    
+    // Load cat image
+    this.load.image("cat", "/images/cat.png")
 
     // Create particle texture for interactions
     this.load.image(
@@ -276,67 +279,8 @@ class OfficeScene extends Phaser.Scene {
   }
 
   createCat() {
-    const cat = this.add.graphics()
-
-    // Main body (orange)
-    cat.fillStyle(0xff8c42)
-    cat.fillEllipse(0, 0, 30, 40) // Body
-
-    // Belly (lighter orange)
-    cat.fillStyle(0xffb366)
-    cat.fillEllipse(0, 3, 20, 28) // Belly
-
-    // Head
-    cat.fillStyle(0xff8c42)
-    cat.fillCircle(0, -25, 15) // Head
-
-    // Ears
-    cat.fillStyle(0xff8c42)
-    cat.fillTriangle(-12, -30, -8, -38, -4, -30) // Left ear
-    cat.fillTriangle(4, -30, 8, -38, 12, -30) // Right ear
-
-    // Inner ears (pink)
-    cat.fillStyle(0xffb3ba)
-    cat.fillTriangle(-9, -32, -7, -35, -6, -32) // Left inner ear
-    cat.fillTriangle(6, -32, 7, -35, 9, -32) // Right inner ear
-
-    // Eyes (closed/happy)
-    cat.lineStyle(2, 0x000000)
-    cat.beginPath()
-    cat.arc(-5, -28, 2, 0.2, Math.PI - 0.2) // Left eye
-    cat.strokePath()
-    cat.beginPath()
-    cat.arc(5, -28, 2, 0.2, Math.PI - 0.2) // Right eye
-    cat.strokePath()
-
-    // Nose
-    cat.fillStyle(0xff69b4)
-    cat.fillTriangle(0, -23, -1, -21, 1, -21)
-
-    // Mouth
-    cat.lineStyle(1, 0x000000)
-    cat.beginPath()
-    cat.arc(-2, -19, 2, 0, Math.PI)
-    cat.strokePath()
-    cat.beginPath()
-    cat.arc(2, -19, 2, 0, Math.PI)
-    cat.strokePath()
-
-    // Whiskers
-    cat.lineStyle(1, 0x000000)
-    cat.lineBetween(-18, -25, -12, -24)
-    cat.lineBetween(-18, -22, -12, -22)
-    cat.lineBetween(12, -24, 18, -25)
-    cat.lineBetween(12, -22, 18, -22)
-
-    // Paws
-    cat.fillStyle(0xff8c42)
-    cat.fillCircle(-8, 18, 4) // Left front paw
-    cat.fillCircle(8, 18, 4) // Right front paw
-    cat.fillCircle(-5, 15, 3) // Left back paw
-    cat.fillCircle(5, 15, 3) // Right back paw
-
-    cat.setPosition(433, 328) // Start in lobby (scaled coordinates)
+    const cat = this.add.image(433, 328, "cat") // Start in lobby (scaled coordinates)
+    cat.setScale(0.35) // Scale down to 1/4 of original size
     this.cat = cat
 
     // Enable physics

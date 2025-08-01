@@ -100,7 +100,7 @@ const ROOM_DEFINITIONS_ORIGINAL = [
 ]
 
 class FinanceOfficeScene extends Phaser.Scene {
-  private character?: Phaser.GameObjects.Graphics
+  private character?: Phaser.GameObjects.Image
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
   private wasd?: {
     W: Phaser.Input.Keyboard.Key
@@ -164,6 +164,9 @@ class FinanceOfficeScene extends Phaser.Scene {
   preload() {
     // Load finance office background
     this.load.image("finance-bg", "/images/finance.jpg")
+    
+    // Load cat image
+    this.load.image("cat", "/images/cat.png")
 
     // Create particle texture for interactions
     this.load.image(
@@ -338,50 +341,7 @@ class FinanceOfficeScene extends Phaser.Scene {
   }
 
   createCharacter() {
-    const character = this.add.graphics()
-
-    // Main body (professional suit - dark blue)
-    character.fillStyle(0x1e40af)
-    character.fillEllipse(0, 0, 30, 40) // Body
-
-    // Shirt (white)
-    character.fillStyle(0xffffff)
-    character.fillEllipse(0, -5, 20, 25) // Shirt
-
-    // Tie (red)
-    character.fillStyle(0xdc2626)
-    character.fillRect(-3, -15, 6, 20) // Tie
-
-    // Head (skin tone)
-    character.fillStyle(0xfdbcb4)
-    character.fillCircle(0, -25, 15) // Head
-
-    // Hair (brown)
-    character.fillStyle(0x92400e)
-    character.fillEllipse(0, -32, 20, 12) // Hair
-
-    // Eyes
-    character.fillStyle(0x000000)
-    character.fillCircle(-5, -28, 2) // Left eye
-    character.fillCircle(5, -28, 2) // Right eye
-
-    // Briefcase
-    character.fillStyle(0x451a03)
-    character.fillRect(15, -5, 8, 12) // Briefcase
-    character.fillStyle(0xfbbf24)
-    character.fillRect(16, -2, 6, 2) // Briefcase handle
-
-    // Legs
-    character.fillStyle(0x374151)
-    character.fillRect(-8, 15, 6, 20) // Left leg
-    character.fillRect(2, 15, 6, 20) // Right leg
-
-    // Shoes
-    character.fillStyle(0x000000)
-    character.fillEllipse(-5, 35, 8, 4) // Left shoe
-    character.fillEllipse(5, 35, 8, 4) // Right shoe
-
-    character.setPosition(400, 500) // Start in lobby
+    const character = this.add.image(400, 500, "cat").setScale(0.25) // Start in lobby
     this.character = character
 
     // Enable physics
