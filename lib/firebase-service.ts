@@ -16,7 +16,6 @@ interface UserProfile {
   createdAt: string
   simulationProgress?: any
   completedSimulations?: string[]
-  totalXP?: number
   badges?: string[]
   cityProgress?: any
   onboardingAnswers?: any
@@ -35,7 +34,6 @@ interface SimulationProgress {
   lastUpdated: string
   completed: boolean
   completedAt?: string
-  xpEarned?: number
   badgesEarned?: string[]
 }
 
@@ -203,7 +201,6 @@ export const saveSimulationProgress = async (progressData: SimulationProgress): 
         updatedAt: new Date().toISOString(),
         simulationProgress: {},
         completedSimulations: [],
-        totalXP: 0,
         badges: [],
         cityProgress: {
           unlockedBuildings: ["school"],
@@ -316,7 +313,6 @@ export const getUserSimulationProgress = async (userId: string): Promise<ApiResp
 export const completeSimulation = async (
   userId: string,
   simulationId: string,
-  xpEarned = 100,
   badgesEarned: string[] = [],
 ): Promise<ApiResponse> => {
   try {
@@ -337,7 +333,7 @@ export const completeSimulation = async (
     const userData = userSnap.data()
     const currentCompletedSimulations = userData.completedSimulations || []
     const currentBadges = userData.badges || []
-    const currentTotalXP = userData.totalXP || 0
+
 
     const batch = writeBatch(db)
 
@@ -347,7 +343,6 @@ export const completeSimulation = async (
     batch.update(progressRef, {
       completed: true,
       completedAt: new Date().toISOString(),
-      xpEarned: xpEarned,
       badgesEarned: badgesEarned,
       lastUpdated: new Date().toISOString(),
     })
@@ -361,11 +356,10 @@ export const completeSimulation = async (
 
     batch.update(userRef, {
       completedSimulations: updatedCompletedSimulations,
-      totalXP: currentTotalXP + xpEarned,
+
       badges: updatedBadges,
       [`simulationProgress.${simulationId}.completed`]: true,
       [`simulationProgress.${simulationId}.completedAt`]: new Date().toISOString(),
-      [`simulationProgress.${simulationId}.xpEarned`]: xpEarned,
       updatedAt: new Date().toISOString(),
     })
 
@@ -478,7 +472,6 @@ export const getStudentProgressCloudFunction = async (userId: string): Promise<A
         userProfile: userProfile.data,
         simulationProgress: simulationProgress.data,
         totalCompleted: simulationProgress.data?.length || 0,
-        totalXP: userProfile.data?.totalXP || 0,
         badges: userProfile.data?.badges || [],
         cityLevel: userProfile.data?.cityProgress?.level || 1,
       }

@@ -852,7 +852,7 @@ export function StudentDashboard() {
                     <div className="space-y-4">
                       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                         <h4 className="font-bold text-lg mb-2 flex items-center">
-                          <Star className="mr-2 h-5 w-5" />🎯 Continue Your Progress
+                          🎯 Continue Your Progress
                         </h4>
                         <div className="space-y-3">
                           <h3 className="text-lg font-semibold text-white">{currentSimulationData.title}</h3>
@@ -947,7 +947,7 @@ export function StudentDashboard() {
                     <div className="space-y-4">
                       <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                         <h4 className="font-bold text-lg mb-2 flex items-center">
-                          <Star className="mr-2 h-5 w-5" />🎉 Discover Your Career Path
+                          <Star className="mr-2 h-5 w-5" /> Discover Your Career Path
                         </h4>
                         <p className="text-sm opacity-90 mb-4">
                           Our AI has analyzed your {completedCount} completed simulation{completedCount > 1 ? "s" : ""}{" "}
@@ -1290,10 +1290,10 @@ export function StudentDashboard() {
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Current Streak */}
-                <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                {/* <div className="text-center p-4 bg-yellow-50 rounded-lg">
                   <div className="text-2xl font-bold text-yellow-600 mb-1">{displayProgress.currentStreak}</div>
                   <div className="text-sm font-medium text-yellow-800">Day Streak</div>
-                </div>
+                </div> */}
 
                 {/* Badges */}
                 <div className="space-y-3">
@@ -1377,14 +1377,14 @@ export function StudentDashboard() {
                   <Globe className="mr-2 h-4 w-4" />
                   Explore All Simulations
                 </Button>
-                <Button
+                {/* <Button
                   variant="outline"
                   className="w-full justify-start bg-transparent"
                   onClick={() => router.push("/profile")}
                 >
                   <Users className="mr-2 h-4 w-4" />
                   View Profile
-                </Button>
+                </Button> */}
                 <Button
                   variant="outline"
                   className="w-full justify-start bg-transparent"
