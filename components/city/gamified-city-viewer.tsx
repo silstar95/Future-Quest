@@ -4,17 +4,12 @@ import { useEffect, useRef, useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Building, Settings, Eye, Palette, RotateCcw, Share, Zap, Trophy, Lock, Play, Info, Check } from "lucide-react"
+import { Building, Settings, Eye, Palette, RotateCcw, Zap, Trophy, Lock, Play, Info, Check } from "lucide-react"
 import { CityGame } from "@/lib/city-game"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import {
-  saveBuildingPositions,
-  getBuildingPositions,
-  saveBuildingPositionSmooth,
-  forceSavePendingPositions,
-} from "@/lib/firebase-service"
+import { saveBuildingPositions, getBuildingPositions, saveBuildingPositionSmooth } from "@/lib/firebase-service"
 import { useAuth } from "@/components/providers/auth-provider"
 
 interface GameifiedCityViewerProps {
@@ -48,7 +43,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
   const isGameHandlingPositionRef = useRef(false)
   const { user } = useAuth()
 
-  // Building types and their unlock conditions
+  // Building types and their unlock conditions - Updated to include City Hall
   const buildingTypes = {
     advertising: {
       id: "advertising",
@@ -86,26 +81,41 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
       description: "Experience healthcare management",
       simulationId: "healthcare-simulation",
     },
+    "city-hall": {
+      id: "city-hall",
+      name: "City Hall",
+      emoji: "🏛️",
+      unlockRequirement: "government-simulation",
+      category: "government",
+      description: "Navigate congressional processes and policy making",
+      simulationId: "government-simulation",
+    },
   }
 
-  const buildings = useMemo(() => 
-    Object.values(buildingTypes).map((building) => ({
-      ...building,
-      type: building.category,
-      isUnlocked: userProgress?.completedSimulations?.includes(building.simulationId) || building.id === "advertising",
-    })), [userProgress?.completedSimulations]
+  const buildings = useMemo(
+    () =>
+      Object.values(buildingTypes).map((building) => ({
+        ...building,
+        type: building.category,
+        isUnlocked:
+          userProgress?.completedSimulations?.includes(building.simulationId) || building.id === "advertising",
+      })),
+    [userProgress?.completedSimulations],
   )
 
-  const studentStats = useMemo(() => ({
-    name: "Student",
-    level: 1,
-    experience: 0,
-    maxExperience: 100,
-    completedSimulations: userProgress?.completedSimulations || [],
-    totalSimulations: 4,
-    badges: [],
-    unlockedBuildings: userProgress?.unlockedBuildings || [],
-  }), [userProgress?.completedSimulations, userProgress?.unlockedBuildings])
+  const studentStats = useMemo(
+    () => ({
+      name: "Student",
+      level: 1,
+      experience: 0,
+      maxExperience: 100,
+      completedSimulations: userProgress?.completedSimulations || [],
+      totalSimulations: 5, // Updated to include City Hall
+      badges: [],
+      unlockedBuildings: userProgress?.unlockedBuildings || [],
+    }),
+    [userProgress?.completedSimulations, userProgress?.unlockedBuildings],
+  )
 
   // Set client-side flag
   useEffect(() => {
@@ -123,13 +133,13 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
       setIsLoadingPositions(true)
 
       // Check for any pending positions in localStorage first
-      const pendingPositions = localStorage.getItem('pendingBuildingPositions')
+      const pendingPositions = localStorage.getItem("pendingBuildingPositions")
       if (pendingPositions) {
         try {
           const parsed = JSON.parse(pendingPositions)
           console.log("Found pending positions in localStorage:", parsed)
           // Clear the localStorage
-          localStorage.removeItem('pendingBuildingPositions')
+          localStorage.removeItem("pendingBuildingPositions")
         } catch (e) {
           console.error("Error parsing pending positions:", e)
         }
@@ -139,7 +149,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
       if (result.success && result.data) {
         console.log("Loaded building positions:", result.data)
         // Ensure the data is an object, not a string
-        const positions = typeof result.data === 'object' && result.data !== null ? result.data : {}
+        const positions = typeof result.data === "object" && result.data !== null ? result.data : {}
         console.log("Processed building positions:", positions)
         setBuildingPositions(positions)
       } else {
@@ -187,10 +197,10 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
           // Success - just update ref, no state changes
           saveStatusRef.current = "saved"
           console.log("Building position saved smoothly:", buildingId, { x, y })
-          
+
           // DON'T update buildingPositions state to prevent re-renders and blinking
           // The game already has the correct position
-          
+
           // Reset to idle after a short delay
           setTimeout(() => {
             saveStatusRef.current = "idle"
@@ -199,7 +209,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
         } catch (error) {
           console.error("Error saving building position:", error)
           saveStatusRef.current = "error"
-          
+
           // Only show error in console, no UI updates to prevent blinking
           setTimeout(() => {
             saveStatusRef.current = "idle"
@@ -210,7 +220,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
     } catch (error) {
       console.error("Error in handleSavePositionSmooth:", error)
       saveStatusRef.current = "error"
-      
+
       // Only log error, no UI updates to prevent blinking
       setTimeout(() => {
         saveStatusRef.current = "idle"
@@ -302,7 +312,8 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
         const currentBuildings = Object.values(buildingTypes).map((building) => ({
           ...building,
           type: building.category,
-          isUnlocked: userProgress?.completedSimulations?.includes(building.simulationId) || building.id === "advertising",
+          isUnlocked:
+            userProgress?.completedSimulations?.includes(building.simulationId) || building.id === "advertising",
         }))
 
         const currentStudentStats = {
@@ -311,7 +322,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
           experience: 0,
           maxExperience: 100,
           completedSimulations: userProgress?.completedSimulations || [],
-          totalSimulations: 4,
+          totalSimulations: 5, // Updated to include City Hall
           badges: [],
           unlockedBuildings: userProgress?.unlockedBuildings || [],
         }
@@ -410,16 +421,16 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
         console.log("Page unloading, saving pending positions:", pendingSavesRef.current)
         // Use synchronous storage or send a beacon to save positions
         // For now, we'll just log it since we can't do async operations on beforeunload
-        localStorage.setItem('pendingBuildingPositions', JSON.stringify(pendingSavesRef.current))
+        localStorage.setItem("pendingBuildingPositions", JSON.stringify(pendingSavesRef.current))
       }
     }
 
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('beforeunload', handleBeforeUnload)
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    window.addEventListener("beforeunload", handleBeforeUnload)
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('beforeunload', handleBeforeUnload)
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      window.removeEventListener("beforeunload", handleBeforeUnload)
     }
   }, [user])
 
@@ -462,7 +473,8 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
           const currentBuildings = Object.values(buildingTypes).map((building) => ({
             ...building,
             type: building.category,
-            isUnlocked: userProgress?.completedSimulations?.includes(building.simulationId) || building.id === "advertising",
+            isUnlocked:
+              userProgress?.completedSimulations?.includes(building.simulationId) || building.id === "advertising",
           }))
 
           const currentStudentStats = {
@@ -471,7 +483,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
             experience: 0,
             maxExperience: 100,
             completedSimulations: userProgress?.completedSimulations || [],
-            totalSimulations: 4,
+            totalSimulations: 5, // Updated to include City Hall
             badges: [],
             unlockedBuildings: userProgress?.unlockedBuildings || [],
           }
@@ -548,18 +560,6 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4 items-center justify-between">
-              {/* <div className="flex items-center space-x-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{userProgress?.cityLevel || 1}</div>
-                  <div className="text-xs opacity-90">City Level</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{buildings.filter((b) => b.isUnlocked).length}</div>
-                  <div className="text-xs opacity-90">Buildings</div>
-                </div>
-                
-              </div> */}
-
               <div className="flex space-x-2 items-center">
                 {/* Save Status Indicator - Only show for manual saves */}
                 {saveStatus !== "idle" && (
@@ -769,8 +769,8 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
           <div
             className="fixed z-50 bg-black/90 text-white px-3 py-2 rounded-lg shadow-lg pointer-events-none transition-all duration-200"
             style={{
-              left: `${Math.min(tooltip.x + 20, window.innerWidth - 200)}px`,
-              top: `${Math.max(tooltip.y - 60, 10)}px`,
+              left: `${Math.min(tooltip.x + 20, window.innerWidth - 100)}px`,
+              top: `${Math.max(tooltip.y - 10, 10)}px`,
             }}
           >
             <div className="font-semibold text-sm">{tooltip.name}</div>

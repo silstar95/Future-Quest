@@ -1,89 +1,9 @@
 import * as Phaser from "phaser"
 
 // Orange cat sprite creation function
-function createCatSprite(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Graphics {
-  const cat = scene.add.graphics()
-
-  // Main body (orange)
-  cat.fillStyle(0xff8c42) // Orange color
-  cat.fillEllipse(0, 0, 40, 50) // Body
-
-  // Belly (lighter orange)
-  cat.fillStyle(0xffb366)
-  cat.fillEllipse(0, 5, 25, 35) // Belly
-
-  // Head
-  cat.fillStyle(0xff8c42)
-  cat.fillCircle(0, -35, 20) // Head
-
-  // Ears
-  cat.fillStyle(0xff8c42)
-  // Left ear - triangular with slight curve
-  cat.beginPath()
-  cat.moveTo(-22, -35) // Base left
-  cat.lineTo(-15, -52) // Top point
-  cat.lineTo(-8, -35)  // Base right
-  cat.closePath()
-  cat.fillPath()
-  
-  // Right ear - triangular with slight curve
-  cat.beginPath()
-  cat.moveTo(8, -35)   // Base left
-  cat.lineTo(15, -52)  // Top point
-  cat.lineTo(22, -35)  // Base right
-  cat.closePath()
-  cat.fillPath()
-
-  // Inner ears (pink) - more detailed
-  cat.fillStyle(0xffb3ba)
-  cat.fillTriangle(-12, -45, -10, -38, -18, -38) // Left inner ear
-  cat.fillTriangle(12, -45, 10, -38, 18, -38) // Right inner ear
-
-  // Eyes (closed/happy)
-  cat.lineStyle(2, 0x000000)
-  cat.beginPath()
-  cat.arc(-8, -40, 3, 0.2, Math.PI - 0.2) // Left eye (curved line)
-  cat.strokePath()
-  cat.beginPath()
-  cat.arc(8, -40, 3, 0.2, Math.PI - 0.2) // Right eye (curved line)
-  cat.strokePath()
-
-  // Nose (small triangle)
-  cat.fillStyle(0xff69b4) // Pink
-  cat.fillTriangle(0, -32, -2, -28, 2, -28)
-
-  // Mouth (small curve)
-  cat.lineStyle(1, 0x000000)
-  cat.beginPath()
-  cat.arc(-3, -25, 3, 0, Math.PI) // Left side of mouth
-  cat.strokePath()
-  cat.beginPath()
-  cat.arc(3, -25, 3, 0, Math.PI) // Right side of mouth
-  cat.strokePath()
-
-  // Whiskers
-  cat.lineStyle(1, 0x000000)
-  // Left whiskers
-  cat.lineBetween(-25, -35, -15, -33)
-  cat.lineBetween(-25, -30, -15, -30)
-  cat.lineBetween(-25, -25, -15, -27)
-  // Right whiskers
-  cat.lineBetween(25, -35, 15, -33)
-  cat.lineBetween(25, -30, 15, -30)
-  cat.lineBetween(25, -25, 15, -27)
-
-  // Tail
-  cat.fillStyle(0xff8c42)
-  cat.fillEllipse(25, 10, 8, 30) // Tail
-
-  // Paws
-  cat.fillStyle(0xff8c42)
-  cat.fillCircle(-12, 25, 6) // Left front paw
-  cat.fillCircle(12, 25, 6) // Right front paw
-  cat.fillCircle(-8, 20, 5) // Left back paw
-  cat.fillCircle(8, 20, 5) // Right back paw
-
-  cat.setPosition(x, y)
+function createCatSprite(scene: Phaser.Scene, x: number, y: number): Phaser.GameObjects.Image {
+  const cat = scene.add.image(x, y, "cat")
+  cat.setScale(0.25) // Scale down the image to match the original cat size
   return cat
 }
 
@@ -131,7 +51,7 @@ class CityScene extends Phaser.Scene {
   private studentStats!: StudentStats
   private buildingSprites: Map<string, Phaser.GameObjects.Container> = new Map()
   private avatar?: Phaser.GameObjects.Sprite
-  private cat?: Phaser.GameObjects.Graphics
+  private cat?: Phaser.GameObjects.Image
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
   private wasd?: {
     W: Phaser.Input.Keyboard.Key
@@ -179,7 +99,8 @@ class CityScene extends Phaser.Scene {
     this.buildings = data.buildings
     this.studentStats = data.studentStats
     // Ensure buildingPositions is always an object
-    this.buildingPositions = typeof data.buildingPositions === 'object' && data.buildingPositions !== null ? data.buildingPositions : {}
+    this.buildingPositions =
+      typeof data.buildingPositions === "object" && data.buildingPositions !== null ? data.buildingPositions : {}
     this.onBuildingSelect = data.onBuildingSelect
     this.onUnlockAnimation = data.onUnlockAnimation
     this.onShowTooltip = data.onShowTooltip
@@ -222,6 +143,9 @@ class CityScene extends Phaser.Scene {
       </svg>
     `),
     )
+
+    // Load the cat sprite
+    this.load.image("cat", "/images/cat.png")
   }
 
   createBuildingTextures() {
@@ -231,11 +155,14 @@ class CityScene extends Phaser.Scene {
     // Create Research Lab
     this.createResearchLab()
 
-    // Create Bank
-    this.createBank()
+    // Create Bank (updated design)
+    this.createBankBuilding()
 
     // Create Hospital
     this.createHospital()
+
+    // Create City Hall (new building)
+    this.createCityHallBuilding()
   }
 
   createAdvertisingAgency() {
@@ -368,83 +295,144 @@ class CityScene extends Phaser.Scene {
     graphics.destroy()
   }
 
-  createBank() {
+  createBankBuilding() {
     const graphics = this.add.graphics()
-    const width = 140
-    const height = 120
-    const depth = 25
+    // Building dimensions
+    const width = 130
+    const height = 90
+    const depth = 20
+    const roofHeight = 25
 
-    // Main building structure (classical bank architecture)
-    // Front face - marble/stone appearance
-    graphics.fillStyle(0xf8f9fa) // Off-white marble
-    graphics.fillRect(0, depth, width, height)
+    // Main building structure (classical bank with triangular pediment)
+    // Front face - cream/beige color like in reference
+    graphics.fillStyle(0xf5deb3) // Wheat/cream color
+    graphics.fillRect(0, depth + roofHeight, width, height)
+    graphics.lineStyle(2, 0x333333)
+    graphics.strokeRect(0, depth + roofHeight, width, height)
 
-    // Classical columns
-    graphics.fillStyle(0xe9ecef)
-    for (let i = 0; i < 5; i++) {
-      const x = 15 + i * 25
-      graphics.fillRect(x, depth + 20, 8, height - 40)
-      // Column capitals
-      graphics.fillRect(x - 2, depth + 20, 12, 6)
-      // Column bases
-      graphics.fillRect(x - 2, height + depth - 26, 12, 6)
-    }
+    // Triangular pediment (roof) - properly closed
+    graphics.fillStyle(0xdaa520) // Golden rod
+    graphics.beginPath()
+    graphics.moveTo(0, depth + roofHeight)
+    graphics.lineTo(width / 2, depth)
+    graphics.lineTo(width, depth + roofHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.lineStyle(2, 0x333333)
+    graphics.strokePath()
 
-    // Bank windows between columns
-    graphics.fillStyle(0x2c3e50, 0.8)
+    // Right side face - properly closed
+    graphics.fillStyle(0xd2b48c) // Tan
+    graphics.beginPath()
+    graphics.moveTo(width, depth + roofHeight)
+    graphics.lineTo(width + depth, roofHeight)
+    graphics.lineTo(width + depth, height + roofHeight)
+    graphics.lineTo(width, height + depth + roofHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // Left side face - add missing left side
+    graphics.fillStyle(0xd2b48c) // Tan
+    graphics.beginPath()
+    graphics.moveTo(0, depth + roofHeight)
+    graphics.lineTo(-depth, roofHeight)
+    graphics.lineTo(-depth, height + roofHeight)
+    graphics.lineTo(0, height + depth + roofHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // Top face of the building (roof top)
+    graphics.fillStyle(0xdaa520) // Golden rod
+    graphics.beginPath()
+    graphics.moveTo(-depth, roofHeight)
+    graphics.lineTo(width + depth, roofHeight)
+    graphics.lineTo(width + depth, depth + roofHeight)
+    graphics.lineTo(-depth, depth + roofHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // Classical columns (4 columns like in reference)
+    graphics.fillStyle(0xfaf0e6) // Linen (light cream for columns)
+    graphics.lineStyle(2, 0x333333)
+    const columnWidth = 8
+    const columnSpacing = (width - 40) / 3 // Space between 4 columns
     for (let i = 0; i < 4; i++) {
-      const x = 23 + i * 25
-      graphics.fillRect(x, depth + 35, 12, 35)
-      graphics.lineStyle(2, 0x34495e)
-      graphics.strokeRect(x, depth + 35, 12, 35)
+      const x = 20 + i * columnSpacing
+      // Column base
+      graphics.fillRect(x - 2, height + depth + roofHeight - 8, columnWidth + 4, 8)
+      graphics.strokeRect(x - 2, height + depth + roofHeight - 8, columnWidth + 4, 8)
+      // Column shaft
+      graphics.fillRect(x, depth + roofHeight + 15, columnWidth, height - 25)
+      graphics.strokeRect(x, depth + roofHeight + 15, columnWidth, height - 25)
+      // Column capital (top)
+      graphics.fillRect(x - 2, depth + roofHeight + 12, columnWidth + 4, 6)
+      graphics.strokeRect(x - 2, depth + roofHeight + 12, columnWidth + 4, 6)
+      // Column fluting (vertical lines for detail)
+      graphics.lineStyle(1, 0xd3d3d3)
+      graphics.moveTo(x + 2, depth + roofHeight + 18)
+      graphics.lineTo(x + 2, height + depth + roofHeight - 15)
+      graphics.moveTo(x + 4, depth + roofHeight + 18)
+      graphics.lineTo(x + 4, height + depth + roofHeight - 15)
+      graphics.moveTo(x + 6, depth + roofHeight + 18)
+      graphics.lineTo(x + 6, height + depth + roofHeight - 15)
+      graphics.strokePath()
+      graphics.lineStyle(2, 0x333333) // Reset line style
     }
 
-    // Top face (roof)
-    graphics.fillStyle(0xdee2e6)
-    graphics.beginPath()
-    graphics.moveTo(0, depth)
-    graphics.lineTo(depth, 0)
-    graphics.lineTo(width + depth, 0)
-    graphics.lineTo(width, depth)
-    graphics.closePath()
-    graphics.fillPath()
+    // "BANK" text on pediment
+    graphics.fillStyle(0x8b4513) // Dark brown text
+    graphics.fillRect(width / 2 - 20, depth + roofHeight - 15, 40, 8)
 
-    // Right side face
-    graphics.fillStyle(0xf1f3f4)
-    graphics.beginPath()
-    graphics.moveTo(width, depth)
-    graphics.lineTo(width + depth, 0)
-    graphics.lineTo(width + depth, height)
-    graphics.lineTo(width, height + depth)
-    graphics.closePath()
-    graphics.fillPath()
+    // Bank logo/emblem (circular like in reference)
+    graphics.fillStyle(0x2e7d32) // Dark green circle
+    graphics.fillCircle(width / 2, depth + roofHeight - 5, 8)
+    graphics.lineStyle(2, 0x333333)
+    graphics.strokeCircle(width / 2, depth + roofHeight - 5, 8)
 
-    // Bank name sign
-    graphics.fillStyle(0x2c3e50)
-    graphics.fillRect(20, depth + 5, 100, 15)
-    graphics.fillStyle(0xf39c12) // Gold lettering
-    graphics.fillRect(22, depth + 7, 96, 11)
+    // Logo details
+    graphics.fillStyle(0xffd700) // Gold
+    graphics.fillCircle(width / 2, depth + roofHeight - 5, 4)
 
-    // Main entrance with steps
-    graphics.fillStyle(0x34495e)
-    graphics.fillRect(width / 2 - 15, height + depth - 35, 30, 35)
+    // Central entrance doors (between middle columns)
+    graphics.fillStyle(0x8b4513) // Dark brown doors
+    graphics.fillRect(width / 2 - 15, height + depth + roofHeight - 30, 30, 30)
+    graphics.lineStyle(3, 0x333333)
+    graphics.strokeRect(width / 2 - 15, height + depth + roofHeight - 30, 30, 30)
 
-    // Steps
-    graphics.fillStyle(0xe9ecef)
-    graphics.fillRect(width / 2 - 20, height + depth - 8, 40, 8)
-    graphics.fillRect(width / 2 - 18, height + depth - 12, 36, 4)
-
-    // Entrance doors
-    graphics.fillStyle(0x8b4513) // Brown doors
-    graphics.fillRect(width / 2 - 12, height + depth - 32, 10, 25)
-    graphics.fillRect(width / 2 + 2, height + depth - 32, 10, 25)
+    // Door panels
+    graphics.fillStyle(0x654321)
+    graphics.fillRect(width / 2 - 12, height + depth + roofHeight - 25, 10, 20)
+    graphics.fillRect(width / 2 + 2, height + depth + roofHeight - 25, 10, 20)
 
     // Door handles
-    graphics.fillStyle(0xf39c12)
-    graphics.fillCircle(width / 2 - 3, height + depth - 20, 1)
-    graphics.fillCircle(width / 2 + 11, height + depth - 20, 1)
+    graphics.fillStyle(0xffd700) // Gold handles
+    graphics.fillCircle(width / 2 - 4, height + depth + roofHeight - 15, 1.5)
+    graphics.fillCircle(width / 2 + 8, height + depth + roofHeight - 15, 1.5)
 
-    graphics.generateTexture("bank", width + depth, height + depth)
+    // Steps leading to entrance (like in reference)
+    graphics.fillStyle(0xf0e68c) // Khaki (lighter than building)
+    graphics.lineStyle(1, 0x333333)
+    // Bottom step
+    graphics.fillRect(width / 2 - 25, height + depth + roofHeight - 5, 50, 5)
+    graphics.strokeRect(width / 2 - 25, height + depth + roofHeight - 5, 50, 5)
+    // Middle step
+    graphics.fillRect(width / 2 - 20, height + depth + roofHeight - 10, 40, 5)
+    graphics.strokeRect(width / 2 - 20, height + depth + roofHeight - 10, 40, 5)
+    // Top step
+    graphics.fillRect(width / 2 - 18, height + depth + roofHeight - 15, 36, 5)
+    graphics.strokeRect(width / 2 - 18, height + depth + roofHeight - 15, 36, 5)
+
+    // Decorative elements on pediment
+    graphics.fillStyle(0xdaa520)
+    // Small decorative circles
+    graphics.fillCircle(width / 2 - 15, depth + roofHeight - 8, 2)
+    graphics.fillCircle(width / 2 + 15, depth + roofHeight - 8, 2)
+
+    // Convert to texture
+    graphics.generateTexture("bank", width + depth * 2, height + depth + roofHeight)
     graphics.destroy()
   }
 
@@ -527,6 +515,221 @@ class CityScene extends Phaser.Scene {
     graphics.destroy()
   }
 
+  createCityHallBuilding() {
+    const graphics = this.add.graphics()
+    // Building dimensions
+    const width = 150
+    const height = 110
+    const depth = 22
+    const domeHeight = 35
+
+    // Main building structure (government/civic building style)
+    // Front face - light stone/marble color
+    graphics.fillStyle(0xf5f5dc) // Beige/light stone
+    graphics.fillRect(0, depth + domeHeight, width, height)
+    graphics.lineStyle(3, 0x333333)
+    graphics.strokeRect(0, depth + domeHeight, width, height)
+
+    // Right side face
+    graphics.fillStyle(0xe6e6fa) // Lavender (slightly different shade)
+    graphics.beginPath()
+    graphics.moveTo(width, depth + domeHeight)
+    graphics.lineTo(width + depth, domeHeight)
+    graphics.lineTo(width + depth, height + domeHeight)
+    graphics.lineTo(width, height + depth + domeHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // Left side face - add missing left side
+    graphics.fillStyle(0xe6e6fa) // Lavender
+    graphics.beginPath()
+    graphics.moveTo(0, depth + domeHeight)
+    graphics.lineTo(-depth, domeHeight)
+    graphics.lineTo(-depth, height + domeHeight)
+    graphics.lineTo(0, height + depth + domeHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // Central dome (key feature of City Hall)
+    const domeX = width / 2
+    const domeY = depth + domeHeight / 2
+    const domeRadius = 25
+
+    // Dome base (circular)
+    graphics.fillStyle(0xd3d3d3) // Light gray dome
+    graphics.fillCircle(domeX, domeY, domeRadius)
+    graphics.lineStyle(3, 0x333333)
+    graphics.strokeCircle(domeX, domeY, domeRadius)
+
+    // Dome top highlight
+    graphics.fillStyle(0xe8e8e8) // Lighter gray highlight
+    graphics.fillCircle(domeX - 8, domeY - 8, 12)
+
+    // Dome finial (decorative top)
+    graphics.fillStyle(0xffd700) // Gold finial
+    graphics.fillCircle(domeX, domeY - domeRadius - 5, 4)
+    graphics.strokeCircle(domeX, domeY - domeRadius - 5, 4)
+
+    // Flag pole on dome
+    graphics.lineStyle(2, 0x8b4513) // Brown pole
+    graphics.moveTo(domeX, domeY - domeRadius - 9)
+    graphics.lineTo(domeX, domeY - domeRadius - 25)
+    graphics.strokePath()
+
+    // American flag (small rectangle)
+    graphics.fillStyle(0xff0000) // Red stripes
+    graphics.fillRect(domeX + 1, domeY - domeRadius - 25, 12, 8)
+    graphics.fillStyle(0x0000ff) // Blue canton
+    graphics.fillRect(domeX + 1, domeY - domeRadius - 25, 5, 4)
+    graphics.lineStyle(1, 0x333333)
+    graphics.strokeRect(domeX + 1, domeY - domeRadius - 25, 12, 8)
+
+    // Top face of the building (roof area around dome)
+    graphics.fillStyle(0xf5f5dc) // Beige/light stone
+    graphics.beginPath()
+    graphics.moveTo(-depth, domeHeight)
+    graphics.lineTo(width + depth, domeHeight)
+    graphics.lineTo(width + depth, depth + domeHeight)
+    graphics.lineTo(-depth, depth + domeHeight)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // Classical columns (6 columns across the front)
+    graphics.fillStyle(0xffffff) // White marble columns
+    graphics.lineStyle(2, 0x333333)
+    const columnWidth = 8
+    const columnSpacing = (width - 60) / 5 // Space between 6 columns
+    const columnHeight = height - 35
+    for (let i = 0; i < 6; i++) {
+      const x = 30 + i * columnSpacing
+      // Column base
+      graphics.fillRect(x - 3, height + depth + domeHeight - 10, columnWidth + 6, 10)
+      graphics.strokeRect(x - 3, height + depth + domeHeight - 10, columnWidth + 6, 10)
+      // Column shaft
+      graphics.fillRect(x, depth + domeHeight + 25, columnWidth, columnHeight)
+      graphics.strokeRect(x, depth + domeHeight + 25, columnWidth, columnHeight)
+      // Column capital (Ionic style)
+      graphics.fillRect(x - 3, depth + domeHeight + 20, columnWidth + 6, 8)
+      graphics.strokeRect(x - 3, depth + domeHeight + 20, columnWidth + 6, 8)
+      // Column fluting (vertical decorative lines)
+      graphics.lineStyle(1, 0xf0f0f0)
+      graphics.moveTo(x + 2, depth + domeHeight + 28)
+      graphics.lineTo(x + 2, height + depth + domeHeight - 15)
+      graphics.moveTo(x + 4, depth + domeHeight + 28)
+      graphics.lineTo(x + 4, height + depth + domeHeight - 15)
+      graphics.moveTo(x + 6, depth + domeHeight + 28)
+      graphics.lineTo(x + 6, height + depth + domeHeight - 15)
+      graphics.strokePath()
+      graphics.lineStyle(2, 0x333333) // Reset line style
+    }
+
+    // Pediment (triangular section above columns)
+    graphics.fillStyle(0xf0f8ff) // Alice blue
+    graphics.beginPath()
+    graphics.moveTo(20, depth + domeHeight + 20)
+    graphics.lineTo(width / 2, depth + domeHeight - 5)
+    graphics.lineTo(width - 20, depth + domeHeight + 20)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+
+    // "CITY HALL" inscription on pediment
+    graphics.fillStyle(0x2f4f4f) // Dark slate gray
+    graphics.fillRect(width / 2 - 25, depth + domeHeight + 5, 50, 10)
+    graphics.lineStyle(1, 0x333333)
+    graphics.strokeRect(width / 2 - 25, depth + domeHeight + 5, 50, 10)
+
+    // Government seal/emblem in pediment
+    graphics.fillStyle(0x4169e1) // Royal blue circle
+    graphics.fillCircle(width / 2, depth + domeHeight + 2, 8)
+    graphics.strokeCircle(width / 2, depth + domeHeight + 2, 8)
+
+    // Seal details (eagle silhouette)
+    graphics.fillStyle(0xffd700) // Gold eagle
+    graphics.fillCircle(width / 2, depth + domeHeight + 2, 4)
+
+    // Grand entrance staircase (wide steps)
+    graphics.fillStyle(0xdcdcdc) // Light gray steps
+    graphics.lineStyle(2, 0x333333)
+    // Bottom step (widest)
+    graphics.fillRect(width / 2 - 40, height + depth + domeHeight - 8, 80, 8)
+    graphics.strokeRect(width / 2 - 40, height + depth + domeHeight - 8, 80, 8)
+    // Middle step
+    graphics.fillRect(width / 2 - 35, height + depth + domeHeight - 16, 70, 8)
+    graphics.strokeRect(width / 2 - 35, height + depth + domeHeight - 16, 70, 8)
+    // Top step
+    graphics.fillRect(width / 2 - 30, height + depth + domeHeight - 24, 60, 8)
+    graphics.strokeRect(width / 2 - 30, height + depth + domeHeight - 24, 60, 8)
+
+    // Main entrance doors (double doors between center columns)
+    graphics.fillStyle(0x8b4513) // Dark brown doors
+    graphics.fillRect(width / 2 - 18, height + depth + domeHeight - 40, 36, 40)
+    graphics.lineStyle(3, 0x333333)
+    graphics.strokeRect(width / 2 - 18, height + depth + domeHeight - 40, 36, 40)
+
+    // Door panels (ornate government doors)
+    graphics.fillStyle(0x654321) // Darker brown panels
+    graphics.fillRect(width / 2 - 15, height + depth + domeHeight - 35, 12, 30)
+    graphics.fillRect(width / 2 + 3, height + depth + domeHeight - 35, 12, 30)
+    graphics.strokeRect(width / 2 - 15, height + depth + domeHeight - 35, 12, 30)
+    graphics.strokeRect(width / 2 + 3, height + depth + domeHeight - 35, 12, 30)
+
+    // Ornate door handles (brass)
+    graphics.fillStyle(0xb8860b) // Dark golden rod (brass)
+    graphics.fillCircle(width / 2 - 5, height + depth + domeHeight - 20, 2)
+    graphics.fillCircle(width / 2 + 11, height + depth + domeHeight - 20, 2)
+
+    // Windows on either side of entrance
+    graphics.fillStyle(0x87ceeb) // Sky blue windows
+    graphics.lineStyle(2, 0x333333)
+    // Left side windows
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 2; col++) {
+        const x = 8 + col * 20
+        const y = depth + domeHeight + 35 + row * 25
+        graphics.fillRect(x, y, 15, 20)
+        graphics.strokeRect(x, y, 15, 20)
+      }
+    }
+    // Right side windows
+    for (let row = 0; row < 2; row++) {
+      for (let col = 0; col < 2; col++) {
+        const x = width - 35 + col * 20
+        const y = depth + domeHeight + 35 + row * 25
+        graphics.fillRect(x, y, 15, 20)
+        graphics.strokeRect(x, y, 15, 20)
+      }
+    }
+
+    // Clock on the front facade (common City Hall feature)
+    graphics.fillStyle(0xffffff) // White clock face
+    graphics.fillCircle(width / 2, depth + domeHeight + 50, 12)
+    graphics.lineStyle(2, 0x333333)
+    graphics.strokeCircle(width / 2, depth + domeHeight + 50, 12)
+
+    // Clock hands (showing 3:00)
+    graphics.lineStyle(3, 0x000000)
+    graphics.moveTo(width / 2, depth + domeHeight + 50)
+    graphics.lineTo(width / 2 + 8, depth + domeHeight + 50) // Hour hand
+    graphics.moveTo(width / 2, depth + domeHeight + 50)
+    graphics.lineTo(width / 2, depth + domeHeight + 42) // Minute hand
+    graphics.strokePath()
+
+    // Clock numbers (12, 3, 6, 9)
+    graphics.fillStyle(0x000000)
+    graphics.fillCircle(width / 2, depth + domeHeight + 40, 1) // 12
+    graphics.fillCircle(width / 2 + 10, depth + domeHeight + 50, 1) // 3
+    graphics.fillCircle(width / 2, depth + domeHeight + 60, 1) // 6
+    graphics.fillCircle(width / 2 - 10, depth + domeHeight + 50, 1) // 9
+
+    // Convert to texture
+    graphics.generateTexture("city-hall", width + depth * 2, height + depth + domeHeight)
+    graphics.destroy()
+  }
+
   create() {
     // Add city background
     const bg = this.add.image(0, 0, "city-bg").setOrigin(0, 0)
@@ -600,7 +803,7 @@ class CityScene extends Phaser.Scene {
         lockBadge.setStrokeStyle(3, 0xcc5555)
         const lockIcon = this.add
           .text(35, -35, "🔒", {
-        fontSize: "16px",
+            fontSize: "16px",
           })
           .setOrigin(0.5)
 
@@ -686,7 +889,7 @@ class CityScene extends Phaser.Scene {
       this.cat.destroy()
       this.cat = undefined
     }
-    
+
     // Create the cat character using the createCatSprite function
     this.cat = createCatSprite(this, 100, 100)
     this.cat.setInteractive()
@@ -952,7 +1155,7 @@ class CityScene extends Phaser.Scene {
   public updateBuildingPositions(positions: { [buildingId: string]: { x: number; y: number } }) {
     this.buildingPositions = { ...positions }
     console.log("Building positions updated in scene:", this.buildingPositions)
-    
+
     // Update existing building positions without recreating the scene
     Object.entries(positions).forEach(([buildingId, position]) => {
       const buildingContainer = this.buildingSprites.get(buildingId)
@@ -981,7 +1184,8 @@ export class CityGame {
     buildingPositions?: { [buildingId: string]: { x: number; y: number } },
   ) {
     // Ensure buildingPositions is always an object
-    const safeBuildingPositions = typeof buildingPositions === 'object' && buildingPositions !== null ? buildingPositions : {}
+    const safeBuildingPositions =
+      typeof buildingPositions === "object" && buildingPositions !== null ? buildingPositions : {}
     console.log("CityGame constructor called with building positions:", safeBuildingPositions)
 
     const config: Phaser.Types.Core.GameConfig = {
