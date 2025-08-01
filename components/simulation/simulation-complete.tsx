@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Star, TrendingUp, Award, Home, RotateCcw, Building, Sparkles } from "lucide-react"
+import { Trophy, Star, TrendingUp, Award, Home, Building, Sparkles } from "lucide-react"
 import { useAuth } from "@/components/providers/auth-provider"
 import { completeSimulation } from "@/lib/firebase-service"
 import { useToast } from "@/hooks/use-toast"
@@ -24,6 +24,7 @@ export function SimulationComplete({
 }: SimulationCompleteProps) {
   const [isProcessing, setIsProcessing] = useState(true)
   const [showUnlockAnimation, setShowUnlockAnimation] = useState(false)
+  const [completionProcessed, setCompletionProcessed] = useState(false)
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -121,8 +122,10 @@ export function SimulationComplete({
 
   useEffect(() => {
     const processCompletion = async () => {
-      if (user) {
+      if (user && !completionProcessed) {
         try {
+          setCompletionProcessed(true) // Prevent multiple executions
+
           // Save completion to database
           await completeSimulation(user.uid, simulationType, {
             ...simulationData,
@@ -137,6 +140,7 @@ export function SimulationComplete({
             setIsProcessing(false)
           }, 1000)
 
+          // Show success toast only once
           toast({
             title: "🎉 Simulation Complete!",
             description: "Your progress has been saved and new buildings unlocked!",
@@ -154,7 +158,7 @@ export function SimulationComplete({
     }
 
     processCompletion()
-  }, [user, simulationData, toast, simulationType, content.achievements])
+  }, [user, simulationType, completionProcessed]) // Remove simulationData and toast from dependencies
 
   const getCompletionTime = () => {
     if (simulationData.startTime) {
@@ -164,6 +168,11 @@ export function SimulationComplete({
       return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
     }
     return "45m"
+  }
+
+  const handleViewFuturePathways = () => {
+    // Redirect to Future Pathways page instead of dashboard
+    window.location.href = "/future-pathways"
   }
 
   if (isProcessing) {
@@ -327,24 +336,32 @@ export function SimulationComplete({
           <div className="space-y-4">
             <p className="text-gray-600 leading-relaxed">
               🎉 Amazing work! You've successfully completed your {content.field.toLowerCase()} simulation and unlocked
-              the {content.building} in your Future Quest city. Your next challenge awaits - explore other career fields
-              by completing additional simulations!
+              the {content.building} in your Future Quest city. Ready to discover your personalized career pathways?
             </p>
 
             <div className="bg-[#f0ad70]/20 p-4 rounded-lg border border-[#db9b6c]/30">
-              <h4 className="font-semibold text-[#2d407e] mb-2">🚀 Continue Your Career Exploration</h4>
+              <h4 className="font-semibold text-[#2d407e] mb-2">🚀 Discover Your Future Pathways</h4>
               <p className="text-[#4e3113] text-sm">
-                Ready to explore other career fields? Complete additional simulations to unlock more buildings and
-                continue building your Future Quest city!
+                Our AI has analyzed your simulation experience and is ready to show you personalized career
+                recommendations based on your interests, skills, and performance!
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button
+                onClick={handleViewFuturePathways}
+                size="lg"
+                className="flex items-center bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                View My Career Pathways
+              </Button>
               {onViewCity && (
                 <Button
                   onClick={onViewCity}
                   size="lg"
-                  className="flex items-center bg-gradient-to-r from-[#713c09] to-[#4e3113] hover:from-[#4e3113] hover:to-[#231349]"
+                  variant="outline"
+                  className="flex items-center border-[#713c09] text-[#713c09] hover:bg-[#713c09] hover:text-white bg-transparent"
                 >
                   <Building className="mr-2 h-5 w-5" />
                   View Your City
@@ -353,19 +370,11 @@ export function SimulationComplete({
               <Button
                 onClick={onReturnToDashboard}
                 size="lg"
-                className="flex items-center bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+                variant="outline"
+                className="flex items-center border-[#db9b6c] text-[#4e3113] hover:bg-[#f0ad70]/20 bg-transparent"
               >
                 <Home className="mr-2 h-5 w-5" />
                 Return to Dashboard
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => (window.location.href = "/simulations")}
-                className="flex items-center border-[#db9b6c] text-[#4e3113] hover:bg-[#f0ad70]/20"
-              >
-                <RotateCcw className="mr-2 h-5 w-5" />
-                Explore More Simulations
               </Button>
             </div>
           </div>

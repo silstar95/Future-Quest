@@ -164,7 +164,7 @@ const QUIZ_STEPS = [
   {
     id: "career-interests",
     title: "Career exploration",
-    question: "Which career fields interest you most? (Select exactly 2)",
+    question: "Which career fields interest you most?",
     type: "checkbox",
     maxSelections: 2,
     minSelections: 2,

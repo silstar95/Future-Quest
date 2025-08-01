@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { DollarSign, Play, Clock, CheckCircle, ArrowRight, Eye, BookOpen } from "lucide-react"
+import { DollarSign, Play, Clock, CheckCircle, ArrowRight, Eye, BookOpen, ExternalLink, Youtube } from "lucide-react"
 
 interface FinanceExplorationPhaseProps {
   onComplete: (data: any) => void
@@ -178,31 +178,67 @@ export default function FinanceExplorationPhase({ onComplete, initialData }: Fin
                 </p>
               </div>
 
-              <div className="bg-gray-100 p-8 rounded-xl text-center">
-                <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
-                  <div className="text-center">
-                    <Play className="w-16 h-16 mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-500">Finance Careers Overview Video</p>
-                    <p className="text-sm text-gray-400">https://www.youtubeeducation.com/watch?v=GWVl7kZKNgc</p>
+              <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200">
+                <div className="text-center mb-4">
+                  <div className="flex items-center justify-center mb-2">
+                    <Youtube className="w-8 h-8 text-green-600 mr-2" />
+                    <h4 className="text-xl font-semibold text-gray-800">Finance Careers Overview</h4>
                   </div>
+                  <p className="text-gray-600 text-sm">Watch this video to learn about various finance roles and career paths</p>
                 </div>
-                <Button
-                  onClick={handleVideoWatched}
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={answers.videoWatched}
+                
+                <div 
+                  className="relative w-full h-64 bg-gradient-to-br from-green-500 to-yellow-600 rounded-lg cursor-pointer group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+                  onClick={() => window.open('https://www.youtube.com/watch?v=GWVl7kZKNgc', '_blank')}
                 >
-                  {answers.videoWatched ? (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Video Watched
-                    </>
-                  ) : (
-                    <>
-                      <Play className="mr-2 h-4 w-4" />
-                      Mark as Watched
-                    </>
-                  )}
-                </Button>
+                  {/* Video Thumbnail Overlay */}
+                  <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300"></div>
+                  
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="bg-white bg-opacity-90 rounded-full p-4 group-hover:scale-110 transition-transform duration-300">
+                      <Play className="w-8 h-8 text-red-600 ml-1" />
+                    </div>
+                  </div>
+                  
+                  {/* Video Info */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                    <div className="flex items-center justify-between text-white">
+                      <div>
+                        <p className="font-medium">Finance Careers Overview</p>
+                        <p className="text-sm opacity-90">Learn about various finance roles</p>
+                      </div>
+                      <ExternalLink className="w-4 h-4 opacity-70" />
+                    </div>
+                  </div>
+                  
+                  {/* Hover Effect */}
+                  <div className="absolute inset-0 bg-red-600 bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
+                </div>
+                
+                <div className="mt-4 text-center">
+                  <Button
+                    onClick={handleVideoWatched}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                    disabled={answers.videoWatched}
+                  >
+                    {answers.videoWatched ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Video Watched
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="mr-2 h-4 w-4" />
+                        Mark as Watched
+                      </>
+                    )}
+                  </Button>
+                  
+                  <p className="text-xs text-gray-500 mt-2">
+                    Click the video above to watch on YouTube
+                  </p>
+                </div>
               </div>
 
               {answers.videoWatched && (

@@ -722,6 +722,11 @@ export function StudentDashboard() {
     router.push("/simulations?tab=city")
   }
 
+  const handleViewFuturePathways = () => {
+    console.log("🔮 Viewing Future Pathways")
+    router.push("/future-pathways")
+  }
+
   // Only show loading screen if we don't have any user data at all
   if (loading && !user) {
     return (
@@ -926,52 +931,92 @@ export function StudentDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Build Your Future City */}
-              <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-2xl">
-                <CardHeader>
-                  <CardTitle className="text-2xl flex items-center">
-                    <Building className="mr-3 h-6 w-6" />
-                    Build Your Future City
-                  </CardTitle>
-                  <CardDescription className="text-orange-100">
-                    Design your career city as you unlock new paths
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <h4 className="font-bold text-lg mb-2">🏗️ City Progress</h4>
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                          <div className="text-2xl font-bold">{completedCount}</div>
-                          <div className="text-xs opacity-90">Simulations</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold">{completedCount}</div>
-                          <div className="text-xs opacity-90">Buildings</div>
+              {/* Build Your Future City or Future Pathways */}
+              {completedCount > 0 ? (
+                <Card className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white border-0 shadow-2xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl flex items-center">
+                      <Lightbulb className="mr-3 h-6 w-6" />
+                      Your Future Pathways Ready!
+                    </CardTitle>
+                    <CardDescription className="text-purple-100">
+                      AI-powered career insights based on your simulation experiences
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                        <h4 className="font-bold text-lg mb-2 flex items-center">
+                          <Star className="mr-2 h-5 w-5" />🎉 Discover Your Career Path
+                        </h4>
+                        <p className="text-sm opacity-90 mb-4">
+                          Our AI has analyzed your {completedCount} completed simulation{completedCount > 1 ? "s" : ""}{" "}
+                          and generated personalized career recommendations just for you!
+                        </p>
+                        <div className="space-y-2">
+                          <div className="text-sm">✨ Personalized career matches</div>
+                          <div className="text-sm">💰 Salary and education insights</div>
+                          <div className="text-sm">🎯 Next simulation recommendations</div>
+                          <div className="text-sm">🚀 Alternative career pathways</div>
                         </div>
                       </div>
+                      <Button
+                        onClick={handleViewFuturePathways}
+                        className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20"
+                      >
+                        View My Career Pathways
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      onClick={handleViewCity}
-                      disabled={isNavigating}
-                      className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20"
-                    >
-                      {isNavigating ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                          Loading City...
-                        </>
-                      ) : (
-                        <>
-                          <Building className="mr-2 h-4 w-4" />
-                          Open City Builder
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-0 shadow-2xl">
+                  <CardHeader>
+                    <CardTitle className="text-2xl flex items-center">
+                      <Building className="mr-3 h-6 w-6" />
+                      Build Your Future City
+                    </CardTitle>
+                    <CardDescription className="text-orange-100">
+                      Design your career city as you unlock new paths
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                        <h4 className="font-bold text-lg mb-2">🏗️ City Progress</h4>
+                        <div className="grid grid-cols-2 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold">{completedCount}</div>
+                            <div className="text-xs opacity-90">Simulations</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold">{completedCount}</div>
+                            <div className="text-xs opacity-90">Buildings</div>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={handleViewCity}
+                        disabled={isNavigating}
+                        className="w-full bg-white/10 border-white/30 text-white hover:bg-white/20"
+                      >
+                        {isNavigating ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                            Loading City...
+                          </>
+                        ) : (
+                          <>
+                            <Building className="mr-2 h-4 w-4" />
+                            Open City Builder
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
 
             {/* Your Exploration Journey */}
@@ -1296,6 +1341,16 @@ export function StudentDashboard() {
                 <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {completedCount > 0 && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start bg-transparent"
+                    onClick={handleViewFuturePathways}
+                  >
+                    <Lightbulb className="mr-2 h-4 w-4" />
+                    View Career Pathways
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="w-full justify-start bg-transparent"
