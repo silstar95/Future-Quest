@@ -43,7 +43,7 @@ const UNREACHABLE_AREAS = [
 ]
 
 // Debug mode to show collision boundaries (set to true to visualize)
-const DEBUG_COLLISION_AREAS = true
+const DEBUG_COLLISION_AREAS = false
 
 // Coordinate system conversion factors
 const ORIGINAL_WIDTH = 1024
@@ -75,11 +75,11 @@ const ROOM_DEFINITIONS_ORIGINAL = [
     width: 301.35,
     height: 331.2,
     description: "Research and analysis center",
-    taskId: "1", // Will handle both research and analysis
+    // No taskId here since R and A keys will handle specific tasks
   },
   {
     id: "treasury",
-    name: "Treasury",
+    name: "Treasury Department",
     x: 785.84, // 675.42 + 320.84/2 (center of the room area) - 50px
     y: 217.05, // 52.45 + 331.2/2 (center of the room area)
     width: 320.84,
@@ -89,7 +89,7 @@ const ROOM_DEFINITIONS_ORIGINAL = [
   },
   {
     id: "investments",
-    name: "Investments",
+    name: "Investment Office",
     x: 785.84, // 675.42 + 320.84/2 (center of the room area) - 50px
     y: 714.84, // 549.99 + 329.7/2 (center of the room area)
     width: 320.84,
@@ -117,10 +117,12 @@ class FinanceOfficeScene extends Phaser.Scene {
   private collisionBodies!: Phaser.Physics.Arcade.StaticGroup
   private rKey?: Phaser.Input.Keyboard.Key
   private aKey?: Phaser.Input.Keyboard.Key
+  private spaceKey?: Phaser.Input.Keyboard.Key
   private roomEntryMessage?: Phaser.GameObjects.Text
   private nearRoomId?: string
   private rKeyPressed = false
   private aKeyPressed = false
+  private spaceKeyPressed = false
 
   public onLocationChange?: (location: string) => void
   public onTaskSelect?: (taskId: string) => void
@@ -194,6 +196,7 @@ class FinanceOfficeScene extends Phaser.Scene {
     this.wasd = this.input.keyboard?.addKeys("W,S,A,D") as any
     this.rKey = this.input.keyboard?.addKey("R")
     this.aKey = this.input.keyboard?.addKey("A")
+    this.spaceKey = this.input.keyboard?.addKey("SPACE")
 
     // Camera follows the character
     this.cameras.main.startFollow(this.character!)
@@ -420,60 +423,60 @@ class FinanceOfficeScene extends Phaser.Scene {
     this.rooms.forEach((room) => {
       const container = this.add.container(room.x, room.y)
 
-      // Room background (finance theme colors)
-      const roomBg = this.add.rectangle(0, 0, room.width, room.height, 0x10b981, 0.3)
-      roomBg.setStrokeStyle(2, 0x059669)
-      container.add(roomBg)
+      // Hide room visuals - only keep interaction zones
+      // Room background (finance theme colors) - HIDDEN
+      // const roomBg = this.add.rectangle(0, 0, room.width, room.height, 0x10b981, 0.3)
+      // roomBg.setStrokeStyle(2, 0x059669)
+      // container.add(roomBg)
 
-      // Room label
-      const label = this.add
-        .text(0, -room.height / 2 + 15, room.name, {
-          fontSize: "14px",
-          fontFamily: "Arial",
-          color: "#059669",
-          fontStyle: "bold",
-        })
-        .setOrigin(0.5)
-      container.add(label)
+      // Room label - HIDDEN
+      // const label = this.add
+      //   .text(0, -room.height / 2 + 15, room.name, {
+      //     fontSize: "14px",
+      //     fontFamily: "Arial",
+      //     color: "#059669",
+      //     fontStyle: "bold",
+      //   })
+      //   .setOrigin(0.5)
+      // container.add(label)
 
-      // Task indicator if room has a task
-      if (room.taskId) {
-        const task = this.tasks.find((t) => t.id === room.taskId)
-        if (task) {
-          const isCompleted = task.isCompleted
-          const indicator = this.add.circle(
-            room.width / 2 - 15,
-            -room.height / 2 + 15,
-            8,
-            isCompleted ? 0x22c55e : 0xef4444,
-          )
-          indicator.setStrokeStyle(2, 0xffffff)
-          container.add(indicator)
+      // Task indicator if room has a task - HIDDEN
+      // if (room.taskId) {
+      //   const task = this.tasks.find((t) => t.id === room.taskId)
+      //   if (task) {
+      //     const isCompleted = task.isCompleted
+      //     const indicator = this.add.circle(
+      //       room.width / 2 - 15,
+      //       -room.height / 2 + 15,
+      //       8,
+      //       isCompleted ? 0x22c55e : 0xef4444,
+      //     )
+      //     indicator.setStrokeStyle(2, 0xffffff)
+      //     container.add(indicator)
 
-          const icon = this.add
-            .text(room.width / 2 - 15, -room.height / 2 + 15, isCompleted ? "✓" : "!", {
-              fontSize: "12px",
-              color: "#ffffff",
-              fontStyle: "bold",
-            })
-            .setOrigin(0.5)
-          container.add(icon)
-        }
-      }
+      //     const icon = this.add
+      //       .text(room.width / 2 - 15, -room.height / 2 + 15, isCompleted ? "✓" : "!", {
+      //       fontSize: "12px",
+      //       color: "#ffffff",
+      //       fontStyle: "bold",
+      //     })
+      //     .setOrigin(0.5)
+      //     container.add(icon)
+      //   }
+      // }
 
-      // Room icon
-      const icons = {
-        lobby: "🏢",
-        analysis: "📊",
-        investment: "💰",
-        treasury: "🏦",
-        research: "📈",
-        risk: "⚖️",
-      }
-      const roomIcon = this.add.text(-room.width / 2 + 20, room.height / 2 - 20, icons[room.id as keyof typeof icons], {
-        fontSize: "20px",
-      })
-      container.add(roomIcon)
+      // Room icon - HIDDEN
+      // const icons = {
+      //   lobby: "🏢",
+      //   "research-analysis": "📈", // Research Lab
+      //   investments: "💰", // Investment Office
+      //   treasury: "🏦", // Treasury Department
+      //   risk: "⚖️", // Risk Management
+      // }
+      // const roomIcon = this.add.text(-room.width / 2 + 20, room.height / 2 - 20, icons[room.id as keyof typeof icons], {
+      //   fontSize: "20px",
+      // })
+      // container.add(roomIcon)
 
       this.roomSprites.set(room.id, container)
     })
@@ -552,7 +555,7 @@ class FinanceOfficeScene extends Phaser.Scene {
     if (this.rKey?.isDown && !this.rKeyPressed && this.nearRoomId === "research-analysis") {
       this.rKeyPressed = true
       if (this.onTaskSelect) {
-        this.onTaskSelect("research") // Task ID for research
+        this.onTaskSelect("1") // Task ID for Research Lab
       }
       this.hideRoomEntryMessage()
     } else if (!this.rKey?.isDown) {
@@ -562,11 +565,30 @@ class FinanceOfficeScene extends Phaser.Scene {
     if (this.aKey?.isDown && !this.aKeyPressed && this.nearRoomId === "research-analysis") {
       this.aKeyPressed = true
       if (this.onTaskSelect) {
-        this.onTaskSelect("analysis") // Task ID for analysis
+        this.onTaskSelect("4") // Task ID for Analysis Center
       }
       this.hideRoomEntryMessage()
     } else if (!this.aKey?.isDown) {
       this.aKeyPressed = false
+    }
+
+    // Handle space key for room entry
+    if (this.spaceKey?.isDown && !this.spaceKeyPressed && this.nearRoomId) {
+      this.spaceKeyPressed = true
+      
+      // For rooms other than research-analysis, use the room's taskId
+      if (this.nearRoomId !== "research-analysis") {
+        const room = this.rooms.find(r => r.id === this.nearRoomId)
+        if (room && room.taskId) {
+          if (this.onTaskSelect) {
+            this.onTaskSelect(room.taskId)
+          }
+        }
+      }
+      
+      this.hideRoomEntryMessage()
+    } else if (!this.spaceKey?.isDown) {
+      this.spaceKeyPressed = false
     }
 
     // Check if character is trying to enter unreachable area and provide visual feedback
