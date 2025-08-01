@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Keyboard, MousePointer, RefreshCw } from "lucide-react"
+import { Keyboard, MousePointer, RefreshCw, MapPin, ArrowRight } from "lucide-react"
 
 interface FinanceGameOfficeViewerProps {
   tasks: any[]
@@ -70,6 +70,34 @@ export function FinanceGameOfficeViewer({
     return locationMap[taskId as keyof typeof locationMap] || "lobby"
   }
 
+  // Helper function to get the next recommended task
+  const getNextTask = () => {
+    // Find the next incomplete task
+    for (const task of tasks) {
+      if (!task.isCompleted) {
+        return task
+      }
+    }
+    return null
+  }
+
+  // Helper function to get the recommended room
+  const getRecommendedRoom = () => {
+    const nextTask = getNextTask()
+    if (nextTask) {
+      const roomId = getTaskLocation(nextTask.id)
+      const room = roomInfo[roomId as keyof typeof roomInfo]
+      return {
+        room: roomId,
+        roomName: room?.name || "Unknown Room",
+        task: nextTask,
+      }
+    }
+    return null
+  }
+
+  const recommendedRoom = getRecommendedRoom()
+
   const initializeGame = async () => {
     if (!gameRef.current || initializationRef.current) return
 
@@ -99,76 +127,47 @@ export function FinanceGameOfficeViewer({
         id: task.id.toString(),
         title: task.title,
         role: task.role,
+        isCompleted: task.isCompleted,
         location: getTaskLocation(task.id),
-        isCompleted: task.isCompleted || false,
-        data: task.data,
       }))
 
-      const completedTaskIds = formattedTasks.filter((task) => task.isCompleted).map((task) => task.id)
-
-      console.log("Initializing FinanceOfficeGame with tasks:", formattedTasks)
-
-      const game = new FinanceOfficeGame(gameRef.current, formattedTasks, completedTaskIds)
+      // Initialize the game
+      financeOfficeGameRef.current = new FinanceOfficeGame(
+        gameRef.current,
+        formattedTasks,
+        formattedTasks.filter(task => task.isCompleted).map(task => task.id)
+      )
 
       // Set up event handlers
-      game.onLocationChange = (location: string) => {
-        console.log("Location changed to:", location)
+      financeOfficeGameRef.current.onLocationChange = (location: string) => {
         setCurrentLocation(location)
       }
 
-      game.onTaskSelect = (taskId: string) => {
-        console.log("Task selected:", taskId)
-        const numericTaskId = Number.parseInt(taskId)
+      financeOfficeGameRef.current.onTaskSelect = (taskId: string) => {
         if (onTaskSelect) {
-          onTaskSelect(numericTaskId)
+          onTaskSelect(parseInt(taskId))
         }
       }
 
-      game.onTaskReview = (taskId: string) => {
-        console.log("Task review:", taskId)
-        const numericTaskId = Number.parseInt(taskId)
+      financeOfficeGameRef.current.onTaskReview = (taskId: string) => {
         if (onTaskSelect) {
-          onTaskSelect(numericTaskId)
+          onTaskSelect(parseInt(taskId))
         }
       }
 
-      financeOfficeGameRef.current = game
       setIsLoading(false)
-      console.log("FinanceOfficeGame initialized successfully")
-    } catch (err) {
-      console.error("Error initializing finance office game:", err)
-      setError("Failed to load finance office viewer. Please refresh the page.")
+    } catch (err: any) {
+      console.error("❌ Error initializing finance office game:", err)
+      setError(err.message || "Failed to load finance office environment")
       setIsLoading(false)
-    } finally {
-      initializationRef.current = false
     }
   }
 
-  // Initialize game only once when component mounts
   useEffect(() => {
-    if (tasks && tasks.length > 0) {
-      const timer = setTimeout(initializeGame, 100)
-      return () => clearTimeout(timer)
+    if (gameRef.current && !initializationRef.current) {
+      initializeGame()
     }
-  }, []) // Empty dependency array - only run once
 
-  // Update task completion status when tasks change
-  useEffect(() => {
-    if (financeOfficeGameRef.current && !isLoading && tasks) {
-      try {
-        const completedTaskIds = tasks.filter((task) => task.isCompleted).map((task) => task.id.toString())
-        console.log("Updating task completion:", completedTaskIds)
-        if (financeOfficeGameRef.current.updateTaskCompletion) {
-          financeOfficeGameRef.current.updateTaskCompletion(completedTaskIds)
-        }
-      } catch (e) {
-        console.warn("Error updating task completion:", e)
-      }
-    }
-  }, [tasks, isLoading])
-
-  // Cleanup on unmount
-  useEffect(() => {
     return () => {
       if (financeOfficeGameRef.current) {
         try {
@@ -176,7 +175,6 @@ export function FinanceGameOfficeViewer({
         } catch (e) {
           console.warn("Error destroying game on unmount:", e)
         }
-        financeOfficeGameRef.current = null
       }
     }
   }, [])
@@ -221,6 +219,37 @@ export function FinanceGameOfficeViewer({
 
   return (
     <div className="space-y-4">
+      {/* Recommended Room Card */}
+      {recommendedRoom && (
+        <Card className="bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 border-2 border-[#db9b6c]/30 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#2d407e] to-[#765889] flex items-center justify-center">
+                <MapPin className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-[#2d407e] mb-1">
+                  🎯 Next Task: Go to the {recommendedRoom.roomName}
+                </h3>
+                <p className="text-[#4e3113] mb-2">
+                  Complete "{recommendedRoom.task.title}" as a {recommendedRoom.task.role}
+                </p>
+                <p className="text-sm text-[#4e3113]/80">
+                  Navigate to the {recommendedRoom.roomName} in the office below to start your next mission!
+                </p>
+              </div>
+              <Button
+                onClick={() => onTaskSelect && onTaskSelect(recommendedRoom.task.id)}
+                className="bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+              >
+                Start Task
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Game Container */}
       <div className="relative">
         <div
@@ -241,31 +270,7 @@ export function FinanceGameOfficeViewer({
       </div>
 
       {/* Controls and Room Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Controls */}
-        <Card>
-          <CardContent className="p-4">
-            <h4 className="font-semibold mb-3 flex items-center">
-              <Keyboard className="mr-2 h-4 w-4" />
-              Controls
-            </h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span>Move Character:</span>
-                <Badge variant="outline">WASD or Arrow Keys</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Enter Room:</span>
-                <Badge variant="outline">Walk Close or Click</Badge>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>Start Task:</span>
-                <Badge variant="outline">Enter Room with Task</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
         {/* Current Room Info */}
         <Card>
           <CardContent className="p-4">
@@ -292,45 +297,7 @@ export function FinanceGameOfficeViewer({
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Room Navigation */}
-      <Card>
-        <CardContent className="p-4">
-          <h4 className="font-semibold mb-3">Quick Room Navigation</h4>
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
-            {Object.entries(roomInfo).map(([roomId, room]) => {
-              const roomTasks = room.tasks.map((taskId) => tasks.find((t) => t.id === taskId)).filter(Boolean)
-              const hasCompletedTasks = roomTasks.some((task) => task.isCompleted)
-              const hasActiveTasks = roomTasks.some((task) => !task.isCompleted)
-
-              return (
-                <Button
-                  key={roomId}
-                  variant={currentLocation === roomId ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handleRoomNavigation(roomId)}
-                  className="flex flex-col items-center p-3 h-auto"
-                  disabled={isLoading}
-                >
-                  <div className="text-lg mb-1">
-                    {roomId === "lobby" && "🏢"}
-                    {roomId === "analysis" && "📊"}
-                    {roomId === "investment" && "💰"}
-                    {roomId === "treasury" && "🏦"}
-                    {roomId === "research" && "📈"}
-                    {roomId === "risk" && "⚖️"}
-                  </div>
-                  <div className="text-xs font-medium">{room.name}</div>
-                  <div className="flex gap-1 mt-1">
-                    {hasCompletedTasks && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
-                    {hasActiveTasks && <div className="w-2 h-2 bg-blue-500 rounded-full"></div>}
-                  </div>
-                </Button>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
+

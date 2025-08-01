@@ -210,7 +210,7 @@ export const GameOfficeViewer = React.forwardRef<any, GameOfficeViewerProps>(
     return (
       <div className="space-y-4">
         {/* Room Navigation */}
-        {currentRoom && (
+        {/* {currentRoom && (
           <Card className="mb-4">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -231,7 +231,7 @@ export const GameOfficeViewer = React.forwardRef<any, GameOfficeViewerProps>(
               </div>
             </CardContent>
           </Card>
-        )}
+        )} */}
         {/* Game Container */}
         <div className="relative">
           <div

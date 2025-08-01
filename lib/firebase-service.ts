@@ -16,6 +16,7 @@ interface UserProfile {
   createdAt: string
   simulationProgress?: any
   completedSimulations?: string[]
+  totalXP?: number
   badges?: string[]
   cityProgress?: any
   onboardingAnswers?: any
@@ -34,6 +35,7 @@ interface SimulationProgress {
   lastUpdated: string
   completed: boolean
   completedAt?: string
+  xpEarned?: number
   badgesEarned?: string[]
 }
 
@@ -72,6 +74,7 @@ export const createUserProfile = async (
       updatedAt: new Date().toISOString(),
       simulationProgress: {},
       completedSimulations: [],
+      totalXP: 0,
       badges: [],
       cityProgress: {
         unlockedBuildings: ["school"],
@@ -201,6 +204,7 @@ export const saveSimulationProgress = async (progressData: SimulationProgress): 
         updatedAt: new Date().toISOString(),
         simulationProgress: {},
         completedSimulations: [],
+        totalXP: 0,
         badges: [],
         cityProgress: {
           unlockedBuildings: ["school"],
@@ -288,7 +292,11 @@ export const getUserSimulationProgress = async (userId: string): Promise<ApiResp
 
     console.log("🔄 Fetching all simulation progress for user:", userId)
 
-    const progressQuery = query(collection(db, "simulationProgress"), where("userId", "==", userId))
+    // Use a simple query without ordering to avoid index requirements
+    const progressQuery = query(
+      collection(db, "simulationProgress"), 
+      where("userId", "==", userId)
+    )
 
     const querySnapshot = await getDocs(progressQuery)
     const progressList: SimulationProgress[] = []
@@ -299,6 +307,13 @@ export const getUserSimulationProgress = async (userId: string): Promise<ApiResp
       if (data.simulationId !== "init") {
         progressList.push(data)
       }
+    })
+
+    // Sort the results in memory instead of in the query
+    progressList.sort((a, b) => {
+      const dateA = new Date(a.lastUpdated || a.startedAt || 0)
+      const dateB = new Date(b.lastUpdated || b.startedAt || 0)
+      return dateB.getTime() - dateA.getTime() // Sort by most recent first
     })
 
     console.log("✅ User simulation progress fetched successfully:", progressList.length, "simulations")
@@ -313,6 +328,7 @@ export const getUserSimulationProgress = async (userId: string): Promise<ApiResp
 export const completeSimulation = async (
   userId: string,
   simulationId: string,
+  xpEarned = 100,
   badgesEarned: string[] = [],
 ): Promise<ApiResponse> => {
   try {
@@ -321,6 +337,10 @@ export const completeSimulation = async (
     }
 
     console.log("🔄 Completing simulation:", simulationId, "for user:", userId)
+    console.log("🔍 XP Earned:", xpEarned, "Badges:", badgesEarned)
+
+    // Ensure badgesEarned is an array
+    const badges = Array.isArray(badgesEarned) ? badgesEarned : []
 
     // First, get current user data to avoid overwriting
     const userRef = doc(db, "users", userId)
@@ -333,7 +353,7 @@ export const completeSimulation = async (
     const userData = userSnap.data()
     const currentCompletedSimulations = userData.completedSimulations || []
     const currentBadges = userData.badges || []
-
+    const currentXP = userData.totalXP || 0
 
     const batch = writeBatch(db)
 
@@ -343,7 +363,8 @@ export const completeSimulation = async (
     batch.update(progressRef, {
       completed: true,
       completedAt: new Date().toISOString(),
-      badgesEarned: badgesEarned,
+      xpEarned: xpEarned,
+      badgesEarned: badges,
       lastUpdated: new Date().toISOString(),
     })
 
@@ -352,11 +373,11 @@ export const completeSimulation = async (
       ? currentCompletedSimulations
       : [...currentCompletedSimulations, simulationId]
 
-    const updatedBadges = Array.from(new Set([...currentBadges, ...badgesEarned]))
+    const updatedBadges = Array.from(new Set([...currentBadges, ...badges]))
 
     batch.update(userRef, {
       completedSimulations: updatedCompletedSimulations,
-
+      totalXP: currentXP + xpEarned,
       badges: updatedBadges,
       [`simulationProgress.${simulationId}.completed`]: true,
       [`simulationProgress.${simulationId}.completedAt`]: new Date().toISOString(),
@@ -472,6 +493,7 @@ export const getStudentProgressCloudFunction = async (userId: string): Promise<A
         userProfile: userProfile.data,
         simulationProgress: simulationProgress.data,
         totalCompleted: simulationProgress.data?.length || 0,
+        totalXP: userProfile.data?.totalXP || 0,
         badges: userProfile.data?.badges || [],
         cityLevel: userProfile.data?.cityProgress?.level || 1,
       }

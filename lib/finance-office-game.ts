@@ -654,20 +654,7 @@ class FinanceOfficeScene extends Phaser.Scene {
 
     this.currentRoom = roomId
 
-    // Check if room has a task
-    if (room.taskId) {
-      const task = this.tasks.find((t) => t.id === room.taskId)
-      if (task) {
-        if (task.isCompleted && this.onTaskReview) {
-          // Allow reviewing completed tasks
-          this.onTaskReview(task.id)
-        } else if (this.onTaskSelect) {
-          // Start new task
-          this.onTaskSelect(task.id)
-        }
-      }
-    }
-
+    // Only notify location change, don't auto-start tasks
     if (this.onLocationChange) {
       this.onLocationChange(roomId)
     }
