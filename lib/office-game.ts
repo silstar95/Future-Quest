@@ -22,28 +22,28 @@ interface TaskData {
 
 const UNREACHABLE_AREAS = [
   // Top left corner
-  { x: 21, y: 25, width: 23, height: 239 },
+  { x: -9, y: 25, width: 53, height: 239 },
   // Top strip
   { x: 21, y: 25, width: 1003, height: 103 },
   // Left side bottom
-  { x: 21, y: 423, width: 23, height: 665 },
+  { x: -9, y: 403, width: 53, height: 685 },
   // Left middle section
-  { x: 21, y: 687, width: 223, height: 401 },
+  { x: 21, y: 667, width: 223, height: 421 },
   // Middle section
-  { x: 265, y: 687, width: 400, height: 105 },
+  { x: 240, y: 657, width: 410, height: 135 },
   // Right middle section
-  { x: 731, y: 687, width: 314, height: 105 },
+  { x: 701, y: 657, width: 314, height: 135 },
   // Bottom strip
-  { x: 21, y: 1081, width: 1003, height: 7 },
+  { x: 21, y: 1061, width: 1003, height: 27 },
   // Right side
-  { x: 997, y: 25, width: 27, height: 1063 },
+  { x: 977, y: 25, width: 27, height: 1063 },
   // Additional unreachable areas
-  { x: 127, y: 492, width: 779, height: 86 },
-  { x: 197, y: 215, width: 575, height: 97 },
-  { x: 467, y: 937, width: 109, height: 39 },
-  { x: 533, y: 787, width: 43, height: 189 },
-  { x: 801, y: 887, width: 105, height: 35 },
-  { x: 801, y: 887, width: 37, height: 169 },
+  { x: 107, y: 462, width: 799, height: 116 },
+  { x: 167, y: 200, width: 605, height: 112 },
+  { x: 437, y: 907, width: 139, height: 69 },
+  { x: 503, y: 787, width: 73, height: 189 },
+  { x: 771, y: 867, width: 135, height: 55 },
+  { x: 771, y: 867, width: 67, height: 189 },
 ]
 
 // Debug mode to show collision boundaries (set to true to visualize)
@@ -280,7 +280,7 @@ class OfficeScene extends Phaser.Scene {
 
   createCat() {
     const cat = this.add.image(433, 328, "cat") // Start in lobby (scaled coordinates)
-    cat.setScale(0.35) // Scale down to 1/4 of original size
+    cat.setScale(0.25) // Scale down to 1/4 of original size
     this.cat = cat
 
     // Enable physics
@@ -465,9 +465,9 @@ class OfficeScene extends Phaser.Scene {
             `In Unreachable Area: ${inUnreachable ? "YES" : "NO"}`,
             `Canvas Size: ${CANVAS_WIDTH}x${CANVAS_HEIGHT}`,
             `Scale Factors: X=${SCALE_X.toFixed(3)}, Y=${SCALE_Y.toFixed(3)}`,
-            "",
-            "Unreachable Areas (Scaled):",
-            areasInfo,
+            // "",
+            // "Unreachable Areas (Scaled):",
+            // areasInfo,
           ])
         }
       },
