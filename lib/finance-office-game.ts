@@ -24,10 +24,10 @@ interface TaskData {
 const UNREACHABLE_AREAS = [
   // Right side top (adjusted x position)
   { x: 447.825, y: 0, width: 49.45, height: 196.65 }, // 462.55 - 49.45/2, moved right 10px
-  // Right side middle (adjusted x position)
-  { x: 447.825, y: 309.56, width: 49.45, height: 447.44 }, // 462.55 - 49.45/2, cut top 20px, moved right 10px
-  // Right side bottom (adjusted x position)
-  { x: 447.825, y: 884, width: 49.45, height: 264 }, // 462.55 - 49.45/2, moved down 60px total, moved right 10px
+  // Right side middle (adjusted x position) - area2 grown top by 20px
+  { x: 447.825, y: 289.56, width: 49.45, height: 467.44 }, // 462.55 - 49.45/2, grown top 20px, moved right 10px
+  // Right side bottom (adjusted x position) - area3 grown top by 70px
+  { x: 447.825, y: 814, width: 49.45, height: 334 }, // 462.55 - 49.45/2, grown top 70px, moved right 10px
   // Bottom strip left (adjusted x position)
   { x: -20, y: 490.38, width: 236.16, height: 34.47 }, // 0 - 20
   // Bottom strip right (adjusted x position)
