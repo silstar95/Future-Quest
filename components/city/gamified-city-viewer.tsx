@@ -770,7 +770,7 @@ export function GameifiedCityViewer({ userProgress, onBuildingClick, onSimulatio
             className="fixed z-50 bg-black/90 text-white px-3 py-2 rounded-lg shadow-lg pointer-events-none transition-all duration-200"
             style={{
               left: `${Math.min(tooltip.x + 20, window.innerWidth - 100)}px`,
-              top: `${Math.max(tooltip.y - 10, 10)}px`,
+              top: `${Math.max(tooltip.y - 20, 10)}px`,
             }}
           >
             <div className="font-semibold text-sm">{tooltip.name}</div>
