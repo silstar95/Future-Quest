@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/components/providers/auth-provider"
 import { useToast } from "@/hooks/use-toast"
 import { saveOnboardingAnswers } from "@/lib/firebase-service"
 import Image from "next/image"
@@ -164,7 +164,7 @@ const QUIZ_STEPS = [
   {
     id: "career-interests",
     title: "Career exploration",
-    question: "Which career fields interest you most? (Select exactly 2)",
+    question: "Which career fields interest you most?",
     type: "checkbox",
     maxSelections: 2,
     minSelections: 2,
@@ -225,7 +225,7 @@ export function OnboardingQuiz() {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState<Record<string, any>>({})
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, refreshUserProfile } = useAuth()
   const { toast } = useToast()
 
   const getCurrentQuestion = () => {
@@ -268,14 +268,20 @@ export function OnboardingQuiz() {
         }
 
         if (user?.uid) {
-          await saveOnboardingAnswers(user.uid, onboardingData)
+          console.log("Saving onboarding answers for user:", user.uid)
+          await saveOnboardingAnswers(user.uid, answers, onboardingData.interests, onboardingData.recommendedSimulations)
+          console.log("Onboarding answers saved successfully")
+
+          // Refresh user profile to get updated data
+          await refreshUserProfile()
 
           toast({
             title: "🎉 Onboarding Complete!",
             description: "Your preferences have been saved. Welcome to Future Quest!",
           })
 
-          router.push("/dashboard/student")
+          // Direct redirect to student dashboard
+          router.replace("/dashboard/student")
         }
       } catch (error) {
         console.error("Error saving onboarding answers:", error)

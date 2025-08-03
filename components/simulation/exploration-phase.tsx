@@ -6,7 +6,18 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Search, Clock, Lightbulb, ArrowRight } from "lucide-react"
+import { Search, Clock, Lightbulb, ArrowRight, AlertTriangle } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface ExplorationPhaseProps {
   onComplete: (data: any) => void
@@ -14,22 +25,23 @@ interface ExplorationPhaseProps {
 }
 
 export function ExplorationPhase({ onComplete, initialData }: ExplorationPhaseProps) {
-  const [timeSpent, setTimeSpent] = useState(0)
-  const [isResearching, setIsResearching] = useState(false)
+  const [timeSpent, setTimeSpent] = useState(initialData?.timeSpent || 0)
+  const [isResearching, setIsResearching] = useState(initialData?.isResearching || false)
   const [answers, setAnswers] = useState({
     summary: initialData?.summary || "",
     roles: initialData?.roles || "",
     companies: initialData?.companies || "",
   })
+  const [showWarning, setShowWarning] = useState(false)
 
-  const minResearchTime = 10 * 60 // 10 minutes in seconds
-  const recommendedTime = 15 * 60 // 15 minutes in seconds
+  const minResearchTime = 1 * 60 // 1 minute in seconds
+  const recommendedTime = 5 * 60 // 5 minutes in seconds
 
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isResearching) {
       interval = setInterval(() => {
-        setTimeSpent((prev) => prev + 1)
+        setTimeSpent((prev: any) => prev + 1)
       }, 1000)
     }
     return () => clearInterval(interval)
@@ -58,27 +70,32 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
       ...answers,
       timeSpent,
       researchCompleted: timeSpent >= minResearchTime,
+      completedAt: new Date().toISOString(),
     })
   }
 
-  const canComplete =
-    timeSpent >= minResearchTime &&
-    answers.summary.trim() !== "" &&
-    answers.roles.trim() !== "" &&
-    answers.companies.trim() !== ""
+  const handleContinueWithWarning = () => {
+    if (timeSpent < recommendedTime) {
+      setShowWarning(true)
+    } else {
+      handleComplete()
+    }
+  }
+
+  const canComplete = answers.summary.trim() !== "" && answers.roles.trim() !== "" && answers.companies.trim() !== ""
 
   const researchProgress = Math.min((timeSpent / recommendedTime) * 100, 100)
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Phase Header */}
-      <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+      <Card className="bg-gradient-to-r from-[#f0ad70]/20 to-[#db9b6c]/20 border-2 border-[#db9b6c]/30">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl">
-            <Search className="mr-3 h-6 w-6 text-green-600" />
+            <Search className="mr-3 h-6 w-6 text-[#2d407e]" />
             Explore: Research Branding & Marketing Careers
           </CardTitle>
-          <p className="text-gray-600 leading-relaxed">
+          <p className="text-[#4e3113] leading-relaxed">
             To begin, we'll start with the first E of Career Exploration - <strong>Explore</strong>. Exploring means
             researching to learn more about a specific industry.
           </p>
@@ -86,19 +103,21 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
       </Card>
 
       {/* Research Timer */}
-      <Card className="border-2 border-blue-200">
+      <Card className="border-2 border-[#db9b6c]/30">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
-              <Clock className="mr-2 h-5 w-5 text-blue-600" />
+              <Clock className="mr-2 h-5 w-5 text-[#2d407e]" />
               Research Timer
             </div>
-            <Badge variant={timeSpent >= minResearchTime ? "default" : "secondary"}>{formatTime(timeSpent)}</Badge>
+            <Badge variant={timeSpent >= minResearchTime ? "default" : "secondary"} className="bg-[#2d407e] text-white">
+              {formatTime(timeSpent)}
+            </Badge>
           </CardTitle>
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-gray-600">
-              <span>Minimum: 10 minutes</span>
-              <span>Recommended: 15 minutes</span>
+              <span>Suggested: 5 minutes</span>
+              <span>{Math.round(researchProgress)}%</span>
             </div>
             <Progress value={researchProgress} className="h-2" />
           </div>
@@ -110,19 +129,19 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
                 Begin by doing an internet search of Branding and Marketing careers. See what you can find about the
                 industry and individual roles.
               </p>
-              <Button onClick={handleStartResearch} className="bg-blue-600 hover:bg-blue-700">
+              <Button onClick={handleStartResearch} className="bg-[#2d407e] hover:bg-[#0e3968]">
                 <Search className="mr-2 h-4 w-4" />
                 Start Research Timer
               </Button>
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+              <div className="bg-[#f0ad70]/20 p-4 rounded-lg border border-[#db9b6c]/30">
+                <h4 className="font-semibold text-[#2d407e] mb-2 flex items-center">
                   <Lightbulb className="mr-2 h-4 w-4" />
                   Research Tip
                 </h4>
-                <p className="text-blue-700 text-sm">
+                <p className="text-[#4e3113] text-sm">
                   Try searching for job boards, company career pages, and industry websites to find current openings and
                   detailed role descriptions.
                 </p>
@@ -171,7 +190,8 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
             <CardHeader>
               <CardTitle>Research Questions</CardTitle>
               <p className="text-gray-600">
-                Once you've spent about 10-15 minutes researching, fill in your responses to the questions below.
+                Review the questions below and take notes that will help you answer them. Once you've spent about 10-15
+                minutes researching, fill in your responses to the questions in this section.
               </p>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -217,21 +237,47 @@ export function ExplorationPhase({ onComplete, initialData }: ExplorationPhasePr
           </Card>
 
           {/* Complete Button */}
-          <Card className="border-2 border-green-200 bg-green-50">
+          <Card className="border-2 border-[#713c09]/30 bg-[#f0ad70]/10">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-green-800">Ready to Continue?</h4>
-                  <p className="text-sm text-green-700">
-                    {timeSpent >= minResearchTime
-                      ? "Great job! You've completed the minimum research time."
-                      : `Continue researching for ${Math.ceil((minResearchTime - timeSpent) / 60)} more minutes.`}
+                  <h4 className="font-semibold text-[#2d407e]">Ready to Continue?</h4>
+                  <p className="text-sm text-[#4e3113]">
+                    {timeSpent >= recommendedTime
+                      ? "Great job! You've completed the recommended research time."
+                      : `Continue researching for ${Math.ceil((recommendedTime - timeSpent) / 60)} more minutes for best results.`}
                   </p>
                 </div>
-                <Button onClick={handleComplete} disabled={!canComplete} className="bg-green-600 hover:bg-green-700">
-                  Complete Exploration
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <AlertDialog open={showWarning} onOpenChange={setShowWarning}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        className="bg-[#713c09] hover:bg-[#4e3113] text-white"
+                        disabled={!canComplete}
+                        onClick={handleContinueWithWarning}
+                      >
+                        Complete Exploration
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center">
+                          <AlertTriangle className="mr-2 h-5 w-5 text-yellow-500" />
+                          Quick Check-In
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to move ahead? You have only spent {formatTime(timeSpent)}. We suggest
+                          spending at least 5 minutes to get the most out of this experience.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Continue Researching</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleComplete}>Yes, I'm Ready to Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </div>
             </CardContent>
           </Card>

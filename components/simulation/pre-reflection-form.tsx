@@ -110,87 +110,95 @@ export function PreReflectionForm({ onComplete, initialData }: PreReflectionForm
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Progress Header */}
-      <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-200">
+      <Card className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white border-0 shadow-2xl">
         <CardHeader>
-          <CardTitle className="flex items-center text-2xl">
-            <Lightbulb className="mr-3 h-6 w-6 text-indigo-600" />
-            Pre-Reflection: Understanding Your Starting Point
-          </CardTitle>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <Lightbulb className="w-6 h-6" />
+            </div>
+            <div>
+              <CardTitle className="text-2xl">Pre-Reflection: Understanding Your Starting Point</CardTitle>
+              <p className="text-[#f0ad70] mt-1">
+                Let's understand your current knowledge about branding and marketing careers
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm">
                 Question {currentQuestion + 1} of {questions.length}
               </span>
-              <span>{Math.round(progress)}% Complete</span>
+              <span className="text-sm">{Math.round(progress)}% Complete</span>
             </div>
-            <Progress value={progress} className="h-2" />
+            <Progress value={progress} className="h-2 bg-white/20" />
           </div>
         </CardHeader>
       </Card>
 
       {/* Question Card */}
-      <Card className="border-2 border-gray-200">
-        <CardHeader>
-          <CardTitle className="text-xl text-gray-800">{currentQ.title}</CardTitle>
-          <p className="text-gray-600 leading-relaxed">{currentQ.question}</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {currentQ.type === "radio" && (
-            <RadioGroup
-              value={answers[currentQ.id as keyof typeof answers]}
-              onValueChange={handleAnswerChange}
-              className="space-y-3"
-            >
-              {currentQ.options?.map((option, index) => (
-                <div
-                  key={index}
-                  className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+      <Card className="border-2 border-gray-200 shadow-lg">
+        <CardContent className="p-8">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-6">{currentQ.question}</h3>
+
+              {currentQ.type === "radio" && (
+                <RadioGroup
+                  value={answers[currentQ.id as keyof typeof answers]}
+                  onValueChange={handleAnswerChange}
+                  className="space-y-3"
                 >
-                  <RadioGroupItem value={option} id={`${currentQ.id}-${index}`} className="mt-1" />
-                  <Label htmlFor={`${currentQ.id}-${index}`} className="flex-1 cursor-pointer leading-relaxed">
-                    {option}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          )}
+                  {currentQ.options?.map((option, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <RadioGroupItem value={option} id={`${currentQ.id}-${index}`} className="mt-1" />
+                      <Label htmlFor={`${currentQ.id}-${index}`} className="flex-1 cursor-pointer leading-relaxed">
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              )}
 
-          {currentQ.type === "textarea" && (
-            <Textarea
-              value={answers[currentQ.id as keyof typeof answers]}
-              onChange={(e) => handleAnswerChange(e.target.value)}
-              placeholder={currentQ.placeholder}
-              className="min-h-32 resize-none"
-              rows={6}
-            />
-          )}
+              {currentQ.type === "textarea" && (
+                <Textarea
+                  value={answers[currentQ.id as keyof typeof answers]}
+                  onChange={(e) => handleAnswerChange(e.target.value)}
+                  placeholder={currentQ.placeholder}
+                  className="min-h-32 resize-none"
+                  rows={6}
+                />
+              )}
+            </div>
 
-          {/* Navigation */}
-          <div className="flex justify-between pt-6 border-t">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
-              className="bg-transparent"
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={handleNext}
-              disabled={!isAnswered}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-            >
-              {currentQuestion === questions.length - 1 ? "Complete Pre-Reflection" : "Next Question"}
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="flex justify-between pt-6 border-t">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+                className="px-6 bg-transparent"
+              >
+                Previous
+              </Button>
+              <Button
+                onClick={handleNext}
+                disabled={!isAnswered}
+                className="px-6 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+              >
+                {currentQuestion === questions.length - 1 ? "Complete Pre-Reflection" : "Next Question"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Help Text */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-gradient-to-br from-[#f0ad70]/20 to-[#db9b6c]/20 border-2 border-[#db9b6c]/30">
         <CardContent className="p-4">
-          <p className="text-sm text-blue-800">
+          <p className="text-sm text-[#4e3113]">
             <strong>💡 Tip:</strong> Be honest in your responses! This helps us understand your starting point and
             personalize your learning experience. There are no right or wrong answers.
           </p>

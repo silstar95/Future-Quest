@@ -47,16 +47,32 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-        <CardTitle className="flex items-center text-2xl">
-          <Users className="mr-3 h-6 w-6" />
-          Task #2: The Fame Formula - Long-Term Roadmap
-        </CardTitle>
-        <p className="text-blue-100">Role: Partnerships Manager | Location: Research Room</p>
-      </CardHeader>
+    <div className="relative min-h-screen">
+      {/* Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/task2.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      </div>
 
-      <CardContent className="p-8">
+      {/* Content Container */}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+            <CardTitle className="flex items-center text-2xl">
+              <Users className="mr-3 h-6 w-6" />
+              Task 2: The Fame Formula - Long-Term Roadmap
+            </CardTitle>
+            <p className="text-blue-100">Role: Partnerships Manager | Location: Research Room</p>
+          </CardHeader>
+
+          <CardContent className="p-8">
         <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3">🤝 Your Mission</h3>
           <p className="text-gray-700 mb-4">
@@ -92,7 +108,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.productCategories}
               onChange={(e) => setFormData((prev) => ({ ...prev, productCategories: e.target.value }))}
               placeholder="List product categories and explain why they align with your celebrity..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -112,7 +128,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.brandCollaborations}
               onChange={(e) => setFormData((prev) => ({ ...prev, brandCollaborations: e.target.value }))}
               placeholder="List specific brands and explain why they would be good partnerships..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -132,7 +148,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.mediaOutlets}
               onChange={(e) => setFormData((prev) => ({ ...prev, mediaOutlets: e.target.value }))}
               placeholder="List media outlets, shows, podcasts and explain the strategic value..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -152,7 +168,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.trendAlignment}
               onChange={(e) => setFormData((prev) => ({ ...prev, trendAlignment: e.target.value }))}
               placeholder="Identify current trends and how your celebrity can authentically participate..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -172,7 +188,7 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
               value={formData.roadmapDiagram}
               onChange={(e) => setFormData((prev) => ({ ...prev, roadmapDiagram: e.target.value }))}
               placeholder="Describe your strategic roadmap or create a visual plan..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
         </div>
@@ -199,6 +215,8 @@ export function TaskTwo({ onComplete, initialData, celebrityData }: TaskTwoProps
           </Button>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </div>
+    </div>
   )
 }

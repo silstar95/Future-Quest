@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import type React from "react"
+
+import { useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +34,9 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
     },
   )
 
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const canComplete = () => {
     return (
       formData.weeklyMessage.trim() !== "" &&
@@ -47,17 +52,43 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
     }
   }
 
-  return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-pink-500 to-red-500 text-white">
-        <CardTitle className="flex items-center text-2xl">
-          <Target className="mr-3 h-6 w-6" />
-          Task #3: #GoingViral
-        </CardTitle>
-        <p className="text-pink-100">Role: Social Media Strategist | Location: Creative Studio</p>
-      </CardHeader>
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "application/pdf")) {
+      setUploadedFile(file)
+      setFormData((prev) => ({ ...prev, samplePost: `Uploaded file: ${file.name}` }))
+    } else {
+      alert("Please upload a PNG, JPG, or PDF file.")
+    }
+  }
 
-      <CardContent className="p-8">
+  return (
+    <div className="relative min-h-screen">
+      {/* Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/task3.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      </div>
+
+      {/* Content Container */}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-pink-500 to-red-500 text-white">
+            <CardTitle className="flex items-center text-2xl">
+              <Target className="mr-3 h-6 w-6" />
+              Task 3: #GoingViral
+            </CardTitle>
+            <p className="text-pink-100">Role: Social Media Strategist | Location: Creative Studio</p>
+          </CardHeader>
+
+          <CardContent className="p-8">
         <div className="bg-pink-50 border border-pink-200 p-6 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3 flex items-center">
             <Instagram className="mr-2 h-5 w-5" />
@@ -95,7 +126,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
               value={formData.weeklyMessage}
               onChange={(e) => setFormData((prev) => ({ ...prev, weeklyMessage: e.target.value }))}
               placeholder="Describe the key message and themes for this week's content..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
 
@@ -115,7 +146,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
               value={formData.contentStrategy}
               onChange={(e) => setFormData((prev) => ({ ...prev, contentStrategy: e.target.value }))}
               placeholder="Detail your content mix, posting frequency, and engagement strategy based on research..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -164,7 +195,7 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
               value={formData.sampleCaptions}
               onChange={(e) => setFormData((prev) => ({ ...prev, sampleCaptions: e.target.value }))}
               placeholder="Write engaging captions that match your celebrity's personality and brand voice..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -179,12 +210,36 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
             <p className="text-gray-600 ml-11 mb-2">
               Create a sample post. You can use Canva.com or describe what the visual would look like.
             </p>
-            <Textarea
-              value={formData.samplePost}
-              onChange={(e) => setFormData((prev) => ({ ...prev, samplePost: e.target.value }))}
-              placeholder="Describe your sample post design, or paste a link if you created one..."
-              className="ml-11 min-h-[80px]"
-            />
+            <div className="ml-11 space-y-3">
+              <Textarea
+                value={formData.samplePost}
+                onChange={(e) => setFormData((prev) => ({ ...prev, samplePost: e.target.value }))}
+                placeholder="Describe your sample post design, or upload a file below..."
+                className="min-h-[80px]"
+              />
+
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 mb-2">Or upload your sample post</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".png,.jpg,.jpeg,.pdf"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mb-2"
+                  >
+                    Choose File (PNG, JPG, PDF)
+                  </Button>
+                  {uploadedFile && <p className="text-sm text-green-600">✓ Uploaded: {uploadedFile.name}</p>}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -210,6 +265,8 @@ export function TaskThree({ onComplete, initialData, celebrityData }: TaskThreeP
           </Button>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </div>
+    </div>
   )
 }

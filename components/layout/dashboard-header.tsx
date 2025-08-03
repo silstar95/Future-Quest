@@ -96,8 +96,13 @@ export function DashboardHeader({
 
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                <Globe className="h-6 w-6 text-indigo-600" />
-                <span className="font-bold text-lg text-indigo-600">Future Quest</span>
+                <img 
+                  src="/images/logo.png" 
+                  alt="Future Quest Logo" 
+                  className="h-28 w-auto object-contain"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => router.push("/dashboard/student")}
+                />
               </div>
 
               <div className="hidden md:block h-6 w-px bg-gray-300" />
@@ -158,14 +163,14 @@ export function DashboardHeader({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer">
+                {/* <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-600 focus:text-red-600">

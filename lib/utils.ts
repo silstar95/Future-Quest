@@ -147,7 +147,9 @@ export function calculateReadingTime(text: string): number {
 }
 
 export function copyToClipboard(text: string): Promise<void> {
-  if (navigator.clipboard && window.isSecureContext) {
+
+
+  if (typeof window !== 'undefined' && navigator?.clipboard && window.isSecureContext) {
     return navigator.clipboard.writeText(text)
   } else {
     // Fallback for older browsers

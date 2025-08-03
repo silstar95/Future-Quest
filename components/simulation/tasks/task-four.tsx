@@ -40,16 +40,32 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
-        <CardTitle className="flex items-center text-2xl">
-          <Megaphone className="mr-3 h-6 w-6" />
-          Task #4: Outsmart, Outshine, Outlast
-        </CardTitle>
-        <p className="text-green-100">Role: Brand Strategist | Location: Research Room</p>
-      </CardHeader>
+    <div className="relative min-h-screen">
+      {/* Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/task2.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      </div>
 
-      <CardContent className="p-8">
+      {/* Content Container */}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
+            <CardTitle className="flex items-center text-2xl">
+              <Megaphone className="mr-3 h-6 w-6" />
+              Task 4: Outsmart, Outshine, Outlast
+            </CardTitle>
+            <p className="text-green-100">Role: Brand Strategist | Location: Research Room</p>
+          </CardHeader>
+
+          <CardContent className="p-8">
         <div className="bg-green-50 border border-green-200 p-6 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3">🏆 Your Mission</h3>
           <p className="text-gray-700 mb-4">
@@ -87,7 +103,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.competitors}
               onChange={(e) => setFormData((prev) => ({ ...prev, competitors: e.target.value }))}
               placeholder="List 3 competitors and briefly explain why they compete with your celebrity..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -106,7 +122,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.competitorStrengths}
               onChange={(e) => setFormData((prev) => ({ ...prev, competitorStrengths: e.target.value }))}
               placeholder="For each competitor, identify their key strengths and what they do well..."
-              className="ml-11 min-h-[150px]"
+              className="ml-4 min-h-[150px]"
             />
           </div>
 
@@ -126,7 +142,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.uniqueFactors}
               onChange={(e) => setFormData((prev) => ({ ...prev, uniqueFactors: e.target.value }))}
               placeholder="Explain how your celebrity stands out from each competitor..."
-              className="ml-11 min-h-[120px]"
+              className="ml-4 min-h-[120px]"
             />
           </div>
 
@@ -149,7 +165,7 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
               value={formData.uniqueSellingProposition}
               onChange={(e) => setFormData((prev) => ({ ...prev, uniqueSellingProposition: e.target.value }))}
               placeholder="Write a compelling 1-2 sentence unique selling proposition..."
-              className="ml-11 min-h-[100px]"
+              className="ml-4 min-h-[100px]"
             />
           </div>
         </div>
@@ -176,6 +192,8 @@ export function TaskFour({ onComplete, initialData, celebrityData }: TaskFourPro
           </Button>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </div>
+    </div>
   )
 }

@@ -41,26 +41,41 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
   }
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-        <CardTitle className="flex items-center text-2xl">
-          <Star className="mr-3 h-6 w-6" />
-          Task #1: Crafting Your Celebrity's Identity
-        </CardTitle>
-        <p className="text-purple-100">Role: Brand Strategist | Location: Whiteboard Room</p>
-      </CardHeader>
+    <div className="relative min-h-screen">
+      {/* Background Image with Dark Overlay */}
+      <div 
+        className="fixed inset-0 z-0"
+        style={{
+          backgroundImage: 'url(/images/task1.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+      </div>
 
-      <CardContent className="p-8">
+      {/* Content Container */}
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+            <CardTitle className="flex items-center text-2xl">
+              <Star className="mr-3 h-6 w-6" />
+              Task 1: Crafting Your Celebrity's Identity
+            </CardTitle>
+            <p className="text-purple-100">Role: Brand Strategist | Location: Whiteboard Room</p>
+          </CardHeader>
+
+          <CardContent className="p-8">
         <div className="bg-purple-50 border border-purple-200 p-6 rounded-lg mb-8">
           <h3 className="text-lg font-semibold mb-3">🎯 Your Mission</h3>
           <p className="text-gray-700 mb-4">
-            Your task today is to select a celebrity as a team that you want to make even more famous. This could be
+            Select a celebrity as a team that you want to make even more famous. This could be
             Taylor Swift, Bad Bunny, Serena Williams, Mr. Beast, Greta Thunberg, Alexandria Ocasio-Cortez (AOC), or
             anyone else. You can also make up your own celebrity!
           </p>
           <p className="text-gray-700">
-            Before you dive into your individual tasks, complete the following steps to establish your celebrity's
-            identity. Use your responses to inform all future tasks.
+            Complete the following steps to establish your celebrity's identity. Use your responses to inform all future tasks.
           </p>
         </div>
 
@@ -77,7 +92,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.celebrityName}
               onChange={(e) => setFormData((prev) => ({ ...prev, celebrityName: e.target.value }))}
               placeholder="e.g., Taylor Swift, Mr. Beast, or create your own celebrity..."
-              className="ml-11"
+              className="ml-4"
             />
           </div>
 
@@ -96,7 +111,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.industry}
               onChange={(e) => setFormData((prev) => ({ ...prev, industry: e.target.value }))}
               placeholder="Describe their industry and specific area of expertise..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
 
@@ -116,7 +131,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.targetAudience}
               onChange={(e) => setFormData((prev) => ({ ...prev, targetAudience: e.target.value }))}
               placeholder="Describe your target audience demographics, interests, and characteristics..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
 
@@ -135,7 +150,7 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
               value={formData.values}
               onChange={(e) => setFormData((prev) => ({ ...prev, values: e.target.value }))}
               placeholder="List and explain their core values and what they stand for..."
-              className="ml-11 min-h-[80px]"
+              className="ml-4 min-h-[80px]"
             />
           </div>
         </div>
@@ -162,6 +177,8 @@ export function TaskOne({ onComplete, initialData }: TaskOneProps) {
           </Button>
         </div>
       </CardContent>
-    </Card>
+        </Card>
+      </div>
+    </div>
   )
 }

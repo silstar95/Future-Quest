@@ -10,8 +10,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/components/providers/auth-provider"
 import { useToast } from "@/hooks/use-toast"
+import { getUserProfile } from "@/lib/firebase-service"
 import { Mail, Sparkles, GraduationCap, Users, ArrowLeft } from "lucide-react"
 import Image from "next/image"
 
@@ -43,12 +44,16 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
     try {
       const user = await signIn(formData.email, formData.password)
 
+      // Get user profile to determine userType
+      const profile = await getUserProfile(user.uid)
+      const userType = profile.success ? profile.data?.userType : "student"
+
       toast({
         title: "🎉 Welcome back!",
         description: "Successfully signed in to your account.",
       })
 
-      router.push(user.userType === "student" ? "/dashboard/student" : "/dashboard/educator")
+      router.push(userType === "student" ? "/dashboard/student" : "/dashboard/educator")
     } catch (error: any) {
       toast({
         title: "Error signing in",
@@ -65,19 +70,35 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
     try {
       const user = await signInWithGoogle()
 
+      // Get user profile to determine userType
+      const profile = await getUserProfile(user.uid)
+      const userType = profile.success ? profile.data?.userType : "student"
+
       toast({
         title: "🎉 Welcome back!",
         description: "Successfully signed in with Google.",
       })
 
-      router.push(user.userType === "student" ? "/dashboard/student" : "/dashboard/educator")
+      router.push(userType === "student" ? "/dashboard/student" : "/dashboard/educator")
     } catch (error: any) {
-      if (error.message.includes("onboarding")) {
+      console.error("Google sign in error:", error)
+
+      if (error.message.includes("No account found")) {
         toast({
-          title: "Complete your profile",
-          description: "Redirecting to sign up...",
+          title: "Account not found",
+          description: "Please sign up first to create your profile.",
+          variant: "destructive",
         })
-        router.push("/auth/signup")
+        // Redirect to signup page after a short delay
+        setTimeout(() => {
+          router.push("/auth/signup")
+        }, 2000)
+      } else if (error.code === "auth/popup-closed-by-user") {
+        toast({
+          title: "Sign-in cancelled",
+          description: "Please try again.",
+          variant: "destructive",
+        })
       } else {
         toast({
           title: "Error signing in",
@@ -95,7 +116,7 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
       {/* Logo in top left */}
       <div className="absolute top-6 left-6 z-20">
         <Image
-          src="/images/logo.png"
+          src="/images/logo-white2.png"
           alt="Future Quest"
           width={200}
           height={80}
@@ -173,7 +194,11 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
             </div>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "student" | "educator")}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="student" className="flex items-center space-x-2">
                 <GraduationCap className="h-4 w-4" />
@@ -209,6 +234,15 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
                     onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                     className="border-2 focus:border-brand-primary transition-colors"
                   />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/auth/reset-password")}
+                      className="text-sm text-brand-primary hover:text-brand-secondary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
 
                 <Button
@@ -255,6 +289,15 @@ export default function LoginForm({ onBack }: { onBack?: () => void }) {
                     onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
                     className="border-2 focus:border-brand-primary transition-colors"
                   />
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/auth/reset-password")}
+                      className="text-sm text-brand-primary hover:text-brand-secondary hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                 </div>
 
                 <Button

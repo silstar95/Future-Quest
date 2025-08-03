@@ -12,7 +12,7 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth"
 import { auth } from "@/lib/firebase"
-import { createUserProfile, getUserProfile } from "@/lib/firebase-service"
+import { createUserProfile, getUserProfile, initializeSimulationProgress } from "@/lib/firebase-service"
 import { useAuth as useAuthContext } from "@/components/providers/auth-provider"
 
 interface SignUpData {
@@ -46,6 +46,8 @@ export function useAuth() {
   const signUp = async (email: string, password: string, userData: SignUpData) => {
     setAuthLoading(true)
     try {
+      console.log("🔄 Starting signup process for:", email)
+
       // Check if email already exists
       const signInMethods = await fetchSignInMethodsForEmail(auth, email)
       console.log("Sign-in methods for email:", signInMethods)
@@ -55,13 +57,14 @@ export function useAuth() {
       }
 
       const { user: firebaseUser } = await createUserWithEmailAndPassword(auth, email, password)
+      console.log("✅ Firebase user created:", firebaseUser.uid)
 
       // Update the user's display name
       await updateProfile(firebaseUser, {
         displayName: `${userData.firstName} ${userData.lastName}`,
       })
 
-      // Create user profile in Firestore
+      // Create user profile in Firestore with proper initialization
       const profileData = {
         firstName: userData.firstName,
         lastName: userData.lastName,
@@ -70,6 +73,15 @@ export function useAuth() {
         userType: userData.userType,
         onboardingCompleted: userData.userType === "educator", // Educators skip onboarding
         createdAt: new Date().toISOString(),
+        simulationProgress: {}, // Initialize empty simulation progress
+        completedSimulations: [],
+        totalXP: 0,
+        badges: [],
+        cityProgress: {
+          unlockedBuildings: ["school"], // Start with school unlocked
+          buildingPositions: {},
+          lastActiveSimulation: null,
+        },
         ...(userData.grade && { grade: userData.grade }),
         ...(userData.role && { role: userData.role }),
         ...(userData.studentCount && { studentCount: userData.studentCount }),
@@ -81,15 +93,28 @@ export function useAuth() {
         }),
       }
 
-      const result = await createUserProfile({
-        uid: firebaseUser.uid,
-        userData: profileData,
-      })
+      console.log("Creating user profile with data:", profileData)
 
-      console.log("User profile created:", result)
+      const result = await createUserProfile(firebaseUser.uid, profileData)
+
+      if (!result.success) {
+        console.error("❌ Failed to create user profile:", result.error)
+        throw new Error(result.error || "Failed to create user profile")
+      }
+
+      // Initialize simulation progress collection
+      console.log("🔄 Initializing simulation progress collection...")
+      const progressResult = await initializeSimulationProgress(firebaseUser.uid)
+
+      if (!progressResult.success) {
+        console.warn("⚠️ Warning: Could not initialize simulation progress:", progressResult.error)
+        // Don't throw error here, just log warning as user profile was created successfully
+      }
+
+      console.log("✅ User profile and simulation progress initialized successfully")
       return firebaseUser
     } catch (error: any) {
-      console.error("Sign up error:", error)
+      console.error("❌ Sign up error:", error)
       throw error
     } finally {
       setAuthLoading(false)
@@ -118,6 +143,15 @@ export function useAuth() {
         onboardingCompleted: additionalData.userType === "educator", // Educators skip onboarding
         createdAt: new Date().toISOString(),
         photoURL: firebaseUser.photoURL,
+        simulationProgress: {}, // Initialize empty simulation progress
+        completedSimulations: [],
+        totalXP: 0,
+        badges: [],
+        cityProgress: {
+          unlockedBuildings: ["school"], // Start with school unlocked
+          buildingPositions: {},
+          lastActiveSimulation: null,
+        },
         ...(additionalData.grade && { grade: additionalData.grade }),
         ...(additionalData.role && { role: additionalData.role }),
         ...(additionalData.studentCount && { studentCount: additionalData.studentCount }),
@@ -129,12 +163,21 @@ export function useAuth() {
         }),
       }
 
-      const result = await createUserProfile({
-        uid: firebaseUser.uid,
-        userData: profileData,
-      })
+      const result = await createUserProfile(firebaseUser.uid, profileData)
 
-      console.log("User profile created with Google:", result)
+      if (!result.success) {
+        console.error("❌ Failed to create user profile:", result.error)
+        throw new Error(result.error || "Failed to create user profile")
+      }
+
+      // Initialize simulation progress collection
+      const progressResult = await initializeSimulationProgress(firebaseUser.uid)
+
+      if (!progressResult.success) {
+        console.warn("⚠️ Warning: Could not initialize simulation progress:", progressResult.error)
+      }
+
+      console.log("✅ User profile created with Google:", result)
       return firebaseUser
     } catch (error: any) {
       console.error("Google sign up error:", error)
@@ -179,8 +222,19 @@ export function useAuth() {
       provider.addScope("profile")
 
       const { user: firebaseUser } = await signInWithPopup(auth, provider)
-      console.log("User signed in with Google:", firebaseUser.uid)
-      return firebaseUser
+
+      // Check if user profile exists
+      const userProfile = await getUserProfileData(firebaseUser.uid)
+
+      if (userProfile) {
+        // User exists, sign them in
+        console.log("Existing user signed in with Google:", firebaseUser.uid)
+        return userProfile
+      } else {
+        // User doesn't exist, they need to sign up first
+        await firebaseSignOut(auth)
+        throw new Error("No account found. Please sign up first to create your profile.")
+      }
     } catch (error: any) {
       console.error("Google sign in error:", error)
       if (error.code === "auth/popup-closed-by-user") {
@@ -188,7 +242,7 @@ export function useAuth() {
       } else if (error.code === "auth/popup-blocked") {
         throw new Error("Popup was blocked. Please allow popups and try again.")
       } else {
-        throw new Error(error.message || "Failed to sign in with Google.")
+        throw error
       }
     } finally {
       setAuthLoading(false)

@@ -1,242 +1,348 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-import { ChevronRight, ChevronLeft, Star, TrendingUp } from "lucide-react"
-
-interface PostReflectionData {
-  enjoymentRating: string
-  knowledgeLevel: string
-  confidenceLevel: string
-  futureInterest: string
-  otherCareers: string
-}
+import { Slider } from "@/components/ui/slider"
+import { CheckCircle, Star, TrendingUp } from "lucide-react"
 
 interface PostReflectionFormProps {
-  onComplete: (data: PostReflectionData) => void
-  initialData?: PostReflectionData
+  onComplete: (answers: any) => void
+  initialData?: any
   preReflectionData?: any
+  simulationType?: string
 }
 
-export function PostReflectionForm({ onComplete, initialData, preReflectionData }: PostReflectionFormProps) {
-  const [currentQuestion, setCurrentQuestion] = useState(0)
-  const [formData, setFormData] = useState<PostReflectionData>(
-    initialData || {
-      enjoymentRating: "",
-      knowledgeLevel: "",
-      confidenceLevel: "",
-      futureInterest: "",
-      otherCareers: "",
-    },
-  )
+export function PostReflectionForm({
+  onComplete,
+  initialData,
+  preReflectionData,
+  simulationType = "general",
+}: PostReflectionFormProps) {
+  const [answers, setAnswers] = useState({
+    enjoymentRating: initialData?.enjoymentRating || [7],
+    knowledgeLevel: initialData?.knowledgeLevel || "",
+    confidenceRating: initialData?.confidenceRating || [3],
+    interestLevel: initialData?.interestLevel || [4],
+    favoriteTask: initialData?.favoriteTask || "",
+    challengingTask: initialData?.challengingTask || "",
+    skillsLearned: initialData?.skillsLearned || "",
+    careerInterest: initialData?.careerInterest || "",
+    otherCareers: initialData?.otherCareers || "",
+    feedback: initialData?.feedback || "",
+  })
 
-  const questions = [
-    {
-      id: "enjoymentRating",
-      title: "Project Enjoyment",
-      question: "On a scale of 1-10, how much did you enjoy this project?",
-      type: "scale",
-      scaleRange: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    },
-    {
-      id: "knowledgeLevel",
-      title: "Knowledge Assessment",
-      question:
-        "After doing this project, how would you describe your knowledge about careers in branding and marketing?",
-      type: "radio",
-      options: [
-        "I know nothing about careers in branding and marketing.",
-        "I know what branding and marketing is but don't know much about individual roles.",
-        "I have some knowledge of branding and marketing roles but still am unsure about the details.",
-        "I have a good understanding of branding and marketing roles.",
-      ],
-    },
-    {
-      id: "confidenceLevel",
-      title: "Confidence Assessment",
-      question: "How confident do you feel in your ability to pursue a career in brand and marketing in the future?",
-      type: "scale",
-      scaleRange: [1, 2, 3, 4, 5],
-      scaleLabels: ["Not at all confident", "Very confident"],
-    },
-    {
-      id: "futureInterest",
-      title: "Future Learning Interest",
-      question: "Would you like to learn more about a career in brand and marketing?",
-      type: "scale",
-      scaleRange: [1, 2, 3, 4, 5],
-      scaleLabels: ["Not at all", "Most Definitely"],
-    },
-    {
-      id: "otherCareers",
-      title: "Career Exploration",
-      question: "What other careers would you be interested in experiencing?",
-      type: "textarea",
-      placeholder: "List other career fields or specific roles you'd like to explore through simulations...",
-    },
+  // Get simulation-specific content
+  const getSimulationContent = () => {
+    switch (simulationType) {
+      case "finance":
+        return {
+          field: "finance",
+          fieldCapitalized: "Finance",
+          icon: "💰",
+          roles: ["Financial Analyst", "Investment Advisor", "Corporate Treasurer", "Risk Manager"],
+          skills: "financial analysis, investment planning, budgeting, risk assessment",
+        }
+      case "brand-marketing":
+        return {
+          field: "branding and marketing",
+          fieldCapitalized: "Branding and Marketing",
+          icon: "🎯",
+          roles: ["Brand Manager", "Marketing Strategist", "Creative Director", "Market Researcher"],
+          skills: "brand strategy, market research, creative thinking, campaign development",
+        }
+      case "healthcare":
+        return {
+          field: "healthcare",
+          fieldCapitalized: "Healthcare",
+          icon: "🏥",
+          roles: ["Healthcare Administrator", "Medical Researcher", "Public Health Specialist", "Healthcare Analyst"],
+          skills: "healthcare systems, patient care, medical research, health policy",
+        }
+      default:
+        return {
+          field: "this field",
+          fieldCapitalized: "This Field",
+          icon: "🎓",
+          roles: ["Professional Role 1", "Professional Role 2", "Professional Role 3", "Professional Role 4"],
+          skills: "professional skills, critical thinking, problem-solving, communication",
+        }
+    }
+  }
+
+  const content = getSimulationContent()
+
+  const knowledgeOptions = [
+    `I know nothing about careers in ${content.field}.`,
+    `I know what ${content.field} is but don't know much about individual roles.`,
+    `I have some knowledge of ${content.field} roles but still am unsure about the details.`,
+    `I have a good understanding of ${content.field} roles.`,
   ]
 
-  const currentQ = questions[currentQuestion]
-  const progress = ((currentQuestion + 1) / questions.length) * 100
-
-  const handleInputChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [currentQ.id]: value,
-    }))
+  const handleSubmit = () => {
+    onComplete(answers)
   }
 
-  const canProceed = () => {
-    const currentValue = formData[currentQ.id as keyof PostReflectionData]
-    return currentValue && currentValue.trim() !== ""
+  const isComplete = () => {
+    return (
+      answers.knowledgeLevel !== "" &&
+      answers.favoriteTask.trim().length > 0 &&
+      answers.challengingTask.trim().length > 0 &&
+      answers.skillsLearned.trim().length > 0 &&
+      answers.careerInterest.trim().length > 0
+    )
   }
 
-  const handleNext = () => {
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1)
-    } else {
-      onComplete(formData)
-    }
-  }
+  // Detect growth from pre-reflection to post-reflection
+  const detectGrowth = () => {
+    if (!preReflectionData) return null
 
-  const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1)
-    }
-  }
+    const preKnowledge = preReflectionData.knowledgeLevel || ""
+    const postKnowledge = answers.knowledgeLevel
 
-  const getGrowthInsight = () => {
-    if (!preReflectionData || currentQuestion !== 1) return null
+    const knowledgeGrowth = knowledgeOptions.indexOf(postKnowledge) > knowledgeOptions.indexOf(preKnowledge)
 
-    const preKnowledge = preReflectionData.knowledgeLevel
-    const postKnowledge = formData.knowledgeLevel
-
-    if (preKnowledge && postKnowledge && preKnowledge !== postKnowledge) {
-      return (
-        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div className="flex items-center mb-2">
-            <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
-            <span className="font-semibold text-green-800">Knowledge Growth Detected!</span>
-          </div>
-          <p className="text-green-700 text-sm">
-            You've shown improvement in your understanding of branding and marketing careers through this simulation.
-          </p>
-        </div>
-      )
+    if (knowledgeGrowth) {
+      return `🎉 Amazing growth! You've expanded your knowledge about ${content.field} careers through this simulation!`
     }
     return null
   }
 
+  const growthMessage = detectGrowth()
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between mb-4">
-            <CardTitle className="text-2xl flex items-center">
-              <Star className="mr-3 h-6 w-6 text-yellow-500" />
-              Post-Reflection
-            </CardTitle>
-            <span className="text-sm text-gray-500">
-              Question {currentQuestion + 1} of {questions.length}
-            </span>
+    <Card className="border-2 border-[#713c09]/30 shadow-lg">
+      <CardHeader className="bg-gradient-to-r from-[#2d407e] to-[#765889] text-white">
+        <div className="flex items-center gap-3">
+          <CheckCircle className="w-8 h-8" />
+          <div>
+            <CardTitle className="text-xl">Post-Simulation Reflection</CardTitle>
+            <CardDescription className="text-[#f0ad70]">
+              {content.icon} Reflect on your {content.field} journey and growth
+            </CardDescription>
           </div>
-          <Progress value={progress} className="h-2" />
-        </CardHeader>
+        </div>
+      </CardHeader>
 
-        <CardContent className="p-8">
-          <div className="mb-8">
-            <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-6 rounded-lg mb-6">
-              <h3 className="text-lg font-semibold mb-2">🎉 Congratulations!</h3>
-              <p className="text-gray-700">
-                You've completed your task. Take a moment to reflect on how you felt working on this task and the wider
-                project.
-              </p>
+      <CardContent className="p-8 space-y-8">
+        {growthMessage && (
+          <div className="bg-[#f0ad70]/20 border border-[#db9b6c]/30 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#2d407e]" />
+              <span className="font-medium text-[#2d407e]">Growth Detected!</span>
             </div>
+            <p className="text-[#4e3113] mt-1">{growthMessage}</p>
+          </div>
+        )}
 
-            <h3 className="text-lg font-semibold text-purple-600 mb-2">{currentQ.title}</h3>
-            <p className="text-xl text-gray-800 mb-6 leading-relaxed">{currentQ.question}</p>
-
-            {currentQ.type === "radio" && (
-              <RadioGroup
-                value={formData[currentQ.id as keyof PostReflectionData]}
-                onValueChange={handleInputChange}
-                className="space-y-3"
-              >
-                {currentQ.options?.map((option, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                    <RadioGroupItem value={option} id={`option-${index}`} className="mt-1" />
-                    <Label htmlFor={`option-${index}`} className="text-gray-700 leading-relaxed cursor-pointer">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            )}
-
-            {currentQ.type === "textarea" && (
-              <Textarea
-                value={formData[currentQ.id as keyof PostReflectionData]}
-                onChange={(e) => handleInputChange(e.target.value)}
-                placeholder={currentQ.placeholder}
-                className="min-h-[120px] text-base"
+        {/* Enjoyment Rating */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              On a scale of 1-10, how much did you enjoy this simulation?
+            </h3>
+            <div className="px-4">
+              <Slider
+                value={answers.enjoymentRating}
+                onValueChange={(value) => setAnswers((prev) => ({ ...prev, enjoymentRating: value }))}
+                max={10}
+                min={1}
+                step={1}
+                className="w-full"
               />
-            )}
-
-            {currentQ.type === "scale" && (
-              <div className="space-y-4">
-                <RadioGroup
-                  value={formData[currentQ.id as keyof PostReflectionData]}
-                  onValueChange={handleInputChange}
-                  className="flex justify-between"
-                >
-                  {currentQ.scaleRange?.map((num) => (
-                    <div key={num} className="flex flex-col items-center space-y-2">
-                      <RadioGroupItem value={num.toString()} id={`scale-${num}`} />
-                      <Label htmlFor={`scale-${num}`} className="text-sm font-medium">
-                        {num}
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-                {currentQ.scaleLabels && (
-                  <div className="flex justify-between text-sm text-gray-600 mt-2">
-                    <span>{currentQ.scaleLabels[0]}</span>
-                    <span>{currentQ.scaleLabels[1]}</span>
-                  </div>
-                )}
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>1 - Not enjoyable</span>
+                <span className="font-medium text-lg text-[#2d407e]">{answers.enjoymentRating[0]}</span>
+                <span>10 - Very enjoyable</span>
               </div>
-            )}
-
-            {getGrowthInsight()}
+            </div>
           </div>
+        </div>
 
-          <div className="flex justify-between">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentQuestion === 0}
-              className="flex items-center bg-transparent"
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Previous
-            </Button>
+        {/* Knowledge Level */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            After doing this simulation, how would you describe your knowledge about careers in {content.field}?
+          </h3>
+          <RadioGroup
+            value={answers.knowledgeLevel}
+            onValueChange={(value) => setAnswers((prev) => ({ ...prev, knowledgeLevel: value }))}
+            className="space-y-3"
+          >
+            {knowledgeOptions.map((option, index) => (
+              <div key={index} className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-gray-50">
+                <RadioGroupItem value={option} id={`knowledge-${index}`} className="mt-1" />
+                <Label htmlFor={`knowledge-${index}`} className="flex-1 cursor-pointer">
+                  {option}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
 
-            <Button
-              onClick={handleNext}
-              disabled={!canProceed()}
-              className="flex items-center bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-            >
-              {currentQuestion === questions.length - 1 ? "Complete Simulation" : "Next"}
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+        {/* Confidence Rating */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              How confident do you feel in your ability to pursue a career in {content.field} in the future?
+            </h3>
+            <div className="px-4">
+              <Slider
+                value={answers.confidenceRating}
+                onValueChange={(value) => setAnswers((prev) => ({ ...prev, confidenceRating: value }))}
+                max={5}
+                min={1}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>1 - Not at all confident</span>
+                <span className="font-medium text-lg text-[#2d407e]">{answers.confidenceRating[0]}</span>
+                <span>5 - Very confident</span>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        {/* Interest Level */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Would you like to learn more about a career in {content.field}?
+            </h3>
+            <div className="px-4">
+              <Slider
+                value={answers.interestLevel}
+                onValueChange={(value) => setAnswers((prev) => ({ ...prev, interestLevel: value }))}
+                max={5}
+                min={1}
+                step={1}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>1 - Not at all</span>
+                <span className="font-medium text-lg text-[#2d407e]">{answers.interestLevel[0]}</span>
+                <span>5 - Most definitely</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Favorite Task */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">Which task or role did you enjoy the most? Why?</h3>
+          <Textarea
+            value={answers.favoriteTask}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, favoriteTask: e.target.value }))}
+            placeholder={`Describe which ${content.field} role you found most engaging and why...`}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        {/* Most Challenging Task */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Which task did you find most challenging? What did you learn from it?
+          </h3>
+          <Textarea
+            value={answers.challengingTask}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, challengingTask: e.target.value }))}
+            placeholder="Describe the most challenging aspect and what you learned..."
+            className="min-h-[100px]"
+          />
+        </div>
+
+        {/* Skills Learned */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            What new skills or insights did you gain from this simulation?
+          </h3>
+          <Textarea
+            value={answers.skillsLearned}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, skillsLearned: e.target.value }))}
+            placeholder={`Reflect on the ${content.skills} skills you developed...`}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        {/* Career Interest */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Has this simulation influenced your interest in pursuing {content.field} as a career? How?
+          </h3>
+          <Textarea
+            value={answers.careerInterest}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, careerInterest: e.target.value }))}
+            placeholder={`Explain how this simulation has affected your interest in ${content.field} careers...`}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        {/* Other Careers */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            What other careers would you be interested in experiencing?
+          </h3>
+          <Textarea
+            value={answers.otherCareers}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, otherCareers: e.target.value }))}
+            placeholder="List other career fields you'd like to explore through simulations..."
+            className="min-h-[80px]"
+          />
+        </div>
+
+        {/* Additional Feedback */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Any additional feedback about this simulation experience?
+          </h3>
+          <Textarea
+            value={answers.feedback}
+            onChange={(e) => setAnswers((prev) => ({ ...prev, feedback: e.target.value }))}
+            placeholder="Share any suggestions, improvements, or additional thoughts..."
+            className="min-h-[80px]"
+          />
+        </div>
+
+        {/* Summary Card */}
+        <Card className="bg-gradient-to-br from-[#f0ad70]/20 to-[#db9b6c]/20 border-[#db9b6c]/30">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Star className="w-6 h-6 text-[#2d407e]" />
+              <h4 className="text-lg font-semibold text-[#2d407e]">Your {content.fieldCapitalized} Journey Summary</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-[#2d407e]">{answers.enjoymentRating[0]}/10</div>
+                <div className="text-[#4e3113]">Enjoyment Rating</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-[#765889]">{answers.confidenceRating[0]}/5</div>
+                <div className="text-[#4e3113]">Confidence Level</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-[#713c09]">{answers.interestLevel[0]}/5</div>
+                <div className="text-[#4e3113]">Future Interest</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end pt-6 border-t">
+          <Button
+            onClick={handleSubmit}
+            disabled={!isComplete()}
+            size="lg"
+            className="px-8 bg-gradient-to-r from-[#2d407e] to-[#765889] hover:from-[#0e3968] hover:to-[#231349]"
+          >
+            Complete Reflection
+            <CheckCircle className="ml-2 h-5 w-5" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { OnboardingQuiz } from "./onboarding-quiz"
 import {
@@ -18,7 +18,7 @@ import LoginForm from "../auth/login-form"
 import { useSearchParams } from "next/navigation"
 import Image from "next/image"
 
-export function LandingPage() {
+function LandingPageContent() {
   const searchParams = useSearchParams()
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [authMode, setAuthMode] = useState<"signup" | "login" | null>(null)
@@ -58,7 +58,7 @@ export function LandingPage() {
       >
         {/* Logo in top left */}
         <div className="absolute top-6 left-20 z-20">
-          <Image src="/images/logo.png" alt="Future Quest" width={400} height={180} className="h-40 w-auto" />
+          <Image src="/images/logo-white.png" alt="Future Quest" width={400} height={180} className="h-40 w-auto" />
         </div>
 
         {/* Optional: Subtle animated grid or particles */}
@@ -104,7 +104,7 @@ export function LandingPage() {
           {/* Subtitle */}
           <div className="mb-12">
             <p className="text-2xl md:text-3xl mb-6 max-w-5xl mx-auto leading-relaxed text-gray-100">
-              🌟 Discover your dream career through{" "}
+               Discover your dream career through{" "}
               <span className="text-[#ecae6c] font-bold animate-pulse">immersive simulations</span>
               <br />
               Build your <span className="text-[#454783] font-bold">futuristic world</span> and{" "}
@@ -131,9 +131,8 @@ export function LandingPage() {
           <div className="space-y-8">
             <div className="relative">
               <p className="text-3xl font-bold text-[#ecae6c] mb-2 animate-bounce">
-                🎯 Ready to Build Your Future?
+              🌟 Ready to Build Your Future?
               </p>
-              <p className="text-xl text-gray-200 mb-8">Join thousands of students already shaping their destiny</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -158,11 +157,6 @@ export function LandingPage() {
                 <Users className="mr-4 h-6 w-6" />I Have an Account
               </Button>
             </div>
-
-            <div className="text-sm text-gray-300 flex items-center justify-center space-x-2">
-              <Star className="w-4 h-4 text-[#ecae6c]" />
-              <span>Free to start • No credit card required • Join in 2 minutes</span>
-            </div>
           </div>
 
           {/* Scroll Indicator */}
@@ -174,5 +168,15 @@ export function LandingPage() {
         </div>
       </section>
     </div>
+  )
+}
+
+export function LandingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#211c3a] to-[#d59f7b] flex items-center justify-center">
+      <div className="text-white text-2xl">Loading...</div>
+    </div>}>
+      <LandingPageContent />
+    </Suspense>
   )
 }
